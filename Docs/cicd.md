@@ -1,0 +1,1 @@
+Ich möchte ein automatisiertes Deployment-System aufbauen, das bei jedem Push auf den _main_ Branch die API automatisch auf dem Webserver aktualisiert. Die API soll in einem Docker-Container laufen. Dazu schaue ich mir verschiedene Technologien näher an.
