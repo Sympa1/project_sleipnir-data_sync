@@ -15,7 +15,7 @@ Mein Hauptentwicklungssystem ist Manjaro (Linux), wobei die Android App aller vo
     - [Feststellen der Funktionen nach der MVP Methode](Docs/grundlegende_funktionen.md)
     - [Erarbeiten des Datenbank Designs](Docs/datenbank_design.md)
     - [Entwurf des Backend System Design](Docs/backend_system_design.md)
-    - [Entwurf des Client-Mockups](Docs/client_mockup.md)
+    - [Entwurf des Client-Mockups](https://github.com/Sympa1/project_sleipnir-data_sync/blob/master/Docs/android_mokup_2.png)
     - [Planung von Automatisierten Tests & Deployment](Docs/cicd.md)
 - 0.0.1 Datenbankentwicklung
     - MySQL Schema erstellen
