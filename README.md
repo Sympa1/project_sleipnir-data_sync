@@ -66,7 +66,6 @@ project_sleipnir/
 │   └── Placeholder
 │
 ├── Docs/
-│   ├── android_mokup_1.png
 │   ├── android_mokup_2.png
 │   ├── ausgangslage_technologien.md
 │   ├── backend_system_design.md
