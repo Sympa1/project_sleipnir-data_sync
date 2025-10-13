@@ -40,8 +40,7 @@ Mein Hauptentwicklungssystem ist Manjaro (Linux), wobei die Android App aller vo
     - ~~Erstellen des automatischen Deployment~~
     - ~~Sicheres Speichern von Datenbanklogin und Passwort~~
 - 1.0.0 Release und Deployment Version 1.0.0
-  - ~~Erstellen des automatischen Deployment~~
-  - ~~Sicheres speichern von Datenbanklogin und Passwort~~
+
 ## Geplante Funktionen der ersten Version
 - Ausgewähltes Verzeichnis wird synchronisiert
 - Basis REST API **ohne** Authentifizierung
