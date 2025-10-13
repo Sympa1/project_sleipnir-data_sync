@@ -15,8 +15,7 @@ Mein Hauptentwicklungssystem ist Manjaro (Linux), wobei die Android App aller vo
     - [Feststellen der Funktionen nach der MVP Methode](Docs/grundlegende_funktionen.md)
     - [Erarbeiten des Datenbank Designs](Docs/datenbank_design.md)
     - [Entwurf des Backend System Design](Docs/backend_system_design.md)
-    - [Entwurf des Client-Mockups](https://github.com/Sympa1/project_sleipnir-data_sync/blob/master/Docs/android_mokup_2.png)
-    - [Planung von Automatisierten Tests & Deployment](Docs/cicd.md)
+    - [Entwurf des Client-Mockups für die Mobile App (Analog auch für die Desktop Apps)](https://github.com/Sympa1/project_sleipnir-data_sync/blob/master/Docs/android_mokup_2.png)
 - 0.0.1 Datenbankentwicklung
     - MySQL Schema erstellen
 - 0.0.2 Implementierung der REST API
@@ -25,6 +24,7 @@ Mein Hauptentwicklungssystem ist Manjaro (Linux), wobei die Android App aller vo
     - Postman Collection
     - Implementierung File Up- und Download
     - Implementierung Python CLI zum Testen
+    - Vorrübergehendes speichern der DB Logindaten in einem .env File
 - 0.0.3 Linux GUI
     - Lokale SQLite Datenbank
     - GUI Framework: CustomTkinter oder QT
@@ -35,9 +35,13 @@ Mein Hauptentwicklungssystem ist Manjaro (Linux), wobei die Android App aller vo
     - GUI Framework: MAUI
     - Lokale Berechnung des Dateihashes
     - Kommunikation, inkl. Manifest, mit der REST API zum Synchronisieren
-- 0.0.5 Erstellen des automatischen Deployment
 - ~~0.1.0 Testing~~
-- ~~1.0.0 Deployment Version 1.0.0~~
+- ~~0.9.0 Release-Vorbereitung~~
+    - ~~Erstellen des automatischen Deployment~~
+    - ~~Sicheres Speichern von Datenbanklogin und Passwort~~
+- 1.0.0 Release und Deployment Version 1.0.0
+  - ~~Erstellen des automatischen Deployment~~
+  - ~~Sicheres speichern von Datenbanklogin und Passwort~~
 ## Geplante Funktionen der ersten Version
 - Ausgewähltes Verzeichnis wird synchronisiert
 - Basis REST API **ohne** Authentifizierung
