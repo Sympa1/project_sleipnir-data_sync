@@ -39,7 +39,7 @@ Mein Hauptentwicklungssystem ist Manjaro (Linux), wobei die Android App aller vo
 - ~~0.9.0 Release-Vorbereitung~~
     - ~~Erstellen des automatischen Deployment~~
     - ~~Sicheres Speichern von Datenbanklogin und Passwort~~
-- 1.0.0 Release und Deployment Version 1.0.0
+- ~~1.0.0 Release und Deployment Version 1.0.0~~
 
 ## Geplante Funktionen der ersten Version
 - Ausgewähltes Verzeichnis wird synchronisiert
