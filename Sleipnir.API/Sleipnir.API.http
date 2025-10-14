@@ -4,3 +4,5 @@ GET {{Sleipnir.API_HostAddress}}/weatherforecast/
 Accept: application/json
 
 ###
+
+// TODO: Was ist das für eine Datei?

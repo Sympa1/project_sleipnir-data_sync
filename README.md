@@ -9,7 +9,15 @@ Mein Hauptentwicklungssystem ist Manjaro (Linux), wobei die Android App aller vo
 - C# ASP .NET Core für das Backend
 - C# MAUI für die Android- und nach Möglichkeit Windows App
 - Python /CustomTKinter/QT für das Manjaro (Linux) Frontend
-## Roadmap (in Arbeit)
+## Roadmap
+
+**Status-Legende:**
+- ✅ Abgeschlossen
+- ⌛ In Arbeit
+- 🕓 Geplant
+- 💭 Konzeptphase
+
+### Versionen
 - 0.0.0 - Planung
     - [Feststellen der technischen Ausgangslage, der zu nutzenden Technologien & Architektur](Docs/ausgangslage_technologien.md) ✅
     - [Feststellen der Funktionen nach der MVP Methode](Docs/grundlegende_funktionen.md) ✅
