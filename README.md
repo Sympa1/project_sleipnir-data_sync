@@ -11,35 +11,39 @@ Mein Hauptentwicklungssystem ist Manjaro (Linux), wobei die Android App aller vo
 - Python /CustomTKinter/QT für das Manjaro (Linux) Frontend
 ## Roadmap (in Arbeit)
 - 0.0.0 - Planung
-    - [Feststellen der technischen Ausgangslage, der zu nutzenden Technologien & Architektur](Docs/ausgangslage_technologien.md)
-    - [Feststellen der Funktionen nach der MVP Methode](Docs/grundlegende_funktionen.md)
-    - [Erarbeiten des Datenbank Designs](Docs/datenbank_design.md)
-    - [Entwurf des Backend System Design](Docs/backend_system_design.md)
-    - [Entwurf des Client-Mockups für die Mobile App (Analog auch für die Desktop Apps)](https://github.com/Sympa1/project_sleipnir-data_sync/blob/master/Docs/android_mokup_2.png)
+    - [Feststellen der technischen Ausgangslage, der zu nutzenden Technologien & Architektur](Docs/ausgangslage_technologien.md) ✅
+    - [Feststellen der Funktionen nach der MVP Methode](Docs/grundlegende_funktionen.md) ✅
+    - [Erarbeiten des Datenbank Designs](Docs/datenbank_design.md) ✅
+    - [Entwurf des Backend System Design](Docs/backend_system_design.md) ✅
+    - [Entwurf des Client-Mockups für die Mobile App (Analog auch für die Desktop Apps)](https://github.com/Sympa1/project_sleipnir-data_sync/blob/master/Docs/android_mokup_2.png) ✅
 - 0.0.1 Datenbankentwicklung
-    - MySQL Schema erstellen
+    - MySQL Schema erstellen ⌛
+    - MySQL Accounts (Admin & Client) anlegeb und Berechtigungen erteilen ⌛
+    - Create Table erstellen ✅
 - 0.0.2 Implementierung der REST API
-    - Grundlegende REST API Endpunkte
-    - Erstellen der SQL Statements
-    - Postman Collection
-    - Implementierung File Up- und Download
-    - Implementierung Python CLI zum Testen
-    - Vorrübergehendes speichern der DB Logindaten in einem .env File
+    - Grundlegende REST API Endpunkte 🕓
+    - Erstellen der SQL Statements 🕓
+    - Postman Collection 🕓
+    - Implementierung File Up- und Download 🕓
+    - Implementierung Python CLI zum Testen 🕓
+    - Vorrübergehendes speichern der DB Logindaten in einem .env File 🕓
 - 0.0.3 Linux GUI
-    - Lokale SQLite Datenbank
-    - GUI Framework: CustomTkinter oder QT
-    - Lokale Berechnung des Dateihashes
-    - Kommunikation, inkl. Manifest, mit der REST API zum Synchronisieren
+    - Lokale SQLite Datenbank 🕓
+    - GUI Framework: CustomTkinter oder QT 🕓
+    - Lokale Berechnung des Dateihashes 🕓
+    - Kommunikation, inkl. Manifest, mit der REST API zum Synchronisieren 🕓
 - 0.0.4 Android / Windows GUI
-    - Lokale SQLite Datenbank
-    - GUI Framework: MAUI
-    - Lokale Berechnung des Dateihashes
-    - Kommunikation, inkl. Manifest, mit der REST API zum Synchronisieren
-- ~~0.1.0 Testing~~
-- ~~0.9.0 Release-Vorbereitung~~
-    - ~~Erstellen des automatischen Deployment~~
-    - ~~Sicheres Speichern von Datenbanklogin und Passwort~~
-- ~~1.0.0 Release und Deployment Version 1.0.0~~
+    - Lokale SQLite Datenbank 🕓
+    - GUI Framework: MAUI 🕓
+    - Lokale Berechnung des Dateihashes 🕓
+    - Kommunikation, inkl. Manifest, mit der REST API zum Synchronisieren 🕓
+- 0.1.0 Testing
+    - Unittest 💭
+- 0.9.0 Release-Vorbereitung
+    - Erstellen des automatischen Deployment 🕓
+    - Sicheres Speichern von Datenbanklogin und Passwort 🕓
+- 1.0.0 Release und Deployment Version 1.0.0
+    - Release durchführen 💭
 
 ## Geplante Funktionen der ersten Version
 - Ausgewähltes Verzeichnis wird synchronisiert
