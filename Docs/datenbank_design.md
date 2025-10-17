@@ -15,25 +15,27 @@
 #### Tabelle: file
 ```sql
 CREATE TABLE file (
-	file_id INTEGER PRIMARY KEY AUTOINCREMENT, 
-	path TEXT NOT NULL UNIQUE, --Pfad vom Sync-Root-Verzeichnis
-	size INTEGER NOT NULL, -- Dateigröße in Bytes
-	modifacation_time TEXT DEFAULT NULL, -- Timestamp wann die Datei geändert wurde
-	created_at TEXT NOT NULL, -- Timestamp wann die Datei erstellt wurde
-	hash TEXT NOT NULL, -- Hash der Datei
-	state TEXT CHECK('synced', 'modified', 'conflict', 'deleted') DEFAULT 'modified', -- Zustand der Datei
-	last_sync TEXT -- Wann wurde die Datei das letzte mal synchoniesiert
+    file_id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    -- Für später user_id INTEGER REFERENCES user(user_id),
+    path TEXT NOT NULL, -- Pfad vom Sync-Root-Verzeichnis
+    size INTEGER NOT NULL, -- Dateigroeße in Bytes
+    modification_time DATETIME DEFAULT NULL, -- Timestamp wann die Datei geändert wurde
+    created_at DATETIME NOT NULL, -- Timestamp wann die Datei erstellt wurde
+    hash TEXT NOT NULL, -- Hash der Datei
+    state ENUM('synced', 'modified', 'conflict', 'deleted'), -- Zustand der Datei
+    updated_at DATETIME -- Wann wurde die Datei das letzte mal geupdatet
 );
 ```
 
 #### Tabelle: sync_log
 ```sql
-CREATE TABLE sync_log(
-	log_id INTEGER PRIMARY KEY AUTOINCREMENT,
-	file_id INTEGER REFERENCES files(file_id),
-	action TEXT CHECK('download', 'upload', 'conflict', 'delete'), -- Was wurde beim synchronisieren gemacht
-	timestamp TEXT,
-	details TEXT -- Sonstige Infos
+CREATE TABLE sync_events(
+    log_id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    file_id INTEGER REFERENCES files(file_id),
+    -- Für später device_id INTEGER REFERENCES device(device_id),
+    action ENUM('download', 'upload', 'conflict', 'delete', 'error'), -- Was wurde beim synchronisieren gemacht
+    timestamp TEXT,
+    details TEXT -- Sonstige Infos
 );
 ```
 ## MySQL Database
