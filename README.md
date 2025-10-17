@@ -25,13 +25,13 @@ Mein Hauptentwicklungssystem ist Manjaro (Linux), wobei die Android App aller vo
     - [Entwurf des Backend System Design](Docs/backend_system_design.md) ✅
     - [Entwurf des Client-Mockups für die Mobile App (Analog auch für die Desktop Apps)](https://github.com/Sympa1/project_sleipnir-data_sync/blob/master/Docs/android_mokup_2.png) ✅
 - 0.0.1 Datenbankentwicklung
-    - MySQL Schema erstellen ⌛
-    - MySQL Accounts (Admin & Client) anlegeb und Berechtigungen erteilen ⌛
+    - MySQL Schema erstellen ✅
+    - MySQL Accounts (Admin & Client) anlegeb und Berechtigungen erteilen ✅
     - Create Table erstellen ✅
 - 0.0.2 Implementierung der REST API
-    - Grundlegende REST API Endpunkte 🕓
-    - Erstellen der SQL Statements 🕓
-    - Postman Collection 🕓
+    - Grundlegende REST API Endpunkte ⌛
+    - Erstellen der SQL Statements ⌛
+    - Postman Collection ⌛
     - Implementierung File Up- und Download 🕓
     - Implementierung Python CLI zum Testen 🕓
     - Vorrübergehendes speichern der DB Logindaten in einem .env File 🕓
