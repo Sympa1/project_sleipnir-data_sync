@@ -12,6 +12,7 @@ public class FileSyncController : Controller
     {
         if (manifests == null || manifests.Count == 0)
             return BadRequest("Manifest missing or invalid.");
+        //TODO: .env File hinzufügen.
         
         // TODO: Implementierung Methoden zum Abgleich, welche Dateien geupdated werden müssen.
         
