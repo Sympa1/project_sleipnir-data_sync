@@ -101,6 +101,7 @@ project_sleipnir/
 │
 ├── Tests/
 │   └── Postman/
+|       ├── Manifest.json
 │       └── Sleipnir.postman_collection.json
 │
 ├── README.md
