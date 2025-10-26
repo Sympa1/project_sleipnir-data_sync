@@ -7,6 +7,8 @@ namespace Sleipnir.API.Controllers;
 [Route("api/[controller]")]
 public class FileSyncController : Controller
 {
+    // TODO: Per Konstruktor eine Instanz von GetFilesToSyncService injizieren?
+    //  ist die dann immer noch für nur einen Request?
     [HttpPost]
     public async Task<IActionResult> PostManifestByClient([FromBody] List<ManifestDto> manifests)
     {

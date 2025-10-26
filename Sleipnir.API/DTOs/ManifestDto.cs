@@ -1,7 +1,7 @@
 namespace Sleipnir.API.DTOs;
 
 /// <summary>
-/// DTO Modell für den POST Request des Manifests (Alle Dateien vom CLient) vom Client.
+/// DTO Modell für den POST request des Manifests (Alle Dateien vom CLient) vom Client.
 /// </summary>
 public class ManifestDto
 {

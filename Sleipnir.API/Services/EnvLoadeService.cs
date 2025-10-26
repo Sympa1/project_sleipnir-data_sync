@@ -1,6 +1,6 @@
 using DotNetEnv; // --> NuGet-Paket DotNetEnv
 
-namespace CSharp;
+namespace Sleipnir.API.Services;
 
 public class EnvLoadeService
 {

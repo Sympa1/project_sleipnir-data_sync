@@ -1,7 +1,7 @@
 using System;
 using System.IO;
 
-namespace CSharp;
+namespace Sleipnir.API.Services;
 
 /// <summary>
 /// Diese Klasse dient zum Schreiben von Logfiles.
