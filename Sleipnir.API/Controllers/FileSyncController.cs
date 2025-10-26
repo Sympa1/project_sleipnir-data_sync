@@ -29,6 +29,7 @@ public class FileSyncController : Controller
             return BadRequest("Manifest missing or invalid.");
         
         // TODO: Implementierung Methoden zum Abgleich, welche Dateien geupdated werden müssen.
+        //  Rückgabewert: Liste: FilesToSyncDto passt noch nicht ganz.
         var filesToSync = _filesToSyncService.GetFilesToSync(manifests);
         
         // TODO: Ok richtig? Ich will ja dem Client eine Liste der zu syncenden Dateien zurückgeben.
