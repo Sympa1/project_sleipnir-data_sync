@@ -1,9 +1,9 @@
 namespace Sleipnir.API.DTOs;
 
 /// <summary>
-/// DTO Modell für den POST Request des Manifests (Alle Dateien vom CLient) vom Client.
+/// DTO Modell für die zu synchronisierenden Dateien.
 /// </summary>
-public class ManifestDto
+public class FilesToSyncDto
 {
     public int size { get; set; }
     public DateTime? modifactionTime { get; set; }
