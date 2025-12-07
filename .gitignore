@@ -8,4 +8,4 @@ riderModule.iml
 *.suo
 *.userosscache
 .idea/
-Sleipnir.API/.env/
+data_sync.API/.env/
