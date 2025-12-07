@@ -9,3 +9,5 @@ riderModule.iml
 *.userosscache
 .idea/
 data_sync.API/.env/
+# Ignore the API .env file (file, not folder)
+data_sync.API/.env
