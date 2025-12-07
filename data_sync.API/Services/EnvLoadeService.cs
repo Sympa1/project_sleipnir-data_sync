@@ -17,7 +17,7 @@ namespace data_sync.API.Services;
 /// Erwartete Variablen in der .env-Datei:
 /// - DB_HOST    (z. B. localhost)
 /// - DB_PORT    (optional, z. B. 5432)
-/// - DB_NAME    (z. B. data_sync)
+/// - DB_NAME    (z. B. postgres)
 /// - DB_USER    (z. B. postgres)
 /// - DB_PASSWORD (optional)
 ///
@@ -40,10 +40,10 @@ public class EnvLoadeService
             // Aktuelles Arbeitsverzeichnis
             string currentDir = Environment.CurrentDirectory;
 
-            // Projektstammverzeichnis suchen (ein oder zwei Ebenen nach oben)
-            string projectDir = Path.GetFullPath(Path.Combine(currentDir, "..", "..", ".."));
+            // Projektstammverzeichnis suchen (ein oder zwei Ebenen nach oben).
+            //string projectDir = Path.GetFullPath(Path.Combine(currentDir, "..", "..", ".."));
 
-            string envPath = Path.Combine(projectDir, ".env");
+            string envPath = Path.Combine(currentDir, ".env");
 
             if (File.Exists(envPath))
             {
@@ -89,10 +89,11 @@ public class EnvLoadeService
 
             if (string.IsNullOrWhiteSpace(dbHost) || string.IsNullOrWhiteSpace(dbName) || string.IsNullOrWhiteSpace(dbUser))
             {
-                // Unvollständige Angaben -> return null
+                // Unvollständige Angaben -> return null.
                 return null;
             }
 
+            // Nur Segment anhängen, wenn Variable gesetzt -> verhindert unnötige Semikolons.
             var portSegment = string.IsNullOrWhiteSpace(dbPort) ? string.Empty : $";Port={dbPort}";
             var passwordSegment = string.IsNullOrWhiteSpace(dbPassword) ? string.Empty : $";Password={dbPassword}";
 

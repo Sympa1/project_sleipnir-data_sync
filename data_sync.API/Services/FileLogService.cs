@@ -16,14 +16,15 @@ public class FileLogService
     /// <param name="logFileName"></param>
     public FileLogService(string logFileName = "error.log")
     {
-        // Platziert das Logfile im Stammverzeichnis des Projekts ../bin/Debug/netX.X/
+        // Platziert das Logfile im Stammverzeichnis des Projekts ../bin/Debug/netX.X/.
         //this._LogFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, logFileName);
         
         // Aktuelles Arbeitsverzeichnis --> ../bin/Debug/netX.X/
         string currentDir = Environment.CurrentDirectory;
 
-        // Projektstammverzeichnis suchen (ein oder zwei Ebenen nach oben)
-        this._LogFilePath = Path.GetFullPath(Path.Combine(currentDir, "..", "..", "..",logFileName));
+        // Projektstammverzeichnis suchen (ein oder zwei Ebenen nach oben).
+        // this._LogFilePath = Path.GetFullPath(Path.Combine(currentDir, "..", "..", "..",logFileName));
+        this._LogFilePath = Path.GetFullPath(Path.Combine(currentDir, "..", logFileName));
     }
 
     /// <summary>
