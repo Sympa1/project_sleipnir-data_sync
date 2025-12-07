@@ -7,7 +7,7 @@ public class SyncEvent
     public SyncAction Action { get; set; }
     public DateTime Timestamp { get; set; }
     public string Details { get; set; } = string.Empty;
-    
+
     // Foreign Key Navigation
     public File File { get; set; } = null!;
 }
