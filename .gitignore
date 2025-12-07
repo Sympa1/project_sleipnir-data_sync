@@ -11,3 +11,5 @@ riderModule.iml
 data_sync.API/.env/
 # Ignore the API .env file (file, not folder)
 data_sync.API/.env
+# Ignore project-level .env example (use .env locally; don't commit secrets)
+.env

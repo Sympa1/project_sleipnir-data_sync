@@ -1,6 +1,6 @@
 namespace data_sync.API.Models;
 
-public class File
+public class SyncFile
 {
     public int FileId { get; set; }
     public string Path { get; set; } = string.Empty;

@@ -9,5 +9,5 @@ public class SyncEvent
     public string Details { get; set; } = string.Empty;
 
     // Foreign Key Navigation
-    public File File { get; set; } = null!;
+    public SyncFile File { get; set; } = null!;
 }
