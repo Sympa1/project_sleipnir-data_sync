@@ -1,5 +1,8 @@
 using data_sync.API.Services;
 
+// TODO: DbStartup fertigstellen und hier aufrufen.
+// TODO: Die DOCS anpassen.
+
 // .env einmalig beim Start laden via EnvLoadeService (sucht Projektstamm).
 // → Die Methode liest die .env Datei (falls vorhanden) und schreibt die Werte in das Prozess-Environment.
 // → Bei Fehlern oder wenn die Datei fehlt, wird ein Log-Eintrag via FileLogService erzeugt.

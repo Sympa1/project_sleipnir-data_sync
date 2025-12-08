@@ -15,6 +15,8 @@ Erreichung der grundlegenden Sync-Funktionalität zwischen Server und Client.
 - Einfache Konfliktlösung - letzte Änderung wird übernommen
 - Manuelle Synchronisation - der User startet den Vorgang (Download / Upload Buttons)
 
+> Hinweis: Datenbankzugriffe erfolgen serverseitig direkt per ADO.NET (MySql.Data / MySqlConnector) gegen MariaDB; es wird kein ORM (EF Core) verwendet.
+
 ## Post MVP Definition
 #### Nachfolgende Funktionen
 - Ein Backupsystem

@@ -22,10 +22,22 @@ Außerdem ist "*ASP .NET Core*" von Microsoft sehr gut dokumentiert.
 
 Also werden ich als Backend eine *REST API* mit "*ASP .NET Core*" entwickeln, die ich dann nach Möglichkeit als *Docker Container* auf einen Ubuntu Webserver laufen lasse.
 
-**Datenbankzugriff:** Für den Datenbankzugriff nutze ich "*Entity Framework Core*" (EF Core) von Microsoft. EF Core ist ein moderner ORM (Object-Relational Mapper), der sich ideal für CRUD-Operationen eignet und die Datenzugriffs-Logik vereinfacht. Dies ermöglicht eine saubere Architektur mit automatischer Datenbankmigrationen und typstarker Abfrage-Unterstützung.
+**Datenbankzugriff:**
+Die ursprüngliche Idee war, EF Core (ORM) zu verwenden. Nach Tests und Abwägung von Komplexität und Kompatibilität habe ich mich jedoch für direkten ADO.NET‑Zugriff auf MariaDB (MySQL‑Protokoll) entschieden. Gründe:
+- Volle Kontrolle über SQL und MariaDB‑spezifische Features
+- Weniger Paket‑/Versionskonflikte (kein Provider‑Binding an EF Core nötig)
+- Einfachere, explizite SQL‑Skripte für Migrationen
 
-In bisherigen eigenen Projekten habe ich Erfahrungen mit MySQL und SQLite gesammelt. Da auf dem Ubuntu Server bereits MySQL läuft werde ich MySQL als Datenbanksystem für die REST API nutzen.
-SQLite werde ich für die Frontend Anwendungen nutzen. Das begründet sich daraus, das ich bei meiner Recherche herausgefunden habe, dass es wohl gängig ist SQLite für Mobile Apps, als lokales Datenbanksystem zu nutzen.
+Als Bibliothek wird `MySql.Data` (oder optional `MySqlConnector`) verwendet.
+
+**Wichtig:** Verbindungsdaten werden über eine `.env` Datei im Projektstamm geladen (EnvLoadeService). Erwartete Variablen (Beispiele):
+- MYSQL_SERVER
+- MYSQL_PORT
+- MYSQL_DATABASE
+- MYSQL_USER
+- MYSQL_PASSWORD
+- MYSQL_SSLMODE (optional)
+
 #### Frontend
 Da ich in Zukunft beruflich Berührungspunkte mit dem C# Framework MAUI haben werde, liegt die Entscheidung nahe, die Android App mit diesem Framework zu entwickeln.
 Nach Möglichkeit, möchte ich die MAUI App auch für den Windows Client nutzen.

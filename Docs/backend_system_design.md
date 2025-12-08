@@ -26,6 +26,10 @@ Client                Server               Database
 - POST - ../api/sync/upload
 - GET - ../api/sync/download
 
+#### Datenzugriff & Services
+- Es wird ein spezifischer ADO.NET‑Service (`MariaDbService` in `data_sync.API/Services/`) geben, der Verbindungen öffnet, SQL‑Statements ausführt und Fehler protokolliert.
+- Beim Start des API‑Servers wird ein `DbStartupCheckService` den Verbindungsaufbau testen und optional notwendige `CREATE TABLE IF NOT EXISTS` SQL‑Skripte ausführen.
+- SQL‑Skripte im Ordner `Database/MariaDB/`.
+
 #### Fehler Behandlung
 Es werden die typischen HTTP Status Codes in Kombination mit strukturierten und aussagekräftigen Error Response verwendet. Das ermöglicht eine korrekte Reaktion auf etwaige Fehler.
-

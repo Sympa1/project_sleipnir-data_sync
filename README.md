@@ -4,7 +4,8 @@ Ich verspreche mir davon zusätzlich, einiges im Bereich DevOPS bzw. CI/CD, Mobi
 Mein Hauptentwicklungssystem ist Manjaro (Linux), wobei die Android App aller voraussiecht nach unter Windows entwickelt werden wird.
 ## Technische Details
 **Geplante Technologien/Frameworks:**
-- C# ASP .NET Core mit Entity Framework Core für das Backend
+- C# ASP .NET Core für das Backend
+- Direkter Zugriff auf MariaDB (MySQL‑Protokoll) über ADO.NET (`MySql.Data` / `MySqlConnector`) statt eines ORMs
 - C# MAUI für die Android- und nach Möglichkeit Windows App
 - Python /CustomTKinter/QT für das Manjaro (Linux) Frontend
 ## Roadmap
@@ -23,17 +24,17 @@ Mein Hauptentwicklungssystem ist Manjaro (Linux), wobei die Android App aller vo
     - [Entwurf des Backend System Design](Docs/backend_system_design.md) ✅
     - [Entwurf des Client-Mockups für die Mobile App (Analog auch für die Desktop Apps)](https://github.com/Sympa1/project_sleipnir-data_sync/blob/master/Docs/android_mokup_2.png) ✅
 - 0.0.1 Datenbankentwicklung
-    - MySQL Schema erstellen ✅
-    - MySQL Accounts (Admin & Client) anlegeb und Berechtigungen erteilen ✅
-    - Create Table erstellen ✅
+    - MariaDB Schema erstellen ✅
+    - MariaDB Accounts (Admin & Client) anlegen und Berechtigungen erteilen ✅
+    - Create Table SQL‑Skripte erstellen ✅
 - 0.0.2 Implementierung der REST API
-    - Entity Framework Core Setup und DbContext konfigurieren ⌛
+    - Datenbankzugriff via `MySql.Data` / `MySqlConnector` implementieren ⌛
     - Grundlegende REST API Endpunkte ⌛
-    - Entity Models erstellen ⌛
+    - Entity Models / DTOs erstellen ⌛
     - Postman Collection ⌛
     - Implementierung File Up- und Download 🕓
     - Implementierung Python CLI zum Testen 🕓
-    - Vorrübergehendes speichern der DB Logindaten in einem .env File ⌛
+    - Vorübergehendes Speichern der DB Logindaten in einem `.env` File ⌛
 - 0.0.3 Linux GUI
     - Lokale SQLite Datenbank 🕓
     - GUI Framework: CustomTkinter oder QT 🕓
@@ -105,7 +106,7 @@ data_sync/
 │   │   ├── EnvLoadeService.cs
 │   │   ├── FileLogService.cs
 │   │   ├── GetFilesToSyncService.cs
-│   │   └── MySQLService.cs
+│   │   └── MariaDbService.cs         # ADO.NET Service für MariaDB
 │   │
 │   ├── Controllers/                 (API Endpoints)
 │   │   └── FileSyncController.cs
@@ -121,7 +122,7 @@ data_sync/
 │   └── main.py
 |
 ├── data_sync.GUI/
-│   └── main.py    
+│   └── main.py
 |
 ├── data_sync.MAUI/
 │   └── data_sync.MAUI.csproj
@@ -144,6 +145,4 @@ Keine bekannten Probleme.
 ~~Work in Progress.~~
 ## Lizenz
 Dieses Projekt ist unter der GPL-3.0 lizenziert - siehe die [LICENSE](LICENSE)-Datei für Details.
-
-
 
