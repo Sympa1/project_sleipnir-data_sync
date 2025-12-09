@@ -3,10 +3,11 @@ Das Backend dient als zentraler Server für die Synchronisation von Dateien zwis
 Der Server koordiniert den Abgleich von Dateien und löst Konflikte zwischen verschieden Clients (Aktuell mit Methode - letzte Änderung gewinnt).
 
 ## REST API Architektur
-Als Kernidee habe ich einen Manifest (Listen) basierten abgleich.
-Der Client sendet eine Liste aller lokal vorhanden Dateien (inkl. Hash und etwaigen Timestamps) an den Server. Der Server vergleicht die Liste mit seinen vorhanden Datei-Daten und gibt als Antwort die Dateien, die sich unterscheiden, zurück.
+Im Kern wird vom CLient ein Manifest an den Server gesendet, welcher daraufhin die Unterschiede ermittelt und dem Client mitteilt, welche Dateien hoch- oder heruntergeladen werden müssen.
+Mit einem Manifest meine ich eine Liste aller Dateien mit Metadaten (Hash, Name, etc.).
 
 Durch dieses Vorgehen erhoffe ich mir einen sehr effizienten Abgleich der Dateien, lager aber zudem die Konfliktbehandlung auf dem Server aus, wodurch ich diese nicht in jeden Client integrieren muss.
+Das möchte ich auch als vorbereitende Maßnahme für z.B. eine intelligente Konfliktlösung in der Zukunft so implemtieren.
 
 ```
 Client                Server               Database

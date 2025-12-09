@@ -34,7 +34,7 @@ Mein Hauptentwicklungssystem ist Manjaro (Linux), wobei die Android App aller vo
     - Postman Collection ⌛
     - Implementierung File Up- und Download 🕓
     - Implementierung Python CLI zum Testen 🕓
-    - Vorübergehendes Speichern der DB Logindaten in einem `.env` File ⌛
+    - Vorübergehendes Speichern der DB Logindaten in einem `.env` File ✅
 - 0.0.3 Linux GUI
     - Lokale SQLite Datenbank 🕓
     - GUI Framework: CustomTkinter oder QT 🕓
@@ -69,7 +69,8 @@ Mein Hauptentwicklungssystem ist Manjaro (Linux), wobei die Android App aller vo
 ## ~~Voraussetzungen~~
 ~~Work in Progress.~~
 ## Verzeichnisstruktur
-```
+
+```text
 data_sync/
 ├── Database/
 │   ├── MySQL/
@@ -129,12 +130,13 @@ data_sync/
 │
 ├── Tests/
 │   └── Postman/
-|       ├── Manifest.json
+│       ├── Manifest.json
 │       └── data_sync.postman_collection.json
 │
 ├── README.md
 └── data_sync.sln
 ```
+U
 ## ~~Installation~~
 ~~Work in Progress.~~
 ## ~~Verwendung~~
@@ -145,4 +147,3 @@ Keine bekannten Probleme.
 ~~Work in Progress.~~
 ## Lizenz
 Dieses Projekt ist unter der GPL-3.0 lizenziert - siehe die [LICENSE](LICENSE)-Datei für Details.
-
