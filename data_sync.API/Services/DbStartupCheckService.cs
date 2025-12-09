@@ -1,21 +1,23 @@
 namespace data_sync.API.Services;
 
-public class DbStartupCheckService
+public class DbStartupCheckService : IDisposable
 {
+    private MariaDbService _dbService;
+    
     public void CheckDatabaseConnection()
     {
         var logService = new FileLogService();
         try
         {
-            using (var dbService = new MariaDbService())
+            using (_dbService = new MariaDbService())
             {
-                using (var connection = dbService.OpenConnection())
+                using (var connection = _dbService.OpenConnection())
                 {
                     if (connection != null)
                     {
                         Console.WriteLine("MariaDB-Verbindung erfolgreich getestet.");
                         
-                        dbService.CloseConnection();
+                        _dbService.CloseConnection();
                     }
                     else
                     {
@@ -38,9 +40,9 @@ public class DbStartupCheckService
         var logService = new FileLogService();
         try
         {
-            using (var dbService = new MariaDbService())
+            using (_dbService = new MariaDbService())
             {
-                using (var connection = dbService.OpenConnection())
+                using (var connection = _dbService.OpenConnection())
                 {
                     if (connection != null)
                     {
@@ -65,7 +67,7 @@ public class DbStartupCheckService
                                 event_type ENUM('created', 'modified', 'deleted', 'error') NOT NULL,
                                 event_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                                 event_details TEXT,
-                                FOREIGN KEY (sync_file_id) REFERENCES SyncFile(id) ON DELETE CASCADE
+                                FOREIGN KEY (`sync_file_id`) REFERENCES `SyncFiles`(`sync_file_id`) ON DELETE CASCADE
                             );
 
                             CREATE TABLE IF NOT EXISTS FehlerProtokoll (
@@ -77,7 +79,7 @@ public class DbStartupCheckService
                             dbCommand.ExecuteNonQuery();
                         }
                         
-                        dbService.CloseConnection();
+                        _dbService.CloseConnection();
                     }
                     else
                     {
@@ -93,5 +95,10 @@ public class DbStartupCheckService
         }
         
         
+    }
+    
+    public void Dispose()
+    {
+        _dbService.Dispose();
     }
 }
