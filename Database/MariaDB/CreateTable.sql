@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS SyncEvent (
     event_type ENUM('created', 'modified', 'deleted', 'error') NOT NULL,
     event_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     event_details TEXT,
-    FOREIGN KEY (sync_file_id) REFERENCES SyncFile(id) ON DELETE CASCADE
+    FOREIGN KEY (sync_file_id) REFERENCES SyncFiles(sync_file_id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS FehlerProtokoll (
