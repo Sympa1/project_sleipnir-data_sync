@@ -1,9 +1,17 @@
 namespace data_sync.API.Services;
 
+/// <summary>
+/// Führt Startup-Checks für die MariaDB-Datenbank durch.
+/// Prüft die Datenbankverbindung und erstellt erforderliche Tabellen.
+/// </summary>
 public class DbStartupCheckService : IDisposable
 {
     private MariaDbService _dbService;
     
+    /// <summary>
+    /// Testet die Verbindung zur MariaDB-Datenbank.
+    /// Gibt Erfolgs- oder Fehlermeldung aus und protokolliert Fehler.
+    /// </summary>
     public void CheckDatabaseConnection()
     {
         var logService = new FileLogService();
@@ -35,6 +43,10 @@ public class DbStartupCheckService : IDisposable
         
     }
     
+    /// <summary>
+    /// Erstellt die erforderlichen Datenbanktabellen, falls diese nicht existieren.
+    /// <b>Tabellen</b>: SyncFiles, SyncEvent, FehlerProtokoll
+    /// </summary>
     public void CheckDatabaseTables()
     {
         var logService = new FileLogService();
@@ -97,6 +109,9 @@ public class DbStartupCheckService : IDisposable
         
     }
     
+    /// <summary>
+    /// Gibt die MariaDbService-Ressource frei.
+    /// </summary>
     public void Dispose()
     {
         _dbService.Dispose();
