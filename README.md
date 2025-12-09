@@ -2,14 +2,15 @@
 Dieses Projekt ist daraus entstanden, dass ich Dateien -in meinem Fall Obsidian Notizen- Zwischen meinen verschieden Endgeräten synchronisieren möchte. Dafür muss ich verschiedene Betriebssysteme, Windows, Linux (Manjaro) und Android bedienen.
 Ich verspreche mir davon zusätzlich, einiges im Bereich DevOPS bzw. CI/CD, Mobile und Desktopapp zu lernen. Aber auch beim Datenbankdesign und bei der REST API, bin ich sicher viel hinzu zu lernen.
 Mein Hauptentwicklungssystem ist Manjaro (Linux), wobei die Android App aller voraussiecht nach unter Windows entwickelt werden wird.
+
 ## Technische Details
 **Geplante Technologien/Frameworks:**
 - C# ASP .NET Core für das Backend
 - Direkter Zugriff auf MariaDB (MySQL‑Protokoll) über ADO.NET (`MySql.Data` / `MySqlConnector`) statt eines ORMs
 - C# MAUI für die Android- und nach Möglichkeit Windows App
 - Python /CustomTKinter/QT für das Manjaro (Linux) Frontend
-## Roadmap
 
+## Roadmap
 **Status-Legende:**
 - ✅ Abgeschlossen
 - ⌛ In Arbeit
@@ -58,19 +59,31 @@ Mein Hauptentwicklungssystem ist Manjaro (Linux), wobei die Android App aller vo
 - Basis REST API **ohne** Authentifizierung
 - Einfache Konfliktlösung - letzte Änderung wird übernommen
 - Manuelle Synchronisation - der User startet den Vorgang (Download / Upload Buttons)
+
 ## Zukünftige Features
 - Ein Backupsystem
 - Eine Authentifizierung 
 - Biometrie Login bei der Android App
 - Auto Sync
 - Intelligente Konfliktlösung
+
+## Branching \& GitLab Flow
+
+Kurz: Wir nutzen GitLab Flow. Detaillierte Regeln zu Branch-Namen, Merge-Requests und Deploys sind in `Docs/GitLabFlow.md` dokumentiert.
+
+- Wichtige Branches: `main` / `production`, `feature/*`, `hotfix/*`, `bugfix/*`, `release/*`
+- Merge-Requests: Review erforderlich, CI-Pipeline muss erfolgreich sein
+- Deploy: `production` ist der Deployment-Branch (automatisiert)
+- Weitere Hinweise: Siehe `Docs/GitLabFlow.md` für Beispiele und Regeln
+
+
 ## ~~Lessons Learned~~
 ~~Work in Progress.~~
 ## ~~Voraussetzungen~~
 ~~Work in Progress.~~
 ## Verzeichnisstruktur
 
-```text
+```
 data_sync/
 ├── Database/
 │   ├── MySQL/
@@ -136,14 +149,18 @@ data_sync/
 ├── README.md
 └── data_sync.sln
 ```
-U
+
 ## ~~Installation~~
 ~~Work in Progress.~~
+
 ## ~~Verwendung~~
 ~~Work in Progress.~~
+
 ## Bekannte Probleme
 Keine bekannten Probleme.
+
 ## ~~Abhängigkeiten~~
 ~~Work in Progress.~~
+
 ## Lizenz
 Dieses Projekt ist unter der GPL-3.0 lizenziert - siehe die [LICENSE](LICENSE)-Datei für Details.
