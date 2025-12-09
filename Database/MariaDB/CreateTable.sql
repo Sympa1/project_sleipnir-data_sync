@@ -15,3 +15,9 @@ CREATE TABLE IF NOT EXISTS SyncEvent (
     event_details TEXT,
     FOREIGN KEY (sync_file_id) REFERENCES SyncFile(id) ON DELETE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS FehlerProtokoll (
+    fehler_protokoll_id INT AUTO_INCREMENT PRIMARY KEY,
+    fehler_beschreibung TEXT NOT NULL,
+    fehler_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
