@@ -8,6 +8,7 @@ namespace data_sync.API.Services;
 /// </summary>
 public class FileLogService
 {
+
     private string _LogFilePath;
     
     /// <summary>
