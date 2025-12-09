@@ -1,7 +1,6 @@
 using data_sync.API.Services;
 
 // TODO: DbStartup fertigstellen und hier aufrufen.
-// TODO: Die DOCS anpassen.
 
 // .env einmalig beim Start laden via EnvLoadeService (sucht Projektstamm).
 // → Die Methode liest die .env Datei (falls vorhanden) und schreibt die Werte in das Prozess-Environment.
@@ -21,8 +20,22 @@ builder.Services.AddScoped<MariaDbService>();
 
 var app = builder.Build();
 
-// DB-Verbindungstest beim Start
-// TODO: Hier per DI den DbStartupCheckService aufrufen, der den Test durchführt.
+// DB-Startup-Checks in einem Scope ausführen (Scoped Services korrekt verwenden)
+using (var scope = app.Services.CreateScope())
+{
+    var dbStartup = scope.ServiceProvider.GetRequiredService<DbStartupCheckService>();
+    var log = scope.ServiceProvider.GetRequiredService<FileLogService>();
+    try
+    {
+        dbStartup.CheckDatabaseConnection();
+        dbStartup.CheckDatabaseTables();
+    }
+    catch (Exception ex)
+    {
+        log.WriteToLog($"DB-Startup-Fehler: {ex}", "DBStartup");
+        Console.WriteLine($"DB-Startup-Fehler: {ex.Message}");
+    }
+}
 
 // Configure the HTTP request pipeline.
 app.UseHttpsRedirection();
