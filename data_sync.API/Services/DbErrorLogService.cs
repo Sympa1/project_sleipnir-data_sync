@@ -4,13 +4,17 @@ namespace data_sync.API.Services;
 // TODO: In der Methode LogDbErrorAsync Exception-Handling einbauen und die using Blöcke auf async stellen.
 // TODO: Ggf. die Programm.cs bzw. den DbStartupcheckService anpassen, damit async passt.
 
+/// <summary>
+/// Diese Klasse stellt eine Methode zum Protokollieren von Datenbankfehlern in der FehlerProtokoll-Tabelle bereit.
+/// Sie nutzt den MariaDbService per DI, um eine Verbindung zur Datenbank herzustellen.
+/// </summary>
 public class DbErrorLogService
 {
     // Private, readonly Feld speichert die injizierte MariaDBService-Instanz
     // '_' ist C#-Konvention für private Felder
     private readonly MariaDbService _dbService;
 
-    // Konstruktor mit Parameter: Der DI-Container ruft das auf und übergibt MariaDBService
+    // Konstruktor mit Parameter: Der DI-Container ruft das auf und übergibt MariaDbService
     // So wird die Abhängigkeit "injiziert" statt hart codiert
     public DbErrorLogService(MariaDbService mariaDbService)
     {

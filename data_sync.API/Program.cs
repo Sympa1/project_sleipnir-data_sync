@@ -2,7 +2,7 @@ using data_sync.API.Services;
 
 // .env einmalig beim Start laden via EnvLoadeService (sucht Projektstamm).
 // → Die Methode liest die .env Datei (falls vorhanden) und schreibt die Werte in das Prozess-Environment.
-// → Bei Fehlern oder wenn die Datei fehlt, wird ein Log-Eintrag via FileLogService erzeugt.
+// → Bei Fehlern oder wenn die Datei fehlt wird ein Log-Eintrag via FileLogService erzeugt.
 EnvLoadeService.LoadDotEnv();
 
 var builder = WebApplication.CreateBuilder(args);
@@ -36,6 +36,8 @@ FileLogService log = new FileLogService("Db-Startup.log");
         Console.WriteLine($"DB-Startup-Fehler: {ex.Message}");
     }
 
+// Testmodus prüfen (Programmargumente)
+// Wenn testMode == true, dann werden die Tests ausgeführt.
 
 // Configure the HTTP request pipeline.
 app.UseHttpsRedirection();
