@@ -33,12 +33,11 @@ Die ursprüngliche Idee war, EF Core (ORM) zu verwenden. Nach Tests und Abwägun
 Als Bibliothek wird `MySql.Data` (oder optional `MySqlConnector`) verwendet.
 
 **Wichtig:** Verbindungsdaten werden über eine `.env` Datei im Projektstamm geladen (EnvLoadeService). Erwartete Variablen (Beispiele):
-- MYSQL_SERVER
-- MYSQL_PORT
-- MYSQL_DATABASE
-- MYSQL_USER
-- MYSQL_PASSWORD
-- MYSQL_SSLMODE (optional)
+- DB_HOST 
+- DB_PORT 
+- DB_NAME 
+- DB_USER
+- DB_PASSWORD
 
 #### Frontend
 Da ich in Zukunft beruflich Berührungspunkte mit dem C# haben werde, liegt die Entscheidung nahe, die Android App mit diesem Framework zu entwickeln.
