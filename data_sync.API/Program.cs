@@ -1,14 +1,22 @@
 using data_sync.API.Services;
+using data_sync.API.Tests;
 
 // .env einmalig beim Start laden via EnvLoadeService (sucht Projektstamm).
-// → Die Methode liest die .env Datei (falls vorhanden) und schreibt die Werte in das Prozess-Environment.
-// → Bei Fehlern oder wenn die Datei fehlt wird ein Log-Eintrag via FileLogService erzeugt.
 EnvLoadeService.LoadDotEnv();
+
+// Testmodus-Flag
+bool testMode = true;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers();
+
+if (testMode)
+{
+    builder.Services.AddScoped<TestService>();
+}
 
 // NOTE: Damit die Ressourcen wieder freigegeben werden, wenn der Scope endet, muss IDisposable implementiert sein.
 // Registriere GetFilesToSyncService als Scoped (mit automatischem Dispose).
@@ -37,7 +45,15 @@ FileLogService log = new FileLogService("Db-Startup.log");
     }
 
 // Testmodus prüfen (Programmargumente)
-// Wenn testMode == true, dann werden die Tests ausgeführt.
+if (testMode)
+{
+    using (var scope = app.Services.CreateScope())
+    {
+        var testService = scope.ServiceProvider.GetRequiredService<TestService>();
+        // Hier können verschiedene Testmethoden aufgerufen werden
+        testService.ChoiceTest(1); // Beispiel: Testvariante 1 ausführen
+    }
+}
 
 // Configure the HTTP request pipeline.
 app.UseHttpsRedirection();
