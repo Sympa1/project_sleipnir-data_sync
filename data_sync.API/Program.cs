@@ -14,6 +14,10 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllers();
 
+// Swagger hinzufügen
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
 if (testMode)
 {
     builder.Services.AddScoped<TestService>();
@@ -60,6 +64,12 @@ if (testMode)
 }
 
 // Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
 app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();

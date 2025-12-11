@@ -6,10 +6,8 @@ namespace data_sync.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class FileSyncController : Controller
+public class FileSyncController : ControllerBase
 {
-    // TODO: Per Konstruktor eine Instanz von GetFilesToSyncService injizieren?
-    //  ist die dann immer noch für nur einen Request?
     private readonly GetFilesToSyncService _filesToSyncService;
     
     /// <summary>
