@@ -6,11 +6,11 @@ namespace data_sync.API.Services;
 /// Service für die Verwaltung der MariaDB-Datenbankverbindung.
 /// Liest Verbindungsdaten aus .env und stellt Verbindungen bereit.
 /// </summary>
-public class MariaDbService : IDisposable
+public class MariaDbService : IAsyncDisposable
 {
     private readonly string _connectionString;
     private MySqlConnection? _connection;
-    
+
     /// <summary>
     /// Konstruktor: Liest DB-Verbindungsdaten aus Umgebungsvariablen (.env).
     /// Wirft Exception bei fehlenden Daten.
@@ -25,9 +25,9 @@ public class MariaDbService : IDisposable
         var password = Environment.GetEnvironmentVariable("DB_PASSWORD");
 
         // Validierung: Alle erforderlichen Variablen müssen gesetzt sein
-        if (string.IsNullOrWhiteSpace(server) || 
-            string.IsNullOrWhiteSpace(database) || 
-            string.IsNullOrWhiteSpace(user) || 
+        if (string.IsNullOrWhiteSpace(server) ||
+            string.IsNullOrWhiteSpace(database) ||
+            string.IsNullOrWhiteSpace(user) ||
             string.IsNullOrWhiteSpace(password))
         {
             var errorMsg = "MariaDB-Verbindungsdaten fehlen in .env (DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASSWORD).";
@@ -35,7 +35,7 @@ public class MariaDbService : IDisposable
             logService.WriteToLog(errorMsg, "DBServiceError");
             throw new InvalidOperationException(errorMsg);
         }
-        
+
         // Connection String über MySqlConnectionStringBuilder erstellen
         var builder = new MySqlConnectionStringBuilder
         {
@@ -47,20 +47,21 @@ public class MariaDbService : IDisposable
             SslMode = MySqlSslMode.Required, // TLS-Verschlüsselung aktiviert
             TlsVersion = "Tls13" // TLS 1.3 für maximale Sicherheit
         };
-        
+
         _connectionString = builder.ConnectionString;
     }
 
     /// <summary>
-    /// Öffnet eine neue Verbindung zur MariaDB.
+    /// Öffnet eine neue Verbindung zur MariaDB asynchron. Die Verbindung wird automatisch durch IAsyncDisposable geschlossen.
     /// </summary>
-    /// <returns>Geöffnete MySqlConnection oder null bei Fehlern./returns>
-    public MySqlConnection? OpenConnection()
+    /// <returns>Geöffnete MySqlConnection oder null bei Fehlern.</returns>
+    public async Task<MySqlConnection?> OpenConnectionAsync()
     {
         try
         {
             _connection = new MySqlConnection(_connectionString);
-            _connection.Open();
+            // Asynchrones Öffnen der Verbindung
+            await _connection.OpenAsync();
             return _connection;
         }
         catch (Exception e)
@@ -70,22 +71,32 @@ public class MariaDbService : IDisposable
             return null;
         }
     }
-    
+
     /// <summary>
-    /// Schließt die aktuelle Verbindung, falls sie offen ist.
+    /// Schließt die aktuelle Verbindung asynchron, falls sie offen ist.
     /// </summary>
-    public void CloseConnection()
+    public async Task CloseConnectionAsync()
     {
         if (_connection?.State == System.Data.ConnectionState.Open)
-            _connection.Close();
+        {
+            // Asynchrones Schließen der Verbindung
+            await _connection.CloseAsync();
+        }
     }
 
     /// <summary>
-    /// Gibt die Datenbankverbindung frei (IDisposable Pattern).
+    /// Gibt die Datenbankverbindung asynchron frei (IAsyncDisposable Interface).
+    /// Diese Methode wird beim "await using" automatisch aufgerufen.
     /// </summary>
-    public void Dispose()
+    public async ValueTask DisposeAsync()
     {
+        // Schließe die Verbindung, bevor sie freigegeben wird
+        if (_connection?.State == System.Data.ConnectionState.Open)
+        {
+            await _connection.CloseAsync();
+        }
+
+        // Gib die Ressourcen frei
         _connection?.Dispose();
     }
 }
-

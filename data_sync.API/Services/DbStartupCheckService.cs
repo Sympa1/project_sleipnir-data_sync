@@ -4,33 +4,33 @@ namespace data_sync.API.Services;
 /// Führt Startup-Checks für die MariaDB-Datenbank durch.
 /// Prüft die Datenbankverbindung und erstellt erforderliche Tabellen.
 /// </summary>
-public class DbStartupCheckService : IDisposable
+public class DbStartupCheckService : IAsyncDisposable
 {
-    private MariaDbService _dbService;
+    private readonly MariaDbService _dbService;
+
+    public DbStartupCheckService(MariaDbService mariaDbService)
+    {
+        _dbService = mariaDbService;
+    }
     
     /// <summary>
     /// Testet die Verbindung zur MariaDB-Datenbank.
     /// Gibt Erfolgs- oder Fehlermeldung aus und protokolliert Fehler.
     /// </summary>
-    public void CheckDatabaseConnection()
+    public async Task CheckDatabaseConnectionAsync()
     {
         var logService = new FileLogService();
         try
         {
-            using (_dbService = new MariaDbService())
+            await using (var connection = await _dbService.OpenConnectionAsync())
             {
-                using (var connection = _dbService.OpenConnection())
+                if (connection != null)
                 {
-                    if (connection != null)
-                    {
-                        Console.WriteLine("MariaDB-Verbindung erfolgreich getestet.");
-                        
-                        _dbService.CloseConnection();
-                    }
-                    else
-                    {
-                        Console.WriteLine("MariaDB-Verbindung fehlgeschlagen.");
-                    }
+                    Console.WriteLine("MariaDB-Verbindung erfolgreich getestet.");
+                }
+                else
+                {
+                    Console.WriteLine("MariaDB-Verbindung fehlgeschlagen.");
                 }
             }
         }
@@ -47,56 +47,49 @@ public class DbStartupCheckService : IDisposable
     /// Erstellt die erforderlichen Datenbanktabellen, falls diese nicht existieren.
     /// <b>Tabellen</b>: SyncFiles, SyncEvent, FehlerProtokoll
     /// </summary>
-    public void CheckDatabaseTables()
+    public async Task CheckDatabaseTablesAsync()
     {
         var logService = new FileLogService();
         try
         {
-            using (_dbService = new MariaDbService())
+            await using (var connection = await _dbService.OpenConnectionAsync())
             {
-                using (var connection = _dbService.OpenConnection())
+                if (connection != null)
                 {
-                    if (connection != null)
+                    // Impementiere hier die Logik zum Überprüfen der erforderlichen Tabellen.
+                    await using (var dbCommand = connection.CreateCommand())
                     {
-                        Console.WriteLine("MariaDB-Verbindung erfolgreich getestet.");
-                        
-                        // Impementiere hier die Logik zum Überprüfen der erforderlichen Tabellen.
-                        using (var dbCommand = connection.CreateCommand())
-                        {
-                            dbCommand.CommandText = @"
-                            CREATE TABLE IF NOT EXISTS SyncFiles (
-                                sync_file_id INT AUTO_INCREMENT PRIMARY KEY,
-                                file_name VARCHAR(255) NOT NULL,
-                                file_path VARCHAR(512) NOT NULL,
-                                last_modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                                status ENUM('pending', 'in_progress', 'completed', 'failed') DEFAULT 'pending',
-                                UNIQUE(file_path)
-                            );
+                        dbCommand.CommandText = @"
+                        CREATE TABLE IF NOT EXISTS SyncFiles (
+                            sync_file_id INT AUTO_INCREMENT PRIMARY KEY,
+                            file_name VARCHAR(255) NOT NULL,
+                            file_path VARCHAR(512) NOT NULL,
+                            last_modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                            status ENUM('pending', 'in_progress', 'completed', 'failed') DEFAULT 'pending',
+                            UNIQUE(file_path)
+                        );
 
-                            CREATE TABLE IF NOT EXISTS SyncEvent (
-                                sync_event_id INT AUTO_INCREMENT PRIMARY KEY,
-                                sync_file_id INT NOT NULL,
-                                event_type ENUM('created', 'modified', 'deleted', 'error') NOT NULL,
-                                event_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                                event_details TEXT,
-                                FOREIGN KEY (`sync_file_id`) REFERENCES `SyncFiles`(`sync_file_id`) ON DELETE CASCADE
-                            );
+                        CREATE TABLE IF NOT EXISTS SyncEvent (
+                            sync_event_id INT AUTO_INCREMENT PRIMARY KEY,
+                            sync_file_id INT NOT NULL,
+                            event_type ENUM('created', 'modified', 'deleted', 'error') NOT NULL,
+                            event_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                            event_details TEXT,
+                            FOREIGN KEY (`sync_file_id`) REFERENCES `SyncFiles`(`sync_file_id`) ON DELETE CASCADE
+                        );
 
-                            CREATE TABLE IF NOT EXISTS FehlerProtokoll (
-                                fehler_protokoll_id INT AUTO_INCREMENT PRIMARY KEY,
-                                fehler_beschreibung TEXT NOT NULL,
-                                fehler_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                            );";
-                            
-                            dbCommand.ExecuteNonQuery();
-                        }
+                        CREATE TABLE IF NOT EXISTS FehlerProtokoll (
+                            fehler_protokoll_id INT AUTO_INCREMENT PRIMARY KEY,
+                            fehler_beschreibung TEXT NOT NULL,
+                            fehler_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                        );";
                         
-                        _dbService.CloseConnection();
+                        dbCommand.ExecuteNonQuery();
                     }
-                    else
-                    {
-                        Console.WriteLine("MariaDB-Verbindung fehlgeschlagen.");
-                    }
+                }
+                else
+                {
+                    Console.WriteLine("MariaDB-Verbindung fehlgeschlagen.");
                 }
             }
         }
@@ -112,8 +105,8 @@ public class DbStartupCheckService : IDisposable
     /// <summary>
     /// Gibt die MariaDbService-Ressource frei.
     /// </summary>
-    public void Dispose()
+    public async ValueTask DisposeAsync()
     {
-        _dbService.Dispose();
+        await _dbService.DisposeAsync();
     }
 }

@@ -5,8 +5,8 @@ using data_sync.API.Tests;
 EnvLoadeService.LoadDotEnv();
 
 // Testmodus-Flag
-//bool testMode = true;
-bool testMode = false;
+bool testMode = true;
+//bool testMode = false;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -33,10 +33,13 @@ FileLogService log = new FileLogService("Db-Startup.log");
 
     try
     {
-        using (var dbStartup = new DbStartupCheckService())
+        var scope = app.Services.CreateScope();
+        var mariaDbService = scope.ServiceProvider.GetRequiredService<MariaDbService>();
+        
+        await using (var dbStartup = new DbStartupCheckService(mariaDbService))
         {
-            dbStartup.CheckDatabaseConnection();
-            dbStartup.CheckDatabaseTables();
+            await dbStartup.CheckDatabaseConnectionAsync();
+            await dbStartup.CheckDatabaseTablesAsync();
         }
     }
     catch (Exception ex)

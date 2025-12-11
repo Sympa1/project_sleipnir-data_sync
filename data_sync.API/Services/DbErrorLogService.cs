@@ -1,8 +1,5 @@
 namespace data_sync.API.Services;
 
-// TODO: MariaDbService auf async umstellen: IAsyncDisposable. Sollten auch Open- & Close-Methoden async sein?
-// TODO: In der Methode LogDbErrorAsync Exception-Handling einbauen und die using Blöcke auf async stellen.
-// TODO: Ggf. die Programm.cs bzw. den DbStartupcheckService anpassen, damit async passt.
 
 /// <summary>
 /// Diese Klasse stellt eine Methode zum Protokollieren von Datenbankfehlern in der FehlerProtokoll-Tabelle bereit.
@@ -29,11 +26,11 @@ public class DbErrorLogService
     /// <param name="contextInfo"></param>
     public async Task LogDbErrorAsync(Exception ex, string contextInfo)
     {
-        using (var connection = _dbService.OpenConnection())
+        await using (var connection = await _dbService.OpenConnectionAsync())
         {
             if (connection != null)
             {
-                using (var dbCommand = connection.CreateCommand())
+                await using (var dbCommand = connection.CreateCommand())
                 {
                     // ex. Message: Gibt die kurze Fehlermeldung als Text zurück
                     // ex. StackTrace: Zeigt die Call-Stack-Information - welche Methoden aufgerufen wurden

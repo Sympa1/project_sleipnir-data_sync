@@ -9,7 +9,7 @@ public class TestService
         {
             case 1:
                 DbErrorLogServiceTests dbErrorLogTests = new DbErrorLogServiceTests();
-                dbErrorLogTests.LogDbErrorAsync_ShouldLogException();
+                dbErrorLogTests.LogDbErrorAsyncException();
                 break;
             case 2:
                 // Testvariante 2 ausführen
