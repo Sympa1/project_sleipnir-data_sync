@@ -20,7 +20,7 @@ public class FileSyncController : ControllerBase
     }
     
     [HttpPost]
-    public async Task<IActionResult> PostManifestByClient([FromBody] List<ManifestDto> manifests)
+    public async Task<IActionResult> PostManifestByClient([FromBody] List<ManifestEntryDto> manifests)
     {
         if (manifests == null || manifests.Count == 0)
             return BadRequest("Manifest missing or invalid.");

@@ -1,10 +1,16 @@
+DROP TABLE IF EXISTS SyncEvent;
+DROP TABLE IF EXISTS SyncFiles;
+DROP TABLE IF EXISTS FehlerProtokoll;
+
 CREATE TABLE IF NOT EXISTS SyncFiles (
     sync_file_id INT AUTO_INCREMENT PRIMARY KEY,
     file_name VARCHAR(255) NOT NULL,
-    file_path VARCHAR(512) NOT NULL,
+    file_path VARCHAR(1024) NOT NULL,
+    file_size BIGINT NOT NULL,
+    hash_value VARCHAR(64) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     last_modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    status ENUM('pending', 'in_progress', 'completed', 'failed') DEFAULT 'pending',
-    UNIQUE(file_path)
+    file_state ENUM('new', 'modified', 'unchanged', 'deleted', 'conflict') NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS SyncEvent (

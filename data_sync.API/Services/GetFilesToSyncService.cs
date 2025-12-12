@@ -9,7 +9,7 @@ public class GetFilesToSyncService
     /// </summary>
     /// <param name="manifests">Liste: ManifestDto</param>
     /// <returns>Liste: filesToSync</returns>
-    public async Task<List<FilesToSyncDto>> GetFilesToSync(List<ManifestDto> manifests)
+    public async Task<List<FilesToSyncDto>> GetFilesToSync(List<ManifestEntryDto> manifests)
     {
         List<FilesToSyncDto> filesToSync = new List<FilesToSyncDto>();
         
