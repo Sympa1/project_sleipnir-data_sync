@@ -56,35 +56,39 @@ public class DbStartupCheckService : IAsyncDisposable
             {
                 if (connection != null)
                 {
-                    // Impementiere hier die Logik zum Überprüfen der erforderlichen Tabellen.
+                    // Implementiere hier die Logik zum Überprüfen der erforderlichen Tabellen.
                     await using (var dbCommand = connection.CreateCommand())
                     {
                         dbCommand.CommandText = @"
                         CREATE TABLE IF NOT EXISTS SyncFiles (
-                            sync_file_id INT AUTO_INCREMENT PRIMARY KEY,
-                            file_name VARCHAR(255) NOT NULL,
-                            file_path VARCHAR(512) NOT NULL,
-                            last_modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                            status ENUM('pending', 'in_progress', 'completed', 'failed') DEFAULT 'pending',
-                            UNIQUE(file_path)
-                        );
+    sync_file_id INT AUTO_INCREMENT PRIMARY KEY,
+    file_name VARCHAR(255) NOT NULL,
+    file_path VARCHAR(1024) NOT NULL,
+    file_size BIGINT NOT NULL,
+    hash_value VARCHAR(64) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    last_modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    file_state ENUM('new', 'modified', 'unchanged', 'deleted', 'conflict') NOT NULL
+);
 
-                        CREATE TABLE IF NOT EXISTS SyncEvent (
-                            sync_event_id INT AUTO_INCREMENT PRIMARY KEY,
-                            sync_file_id INT NOT NULL,
-                            event_type ENUM('created', 'modified', 'deleted', 'error') NOT NULL,
-                            event_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                            event_details TEXT,
-                            FOREIGN KEY (`sync_file_id`) REFERENCES `SyncFiles`(`sync_file_id`) ON DELETE CASCADE
-                        );
+CREATE TABLE IF NOT EXISTS SyncEvent (
+    sync_event_id INT AUTO_INCREMENT PRIMARY KEY,
+    sync_file_id INT NOT NULL,
+    event_type ENUM('created', 'modified', 'deleted', 'error') NOT NULL,
+    event_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    event_details TEXT,
+    FOREIGN KEY (sync_file_id) REFERENCES SyncFiles(sync_file_id) ON DELETE CASCADE
+);
 
-                        CREATE TABLE IF NOT EXISTS FehlerProtokoll (
-                            fehler_protokoll_id INT AUTO_INCREMENT PRIMARY KEY,
-                            fehler_beschreibung TEXT NOT NULL,
-                            fehler_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                        );";
+CREATE TABLE IF NOT EXISTS FehlerProtokoll (
+    fehler_protokoll_id INT AUTO_INCREMENT PRIMARY KEY,
+    fehler_beschreibung TEXT NOT NULL,
+    fehler_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);";
                         
-                        dbCommand.ExecuteNonQuery();
+                        // Asynchrone Ausführung — blockiert nicht
+                        await dbCommand.ExecuteNonQueryAsync();
+                        Console.WriteLine("Datenbanktabellen erfolgreich erstellt/geprüft.");
                     }
                 }
                 else

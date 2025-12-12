@@ -1,18 +1,18 @@
 [
   {
-    "fileName": "document.txt",
-    "relativePath": "projects/alpha/docs",
-    "size": 12345,
-    "lastModifiedUtc": "2025-12-12T10:00:00Z",
-    "sha256": "abcdef012345...",
-    "changeState": "Modified"
+    "FileName": "document1.txt",
+    "FilePath": "projects/alpha/docs",
+    "FileSize": 12345,
+    "LastModified": "2025-12-12T10:00:00Z",
+    "Hashvalue": "abcdef012345...",
+    "FileState": "Modified"
   },
   {
-    "fileName": "document.txt",
-    "relativePath": "projects/alpha/docs",
-    "size": 12345,
-    "lastModifiedUtc": "2025-12-12T10:00:00Z",
-    "sha256": "sha256:4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5",
-    "changeState": "Modified"
+    "FileName": "document2.txt",
+    "FilePath": "projects/alpha/docs",
+    "FileSize": 12345,
+    "LastModified": "2025-12-12T10:00:00Z",
+    "Hashvalue": "sha256:4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5",
+    "FileState": "Modified"
   }
 ]

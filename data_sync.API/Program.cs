@@ -5,8 +5,8 @@ using data_sync.API.Tests;
 EnvLoadeService.LoadDotEnv();
 
 // Testmodus-Flag
-bool testMode = true;
-//bool testMode = false;
+//bool testMode = true;
+bool testMode = false;
 
 
 var builder = WebApplication.CreateBuilder(args);
