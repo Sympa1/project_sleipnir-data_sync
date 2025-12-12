@@ -12,7 +12,12 @@ bool testMode = false;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    // JSON-Deserialisierung: PascalCase (statt default camelCase) akzeptieren
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.PropertyNamingPolicy = null;
+    });
 
 // Swagger hinzufügen
 builder.Services.AddEndpointsApiExplorer();
@@ -67,7 +72,12 @@ if (testMode)
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "data_sync.API v1");
+        // Swagger auf Root-Path (/) zugreifbar machen
+        c.RoutePrefix = string.Empty;
+    });
 }
 
 app.UseHttpsRedirection();

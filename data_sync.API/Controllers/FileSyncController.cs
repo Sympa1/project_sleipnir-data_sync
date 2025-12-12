@@ -22,14 +22,13 @@ public class FileSyncController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> PostManifestByClient([FromBody] List<ManifestEntryDto> manifests)
     {
-        if (manifests == null || manifests.Count == 0)
+        if (manifests.Count == 0)
             return BadRequest("Manifest missing or invalid.");
         
-        // TODO: Implementierung Methoden zum Abgleich, welche Dateien geupdated werden müssen.
-        //  Rückgabewert: Liste: FilesToSyncDto passt noch nicht ganz.
-        //var filesToSync = _filesToSyncService.GetFilesToSync(manifests);
+        // Ermittle Dateien, die synchronisiert werden müssen
+        var filesToSync = await _filesToSyncService.GetFilesToSync(manifests);
         
-        // TODO: Ok richtig? Ich will ja dem Client eine Liste der zu syncenden Dateien zurückgeben.
-        return Ok();
+        // Gib dem Client die Liste der zu synchronisierenden Dateien zurück
+        return Ok(filesToSync);
     }
 }

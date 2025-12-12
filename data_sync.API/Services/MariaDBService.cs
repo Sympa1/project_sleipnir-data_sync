@@ -45,7 +45,7 @@ public class MariaDbService : IAsyncDisposable
             UserID = user,
             Password = password,
             SslMode = MySqlSslMode.Required, // TLS-Verschlüsselung aktiviert
-            TlsVersion = "Tls12" // TLS 1.3 für maximale Sicherheit
+            TlsVersion = "Tls13" // TLS 1.3 für maximale Sicherheit
         };
 
         _connectionString = builder.ConnectionString;
