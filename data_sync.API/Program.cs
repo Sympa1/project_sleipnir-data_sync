@@ -19,10 +19,6 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.PropertyNamingPolicy = null;
     });
 
-// Swagger hinzufügen
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
 if (testMode)
 {
     builder.Services.AddScoped<TestService>();
@@ -66,18 +62,6 @@ if (testMode)
         // Hier können verschiedene Testmethoden aufgerufen werden
         testService.ChoiceTest(1); // Beispiel: Testvariante 1 ausführen
     }
-}
-
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI(c =>
-    {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "data_sync.API v1");
-        // Swagger auf Root-Path (/) zugreifbar machen
-        c.RoutePrefix = string.Empty;
-    });
 }
 
 app.UseHttpsRedirection();
