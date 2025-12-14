@@ -4,6 +4,8 @@ using data_sync.API.Services;
 
 namespace data_sync.API.Controllers;
 
+// NOTE: Beim Download zum Client muss anschließend der Hashwert vom Client neu berechnet und in der ClientDB aktualisiert werden.
+
 [ApiController]
 [Route("api/[controller]")]
 public class FileSyncController : ControllerBase
