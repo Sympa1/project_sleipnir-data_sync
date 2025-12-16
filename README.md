@@ -30,7 +30,7 @@ Mein Hauptentwicklungssystem ist Manjaro (Linux), wobei die Android App aller vo
     - Create Table SQL‑Skripte erstellen ✅
 - 0.0.2 Implementierung der REST API
     - Datenbankzugriff via `MySql.Data` / `MySqlConnector` implementieren ✅ 
-    - Grundlegende REST API Endpunkte ⌛
+    - Grundlegende REST API Endpunkte ✅
     - Entity Models / DTOs erstellen ✅
     - Postman Collection ⌛
     - Implementierung File Up- und Download ⌛
