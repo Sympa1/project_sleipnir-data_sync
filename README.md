@@ -29,11 +29,11 @@ Mein Hauptentwicklungssystem ist Manjaro (Linux), wobei die Android App aller vo
     - MariaDB Accounts (Admin & Client) anlegen und Berechtigungen erteilen ✅
     - Create Table SQL‑Skripte erstellen ✅
 - 0.0.2 Implementierung der REST API
-    - Datenbankzugriff via `MySql.Data` / `MySqlConnector` implementieren ⌛
+    - Datenbankzugriff via `MySql.Data` / `MySqlConnector` implementieren ✅ 
     - Grundlegende REST API Endpunkte ⌛
-    - Entity Models / DTOs erstellen ⌛
+    - Entity Models / DTOs erstellen ✅
     - Postman Collection ⌛
-    - Implementierung File Up- und Download 🕓
+    - Implementierung File Up- und Download ⌛
     - Implementierung Python CLI zum Testen 🕓
     - Vorübergehendes Speichern der DB Logindaten in einem `.env` File ✅
 - 0.0.3 Linux GUI
@@ -47,7 +47,7 @@ Mein Hauptentwicklungssystem ist Manjaro (Linux), wobei die Android App aller vo
     - Lokale Berechnung des Dateihashes 🕓
     - Kommunikation, inkl. Manifest, mit der REST API zum Synchronisieren 🕓
 - 0.1.0 Testing
-    - Unittest 💭
+    - End to End Test 💭
 - 0.9.0 Release-Vorbereitung
     - Erstellen des automatischen Deployment 🕓
     - Sicheres Speichern von Datenbanklogin und Passwort 🕓

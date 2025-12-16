@@ -62,37 +62,38 @@ public class GetFilesToSyncService
                         {
                             await using (var dbCommand2 = connection.CreateCommand())
                             {
-                                DateTime lastModifiedFromDb;
+                                DateTime? lastModifiedFromDb = null;
                                 // Optimalerweise noch zusätlich den Dateipfad prüfen
                                 dbCommand2.CommandText = "SELECT last_modified FROM SyncFiles WHERE file_name = @fileName;";
                                 dbCommand2.Parameters.AddWithValue("@fileName", manifest.FileName);
                         
                                 string dateFromDb = await dbCommand2.ExecuteScalarAsync() as string;
 
-                                if (dateFromDb != null)
+                                if (!string.IsNullOrEmpty(dateFromDb))
                                 { 
                                     lastModifiedFromDb = DateTime.Parse(dateFromDb!);  
                                 }
                             
-                                if (manifest.LastModified > lastModifiedFromDb)
+                                if (!lastModifiedFromDb.HasValue) // Prüft, ob der Wert null ist. Null = false / Wert = true
                                 {
-                                    // Client-Datei ist neuer → Datei muss hochgeladen werden
+                                    // Kein valides Datum in DB -> behandeln (hier: Client als neuer behandeln)
                                     manifestOut.FileState = FileChangeState.Modified;
                                     manifestOut.ToUpload = true;
                                 }
-                                else if (manifest.LastModified < lastModifiedFromDb)
+                                else if (manifest.LastModified > lastModifiedFromDb.Value)
                                 {
-                                    // Server-Datei ist neuer → Datei muss heruntergeladen werden
+                                    manifestOut.FileState = FileChangeState.Modified;
+                                    manifestOut.ToUpload = true;
+                                }
+                                else if (manifest.LastModified < lastModifiedFromDb.Value)
+                                {
                                     manifestOut.FileState = FileChangeState.Modified;
                                     manifestOut.ToDownload = true;
                                 }
                                 else
                                 {
-                                    // Beide Dateien haben das gleiche Änderungsdatum, aber unterschiedliche Hashwerte
-                                    // → Konfliktfall
                                     manifestOut.FileState = FileChangeState.Conflict;
                                 }
-                                filesToSync.Add(manifestOut);
                             }
                         }
                         else
@@ -103,6 +104,7 @@ public class GetFilesToSyncService
                     }
                 }
             }
+            filesToSync.Add(manifestOut);
         }
         
         return filesToSync;

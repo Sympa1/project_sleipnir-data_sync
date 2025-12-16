@@ -7,16 +7,16 @@ namespace data_sync.API.Controllers;
 // NOTE: Beim Download zum Client muss anschließend der Hashwert vom Client neu berechnet und in der ClientDB aktualisiert werden.
 
 [ApiController]
-[Route("api/[controller]")]
-public class FileSyncController : ControllerBase
+[Route("api/sync/[controller]")]
+public class ManifestController : ControllerBase
 {
     private readonly GetFilesToSyncService _filesToSyncService;
     
     /// <summary>
-    /// Konstruktor für FileSyncController, der GetFilesToSyncService injiziert.
+    /// Konstruktor für ManifestController, der GetFilesToSyncService injiziert.
     /// </summary>
     /// <param name="filesToSyncService"></param>
-    public FileSyncController(GetFilesToSyncService filesToSyncService)
+    public ManifestController(GetFilesToSyncService filesToSyncService)
     {
         _filesToSyncService = filesToSyncService;
     }
@@ -34,3 +34,4 @@ public class FileSyncController : ControllerBase
         return Ok(filesToSync);
     }
 }
+

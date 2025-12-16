@@ -29,5 +29,5 @@ CREATE TABLE IF NOT EXISTS FehlerProtokoll (
 );
 
 INSERT INTO SyncFiles (file_name, file_path, file_size, hash_value, file_state) VALUES
-('example.txt', '/path/to/example.txt', 1024, 'd2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2', 'new'),
+('example.txt', '/path/to/example.txt', 1024, 'dd2d2d2d22d2d2d2d2', 'new'),
 ('sample.jpg', '/path/to/sample.jpg', 2048, 'e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3', 'modified');
