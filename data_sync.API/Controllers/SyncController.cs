@@ -23,8 +23,7 @@ public class SyncController : ControllerBase
         _filesToSyncService = filesToSyncService;
     }
     
-    [HttpPost]
-    [Route("manifest")]
+    [HttpPost("manifest")]
     public async Task<IActionResult> PostManifestByClient([FromBody] List<ManifestEntryDto> manifests)
     {
         if (manifests.Count == 0)
@@ -40,8 +39,7 @@ public class SyncController : ControllerBase
     /// </summary>
     /// <param name="files"></param>
     /// <returns></returns>
-    [HttpPost]
-    [Route("upload")]
+    [HttpPost("upload")]
     public async Task<IActionResult> UploadFile(List<IFormFile> files)
     {
         if (files == null || files.Count == 0)
@@ -51,7 +49,7 @@ public class SyncController : ControllerBase
         
         // TODO: Die Verzeichnisstruktur muss später noch gespiegelt werden.
         // Erstellen des Upload-Verzeichnisses, falls es nicht existiert
-        var uploadPath = Path.Combine("..", "Uploads");
+        var uploadPath = Path.Combine("Uploads");
         if (!Directory.Exists(uploadPath))
         {
             Directory.CreateDirectory(uploadPath);
@@ -65,7 +63,8 @@ public class SyncController : ControllerBase
             {
                 var fileName = Path.GetFileName(file.FileName); // Extrahiert den Dateinamen
                 
-                using (var stream = System.IO.File.Create(Path.Combine("..", "Uploads", fileName))) // Erstellt einen Dateistream zum Speichern der Datei
+                // TODO: Der Pfad muss später noch angepasst werden, um die Verzeichnisstruktur zu erhalten.
+                using (var stream = System.IO.File.Create(Path.Combine("Uploads", fileName))) // Erstellt einen Dateistream zum Speichern der Datei
                 {
                     await file.CopyToAsync(stream); // Kopiert den Inhalt der hochgeladenen Datei in den Dateistream
                 }
@@ -73,14 +72,26 @@ public class SyncController : ControllerBase
         }
         return Ok(new { count = files.Count, size }); // Gibt die Anzahl der hochgeladenen Dateien und deren Gesamtgröße als anonymes Objekt zurück
     }
-    
-    [HttpGet]
-    [Route("download")]
-    public async Task<IActionResult> DownloadFile()
-    {
 
-        // Vorbereitungen zum download einer Datei
-        return null;
+    [HttpGet("download")]
+    public async Task<IActionResult> DownloadFile([FromQuery] string fileName)
+    {
+        var filePath = Path.Combine("Uploads", fileName); // Pfad zur Datei im Upload-Verzeichnis
+
+        if (!System.IO.File.Exists(filePath))
+        {
+            return NotFound("File not found.");
+        }
+
+        var memory = new MemoryStream();
+        using (var stream = new FileStream(filePath, FileMode.Open))
+        {
+            await stream.CopyToAsync(memory); // Kopiert den Inhalt der Datei in den MemoryStream
+        }
+        memory.Position = 0; // Setzt die Position des MemoryStreams auf den Anfang zurück
+
+        var contentType = "application/octet-stream"; // Allgemeiner MIME-Typ für Binärdateien
+        return File(memory, contentType, fileName); // Gibt die Datei als Download zurück
     }
 }
 
