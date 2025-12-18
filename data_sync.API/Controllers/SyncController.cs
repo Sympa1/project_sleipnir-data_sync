@@ -6,6 +6,9 @@ namespace data_sync.API.Controllers;
 
 // TODO: Wie mache ich das mit dem löschen von Dateien?
 
+// TODO: Metadaten in der DB des Clients speichern (z.B. Dateigröße, Hash-Wert, Änderungsdatum). Das soll beim
+//  Upload passieren.
+
 [ApiController]
 [Route("api/[controller]")]
 public class SyncController : ControllerBase
