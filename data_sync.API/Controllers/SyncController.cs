@@ -44,7 +44,7 @@ public class SyncController : ControllerBase
     /// files und basePath sind die Keywords. basePath wird als Query-Parameter übergeben.
     /// Es können mehrere Dateien gleichzeitig hochgeladen werden, aber sie müssen im selben Verzeichnis liegen.
     /// </summary>
-    /// <param name="files">Die Datei(en) die Übertragen werden</param>
+    /// <param name="files">Die Datei(en) die übertragen werden</param>
     /// <param name="basePath">Der Dateipfad für die Datei(en)</param>
     /// <returns></returns>
     [HttpPost("upload")]
@@ -92,6 +92,7 @@ public class SyncController : ControllerBase
     [HttpPost("confirm-upload")]
     public async Task<IActionResult> ConfirmUpload([FromBody] ManifestEntryDto metadata)
     {
+        // TODO: Via foreach mehrere Einträge verarbeiten
         var fileName = Path.GetFileName(metadata.FilePath);
         var filePath = Path.Combine("uploads", fileName);
 
@@ -109,9 +110,9 @@ public class SyncController : ControllerBase
         if (fileInfo.Length != metadata.FileSize)
             return BadRequest("Dateigröße stimmt nicht überein.");
 
-        // TODO: Im UpdateMetadataService implemtieren
+        // TODO: Im UpdateMetadataService implemtiereren
         // Erst jetzt: Metadaten aktualisieren
-        await _updateMetadataService.UpdateAsync(new ManifestEntryDto
+        await UpdateMetadataAsync(new ManifestEntryDto
         {
             FilePath = metadata.FilePath,
             FileName = metadata.FileName,
@@ -122,7 +123,7 @@ public class SyncController : ControllerBase
             FileState = metadata.FileState
         });
 
-        return Ok("Datei und Metadaten bestätigt.");
+        return Ok("Metadaten validiert und Metadaten in DB übertrgen.");
     }
 
     // TODO: Eine Base64 kodierte JSON Datei wäre auch eine Möglichkeit, Dateien zu übertragen. Damit könnte man

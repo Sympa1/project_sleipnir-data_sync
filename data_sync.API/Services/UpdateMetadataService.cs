@@ -1,3 +1,5 @@
+using data_sync.API.DTOs;
+
 namespace data_sync.API.Services;
 
 public class UpdateMetadataService
@@ -11,4 +13,8 @@ public class UpdateMetadataService
     // Ich muss den Hashwert der Datei ermitteln
     // Ich muss vom Client den state der Datei bekommen
     // Ich muss vom CLient den Erstellzeitpunkt der Datei bekommen
+    public async Task UpdateMetadataAsync(ManifestEntryDto metaData)
+    {
+        
+    }
 }
