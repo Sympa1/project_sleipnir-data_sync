@@ -81,6 +81,49 @@ public class SyncController : ControllerBase
         }
         return Ok(new { count = files.Count, size }); // Gibt die Anzahl der hochgeladenen Dateien und deren Gesamtgröße als anonymes Objekt zurück
     }
+    
+    /// <summary>
+    /// Nimmt nach dem Upload im Format des Manifest's die Metadaten entgegen und validiert diese.
+    /// Erst wenn die Validierung erfolgreich ist, werden die Metadaten in der DB aktualisiert.
+    /// <b>Wichtig:</b> Die Liste an Metadaten muss exakt der Liste der hochgeladenen Dateien entsprechen.
+    /// </summary>
+    /// <param name="metadata"></param>
+    /// <returns></returns>
+    [HttpPost("confirm-upload")]
+    public async Task<IActionResult> ConfirmUpload([FromBody] ManifestEntryDto metadata)
+    {
+        var fileName = Path.GetFileName(metadata.FilePath);
+        var filePath = Path.Combine("uploads", fileName);
+
+        // Validierung: Datei existiert?
+        if (!System.IO.File.Exists(filePath))
+            return NotFound("Datei nicht gefunden. Upload fehlgeschlagen?");
+
+        // Validierung: Hash vergleichen (Client vs. Server)
+        var serverHash = UtilsService.CalculateFileHash(filePath);
+        if (serverHash != metadata.Hashvalue)
+            return BadRequest("Datei-Hash stimmt nicht überein. Upload beschädigt?");
+
+        // Validierung: Dateigröße prüfen
+        var fileInfo = new FileInfo(filePath);
+        if (fileInfo.Length != metadata.FileSize)
+            return BadRequest("Dateigröße stimmt nicht überein.");
+
+        // TODO: Im UpdateMetadataService implemtieren
+        // Erst jetzt: Metadaten aktualisieren
+        await _updateMetadataService.UpdateAsync(new ManifestEntryDto
+        {
+            FilePath = metadata.FilePath,
+            FileName = metadata.FileName,
+            FileSize = fileInfo.Length,
+            Hashvalue = serverHash,
+            CreatedAt = metadata.CreatedAt,
+            LastModified = metadata.LastModified,
+            FileState = metadata.FileState
+        });
+
+        return Ok("Datei und Metadaten bestätigt.");
+    }
 
     // TODO: Eine Base64 kodierte JSON Datei wäre auch eine Möglichkeit, Dateien zu übertragen. Damit könnte man
     //  mehrere Dateien in einem Request übertragen.

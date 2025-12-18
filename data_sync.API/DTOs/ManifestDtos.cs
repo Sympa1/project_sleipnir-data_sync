@@ -20,6 +20,9 @@ public class ManifestEntryDto
     [JsonPropertyName("lastModifiedUtc")]
     public DateTime LastModified { get; set; }
     
+    [JsonPropertyName("createdAt")]
+    public DateTime CreatedAt { get; set; }
+    
     [JsonPropertyName("sha256")]
     public required string Hashvalue { get; set; }
     
