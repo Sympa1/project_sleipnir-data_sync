@@ -5,7 +5,6 @@ using data_sync.API.Services;
 namespace data_sync.API.Controllers;
 
 // TODO: Wie mache ich das mit dem löschen von Dateien?
-// TODO: Beim Download zum Client muss anschließend der Hashwert vom Client neu berechnet und in der ClientDB aktualisiert werden.
 
 [ApiController]
 [Route("api/[controller]")]

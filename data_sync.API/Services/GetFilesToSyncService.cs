@@ -101,12 +101,24 @@ public class GetFilesToSyncService
                             // Hash gleich → Datei ist synchron, nicht nötig zu synchronisieren
                             manifestOut.FileState = FileChangeState.Unchanged;
                         }
+                        
+                        // Hier den Dateipfad vom Server abfragen und prüfen, ob die Datei dort existiert.
+
+                        await using (var dbCommand3 = connection.CreateCommand())
+                        {
+                            dbCommand3.CommandText = "SELECT file_path FROM SyncFiles WHERE file_name = @fileName;";
+                            dbCommand3.Parameters.AddWithValue("@fileName", manifest.FileName);
+                        
+                            string? fullPath = await dbCommand3.ExecuteScalarAsync() as string;
+
+                            if (string.IsNullOrEmpty(fullPath))
+                            {
+                                manifestOut.FilePath = fullPath;
+                            }
+                        }
                     }
                 }
             }
-            // Hier den Dateipfad vom Server abfragen und prüfen, ob die Datei dort existiert.
-            
-            
             filesToSync.Add(manifestOut);
         }
         
