@@ -4,7 +4,6 @@ using data_sync.API.Services;
 
 namespace data_sync.API.Controllers;
 
-// TODO: Übertragung der Dateidaten implementieren (Upload und Download)
 // TODO: Wie mache ich das mit dem löschen von Dateien?
 // TODO: Beim Download zum Client muss anschließend der Hashwert vom Client neu berechnet und in der ClientDB aktualisiert werden.
 
@@ -23,6 +22,11 @@ public class SyncController : ControllerBase
         _filesToSyncService = filesToSyncService;
     }
     
+    /// <summary>
+    /// Gibt dem Client die Liste der Dateien zurück, mit dem Status/Zustand der betreffenden Dateien.
+    /// </summary>
+    /// <param name="manifests"></param>
+    /// <returns></returns>
     [HttpPost("manifest")]
     public async Task<IActionResult> PostManifestByClient([FromBody] List<ManifestEntryDto> manifests)
     {
@@ -33,14 +37,16 @@ public class SyncController : ControllerBase
         
         return Ok(filesToSync);  // Gib dem Client die Liste der zu synchronisierenden Dateien zurück
     }
-
+    
     /// <summary>
-    /// Wichtig: Beim Client muss im Body das Formdata mit dem Key "files" verwendet werden.
+    /// files und basePath sind die Keywords. basePath wird als Query-Parameter übergeben.
+    /// Es können mehrere Dateien gleichzeitig hochgeladen werden, aber sie müssen im selben Verzeichnis liegen.
     /// </summary>
-    /// <param name="files"></param>
+    /// <param name="files">Die Datei(en) die Übertragen werden</param>
+    /// <param name="basePath">Der Dateipfad für die Datei(en)</param>
     /// <returns></returns>
     [HttpPost("upload")]
-    public async Task<IActionResult> UploadFile(List<IFormFile> files)
+    public async Task<IActionResult> UploadFile(List<IFormFile> files, [FromQuery] string basePath = "")
     {
         if (files == null || files.Count == 0)
         {
@@ -49,22 +55,23 @@ public class SyncController : ControllerBase
         
         // TODO: Die Verzeichnisstruktur muss später noch gespiegelt werden.
         // Erstellen des Upload-Verzeichnisses, falls es nicht existiert
-        var uploadPath = Path.Combine("Uploads");
+        var uploadPath = Path.Combine("uploads", basePath);
         if (!Directory.Exists(uploadPath))
         {
             Directory.CreateDirectory(uploadPath);
         }
-        
-        long size = files.Sum(f => f.Length); // Gesamtgröße aller hochgeladenen Dateien in Bytes
+
+        //long size = files.Sum(f => f.Length); // Gesamtgröße aller hochgeladenen Dateien in Bytes
+        string size = $"{files.Sum(f => f.Length)} Bytes";
 
         foreach (var file in files)
         {
             if (file.Length > 0) // Ermittelt die Dateigröße in Bytes
             {
                 var fileName = Path.GetFileName(file.FileName); // Extrahiert den Dateinamen
+                var fullPath = Path.Combine(uploadPath, fileName);
                 
-                // TODO: Der Pfad muss später noch angepasst werden, um die Verzeichnisstruktur zu erhalten.
-                using (var stream = System.IO.File.Create(Path.Combine("Uploads", fileName))) // Erstellt einen Dateistream zum Speichern der Datei
+                using (var stream = System.IO.File.Create(Path.Combine(fullPath))) // Erstellt einen Dateistream zum Speichern der Datei
                 {
                     await file.CopyToAsync(stream); // Kopiert den Inhalt der hochgeladenen Datei in den Dateistream
                 }
@@ -73,25 +80,33 @@ public class SyncController : ControllerBase
         return Ok(new { count = files.Count, size }); // Gibt die Anzahl der hochgeladenen Dateien und deren Gesamtgröße als anonymes Objekt zurück
     }
 
+    // TODO: Eine Base64 kodierte JSON Datei wäre auch eine Möglichkeit, Dateien zu übertragen. Damit könnte man
+    //  mehrere Dateien in einem Request übertragen.
+    /// <summary>
+    /// Download einer Datei anhand des Dateipfads des Servers. Der Pfad wird als Query-Parameter übergeben.
+    /// Den Serverdateipfad erält man als Response beim API Call "Manifest".
+    /// </summary>
+    /// <param name="fileName"></param>
+    /// <returns></returns>
     [HttpGet("download")]
-    public async Task<IActionResult> DownloadFile([FromQuery] string fileName)
+    public async Task<IActionResult> DownloadFile([FromQuery] string filePath)
     {
-        var filePath = Path.Combine("Uploads", fileName); // Pfad zur Datei im Upload-Verzeichnis
+        string fullPath = Path.Combine("uploads", filePath); // Pfad zur Datei im Upload-Verzeichnis
 
-        if (!System.IO.File.Exists(filePath))
+        if (!System.IO.File.Exists(fullPath))
         {
             return NotFound("File not found.");
         }
 
         var memory = new MemoryStream();
-        using (var stream = new FileStream(filePath, FileMode.Open))
+        using (var stream = new FileStream(fullPath, FileMode.Open))
         {
             await stream.CopyToAsync(memory); // Kopiert den Inhalt der Datei in den MemoryStream
         }
         memory.Position = 0; // Setzt die Position des MemoryStreams auf den Anfang zurück
 
         var contentType = "application/octet-stream"; // Allgemeiner MIME-Typ für Binärdateien
-        return File(memory, contentType, fileName); // Gibt die Datei als Download zurück
+        return File(memory, contentType, fullPath); // Gibt die Datei als Download zurück
     }
 }
 

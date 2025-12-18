@@ -104,6 +104,9 @@ public class GetFilesToSyncService
                     }
                 }
             }
+            // Hier den Dateipfad vom Server abfragen und prüfen, ob die Datei dort existiert.
+            
+            
             filesToSync.Add(manifestOut);
         }
         
