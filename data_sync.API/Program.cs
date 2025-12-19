@@ -31,6 +31,8 @@ builder.Services.AddScoped<GetFilesToSyncService>();
 // Registriere MariaDbService als Scoped (wird pro Request neu erstellt und automatisch disposed)
 builder.Services.AddScoped<MariaDbService>();
 
+builder.Services.AddScoped<UpdateMetadataService>();
+
 var app = builder.Build();
 
 // DB-Startup-Checks direkt instanziieren (nicht aus DI)

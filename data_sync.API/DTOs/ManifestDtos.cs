@@ -34,7 +34,7 @@ public class ManifestEntryDto
 /// <summary>
 /// DTO Modell für die Antwort des Manifests an den Client.
 /// </summary>
-public class ManifestOutDto
+public class ManifestResponseDto
 {
     [JsonPropertyName("fileName")]
     public string FileName { get; set; }

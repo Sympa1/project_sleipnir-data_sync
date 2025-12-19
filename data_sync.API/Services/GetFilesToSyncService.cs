@@ -19,13 +19,13 @@ public class GetFilesToSyncService
     /// </summary>
     /// <param name="manifests">Liste: ManifestDto</param>
     /// <returns>Liste: filesToSync</returns>
-    public async Task<List<ManifestOutDto>> GetFilesToSync(List<ManifestEntryDto> manifests)
+    public async Task<List<ManifestResponseDto>> GetFilesToSync(List<ManifestEntryDto> manifests)
     {
-        List<ManifestOutDto> filesToSync = new List<ManifestOutDto>();
+        List<ManifestResponseDto> filesToSync = new List<ManifestResponseDto>();
 
         foreach (var manifest in manifests)
         {
-            ManifestOutDto manifestOut = new ManifestOutDto
+            ManifestResponseDto manifestOut = new ManifestResponseDto
                 {
                     FileName = manifest.FileName, 
                     FilePath =  manifest.FilePath,

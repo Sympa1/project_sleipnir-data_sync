@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using data_sync.API.DTOs;
 using data_sync.API.Services;
+using Mysqlx.Crud;
 
 namespace data_sync.API.Controllers;
 
@@ -14,14 +15,16 @@ namespace data_sync.API.Controllers;
 public class SyncController : ControllerBase
 {
     private readonly GetFilesToSyncService _filesToSyncService;
+    private readonly UpdateMetadataService _updateMetadataService;
     
     /// <summary>
     /// Konstruktor für SyncController, der GetFilesToSyncService injiziert.
     /// </summary>
     /// <param name="filesToSyncService"></param>
-    public SyncController(GetFilesToSyncService filesToSyncService)
+    public SyncController(GetFilesToSyncService filesToSyncService, UpdateMetadataService updateMetadataService)
     {
         _filesToSyncService = filesToSyncService;
+        _updateMetadataService = updateMetadataService;
     }
     
     /// <summary>
@@ -90,40 +93,59 @@ public class SyncController : ControllerBase
     /// <param name="metadata"></param>
     /// <returns></returns>
     [HttpPost("confirm-upload")]
-    public async Task<IActionResult> ConfirmUpload([FromBody] ManifestEntryDto metadata)
+    public async Task<IActionResult> ConfirmUpload([FromBody] List<ManifestEntryDto> metadataList)
     {
-        // TODO: Via foreach mehrere Einträge verarbeiten
-        var fileName = Path.GetFileName(metadata.FilePath);
-        var filePath = Path.Combine("uploads", fileName);
-
-        // Validierung: Datei existiert?
-        if (!System.IO.File.Exists(filePath))
-            return NotFound("Datei nicht gefunden. Upload fehlgeschlagen?");
-
-        // Validierung: Hash vergleichen (Client vs. Server)
-        var serverHash = UtilsService.CalculateFileHash(filePath);
-        if (serverHash != metadata.Hashvalue)
-            return BadRequest("Datei-Hash stimmt nicht überein. Upload beschädigt?");
-
-        // Validierung: Dateigröße prüfen
-        var fileInfo = new FileInfo(filePath);
-        if (fileInfo.Length != metadata.FileSize)
-            return BadRequest("Dateigröße stimmt nicht überein.");
-
-        // TODO: Im UpdateMetadataService implemtiereren
-        // Erst jetzt: Metadaten aktualisieren
-        await UpdateMetadataAsync(new ManifestEntryDto
+        List <ValidationErrorDto> validationErrors = new List <ValidationErrorDto>();
+        int successCount = 0;
+        
+        foreach (var metadata in metadataList)
         {
-            FilePath = metadata.FilePath,
-            FileName = metadata.FileName,
-            FileSize = fileInfo.Length,
-            Hashvalue = serverHash,
-            CreatedAt = metadata.CreatedAt,
-            LastModified = metadata.LastModified,
-            FileState = metadata.FileState
-        });
+            string fileName = Path.GetFileName(metadata.FilePath);
+            string filePath = Path.Combine("uploads", fileName);
 
-        return Ok("Metadaten validiert und Metadaten in DB übertrgen.");
+            // Validierung: Datei existiert?
+            if (!System.IO.File.Exists(filePath))
+            {
+                validationErrors.Add(new ValidationErrorDto {FileName = fileName, ErrorMessage = "Datei auf den Server nicht gefunden."});
+                continue;
+            }
+
+            // Validierung: Hash vergleichen (Client vs. Server)
+            string serverHash = UtilsService.CalculateFileHash(filePath);
+            if (serverHash != metadata.Hashvalue)
+            {
+                validationErrors.Add(new ValidationErrorDto {FileName = fileName, ErrorMessage = "Hashwert stimmt nicht überein."});
+                continue;
+            }
+
+            // Validierung: Dateigröße prüfen
+            var fileInfo = new FileInfo(filePath);
+            if (fileInfo.Length != metadata.FileSize)
+            {
+                validationErrors.Add(new ValidationErrorDto {FileName = fileName, ErrorMessage = "Dateigröße stimmt nicht überein."});
+                continue;
+            }
+            
+            // Erst jetzt: Metadaten aktualisieren
+            await _updateMetadataService.UpdateMetadataAsync(new ManifestEntryDto
+            {
+                FilePath = metadata.FilePath,
+                FileName = metadata.FileName,
+                FileSize = fileInfo.Length,
+                Hashvalue = serverHash,
+                CreatedAt = metadata.CreatedAt,
+                LastModified = metadata.LastModified,
+                FileState = metadata.FileState
+            });
+
+            successCount++;
+        }
+        return Ok(new ConfirmUploadResponseDto
+        {
+            SuccessCount = successCount,
+            ErrorCount = validationErrors.Count,
+            Errors = validationErrors
+        });
     }
 
     // TODO: Eine Base64 kodierte JSON Datei wäre auch eine Möglichkeit, Dateien zu übertragen. Damit könnte man
