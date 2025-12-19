@@ -173,8 +173,23 @@ public class SyncController : ControllerBase
         }
         memory.Position = 0; // Setzt die Position des MemoryStreams auf den Anfang zurück
 
-        var contentType = "application/octet-stream"; // Allgemeiner MIME-Typ für Binärdateien
+        string contentType = "application/octet-stream"; // Allgemeiner MIME-Typ für Binärdateien
         return File(memory, contentType, fullPath); // Gibt die Datei als Download zurück
+    }
+
+    [HttpGet("confirm-download")]
+    public async Task<IActionResult> ConfirmDownload([FromQuery] string filePath)
+    {
+        var responseMetadata = _updateMetadataService.GetMetadataAsync();
+
+        if (responseMetadata == null)
+        {
+            return NotFound("Metadata not found.");
+        }
+        else
+        {
+            return Ok(responseMetadata);
+        }
     }
 }
 

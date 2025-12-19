@@ -2,10 +2,14 @@ DROP TABLE IF EXISTS SyncEvent;
 DROP TABLE IF EXISTS FehlerProtokoll;
 DROP TABLE IF EXISTS SyncFiles;
 
+ALTER TABLE SyncFiles
+    ADD UNIQUE KEY unique_file_path (file_path);
+
+
 CREATE TABLE IF NOT EXISTS SyncFiles (
     sync_file_id INT AUTO_INCREMENT PRIMARY KEY,
     file_name VARCHAR(255) NOT NULL,
-    file_path VARCHAR(1024) NOT NULL,
+    file_path VARCHAR(1024) NOT NULL UNIQUE ,
     file_size BIGINT NOT NULL,
     hash_value VARCHAR(64) NOT NULL, -- sha256 hash
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
