@@ -41,13 +41,13 @@ def main():
     args = parser.parse_args()
 
     if args.sync:
-        pass
+        print("sync process started")
     elif args.manifest:
-        pass
+        print("manifest process started")
     elif args.download:
-        pass
+        print("download process started")
     elif args.upload:
-        pass
+        print("upload process started")
 
 
 if __name__ == '__main__':
