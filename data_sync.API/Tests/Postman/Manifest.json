@@ -1,18 +1,38 @@
 [
   {
-    "size": 1234,
-    "modifactionTime": "2025-10-19T12:00:00",
-    "createdAt": "2025-01-01T08:30:00",
-    "hash": "abc123def456",
-    "state": "synced",
-    "updatedAt": "2025-10-19T12:00:00"
+    "fileName": "document1.txt",
+    "relativePath": "projects/alpha/docs",
+    "size": 12345,
+    "lastModifiedUtc": "2025-12-12T10:00:00Z",
+    "sha256": "abcdef...",
+    "changeState": "Modified",
+    "createdAt": "2025-12-10T09:00:00Z"
   },
   {
-    "size": 5678,
-    "modifactionTime": "2025-10-16T08:11:00",
-    "createdAt": "2025-10-16T08:11:00",
-    "hash": "sha256:4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5",
-    "state": "synced",
-    "updatedAt": "2025-10-16T08:11:00"
+    "fileName": "document2.txt",
+    "relativePath": "projects/alpha/docs",
+    "size": 98765,
+    "lastModifiedUtc": "2025-12-12T10:00:00Z",
+    "sha256": "sha256:4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5",
+    "changeState": "Modified",
+    "createdAt": "2025-12-10T09:00:00Z"
+  },
+  {
+    "fileName": "example.txt",
+    "relativePath": "/path/to/example.txt",
+    "size": 1024,
+    "lastModifiedUtc": "2025-12-12T10:00:00Z",
+    "sha256": "d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2",
+    "changeState": "Unchanged",
+    "createdAt": "2025-12-10T09:00:00Z"
+  },
+  {
+    "fileName": "sample.jpg",
+    "relativePath": "/path/to/sample.jpg",
+    "size": 2048,
+    "lastModifiedUtc": "2025-12-14T10:00:00Z",
+    "sha256": "e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3",
+    "changeState": "Modified",
+    "createdAt": "2025-12-10T09:00:00Z"
   }
 ]

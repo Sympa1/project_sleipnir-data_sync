@@ -5,14 +5,19 @@ using data_sync.API.Tests;
 EnvLoadeService.LoadDotEnv();
 
 // Testmodus-Flag
-bool testMode = true;
-//bool testMode = false;
+//bool testMode = true;
+bool testMode = false;
 
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    // JSON-Deserialisierung: PascalCase (statt default camelCase) akzeptieren
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.PropertyNamingPolicy = null;
+    });
 
 if (testMode)
 {
@@ -25,6 +30,8 @@ builder.Services.AddScoped<GetFilesToSyncService>();
 
 // Registriere MariaDbService als Scoped (wird pro Request neu erstellt und automatisch disposed)
 builder.Services.AddScoped<MariaDbService>();
+
+builder.Services.AddScoped<UpdateMetadataService>();
 
 var app = builder.Build();
 
@@ -59,7 +66,6 @@ if (testMode)
     }
 }
 
-// Configure the HTTP request pipeline.
 app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();

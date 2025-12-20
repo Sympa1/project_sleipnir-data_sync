@@ -20,6 +20,9 @@ Client                Server               Database
   |----> POST /upload   |                     |
   |                     |----> Insert/Update  |
   |<---- Success        |<---- Confirmation   |
+  |----> GET /download  |                     |
+  |                     |----> Update         |
+  |<---- Success        |<---- Confirmation   |
 ```
 
 #### Kern-Endpoints

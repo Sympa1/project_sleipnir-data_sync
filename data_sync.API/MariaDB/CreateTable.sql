@@ -1,10 +1,20 @@
+DROP TABLE IF EXISTS SyncEvent;
+DROP TABLE IF EXISTS FehlerProtokoll;
+DROP TABLE IF EXISTS SyncFiles;
+
+ALTER TABLE SyncFiles
+    ADD UNIQUE KEY unique_file_path (file_path);
+
+
 CREATE TABLE IF NOT EXISTS SyncFiles (
     sync_file_id INT AUTO_INCREMENT PRIMARY KEY,
     file_name VARCHAR(255) NOT NULL,
-    file_path VARCHAR(512) NOT NULL,
+    file_path VARCHAR(1024) NOT NULL UNIQUE ,
+    file_size BIGINT NOT NULL,
+    hash_value VARCHAR(64) NOT NULL, -- sha256 hash
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     last_modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    status ENUM('pending', 'in_progress', 'completed', 'failed') DEFAULT 'pending',
-    UNIQUE(file_path)
+    file_state ENUM('new', 'modified', 'unchanged', 'deleted', 'conflict') NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS SyncEvent (
@@ -21,3 +31,7 @@ CREATE TABLE IF NOT EXISTS FehlerProtokoll (
     fehler_beschreibung TEXT NOT NULL,
     fehler_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+INSERT INTO SyncFiles (file_name, file_path, file_size, hash_value, file_state) VALUES
+('example.txt', '/path/to/example.txt', 1024, 'dd2d2d2d22d2d2d2d2', 'new'),
+('sample.jpg', '/path/to/sample.jpg', 2048, 'e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3', 'modified');
