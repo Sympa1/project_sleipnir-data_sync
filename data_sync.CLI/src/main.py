@@ -1,4 +1,5 @@
 import argparse
+from backend import FileLogger
 
 def main():
     """Main Funktion for Data Synchronization CLI Tool"""
@@ -44,6 +45,9 @@ def main():
         print("sync process started")
     elif args.manifest:
         print("manifest process started")
+        log = FileLogger()
+        log.write_log("Manifest process initiated.")
+
     elif args.download:
         print("download process started")
     elif args.upload:
