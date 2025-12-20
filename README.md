@@ -35,6 +35,7 @@ Mein Hauptentwicklungssystem ist Manjaro (Linux), wobei die Android App aller vo
     - Postman Collection ✅
     - Implementierung File Up- und Download ✅
     - Implementierung Python CLI zum Testen ⌛
+    - Lokale SQLite Datenbank ⌛
     - Vorübergehendes Speichern der DB Logindaten in einem `.env` File ✅
 - 0.0.3 Linux GUI
     - Lokale SQLite Datenbank 🕓
