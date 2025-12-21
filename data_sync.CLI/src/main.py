@@ -1,5 +1,5 @@
 import argparse
-from backend import FileLogger, SqliteHandler
+from backend import FileLogger, DbSetup
 
 def main():
     """Main Funktion for Data Synchronization CLI Tool"""
@@ -60,6 +60,11 @@ def main():
 
     elif args.upload:
         print("upload process started")
+
+    elif args.init:
+        print("Initializing database...")
+        DbSetup.setup_db()
+        print("Database initialized successfully.")
 
 
 if __name__ == '__main__':
