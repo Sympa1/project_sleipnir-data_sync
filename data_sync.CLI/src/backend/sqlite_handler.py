@@ -2,6 +2,10 @@ import sqlite3
 
 class SqliteHandler:
     def __init__(self, db_path="cli_db.db"):
+        """
+        Initialisiert den SqliteHandler mit dem Pfad zur SQLite-Datenbank.
+        :param db_path: Pfad zur SQLite-Datenbankdatei
+        """
         self.db_path = db_path
 
     def execute_query(self, query, params=None):
@@ -33,3 +37,4 @@ class SqliteHandler:
             except Exception as e:
                 print(f"Unbekannter Fehler: {e}")
                 raise
+

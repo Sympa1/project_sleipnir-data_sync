@@ -1,5 +1,5 @@
 import argparse
-from backend import FileLogger
+from backend import FileLogger, SqliteHandler
 
 def main():
     """Main Funktion for Data Synchronization CLI Tool"""
@@ -38,11 +38,18 @@ def main():
         help='Startet den Upload-Prozess nach Manifestübermittlung.'
     )
 
+    group.add_argument(
+        '--init', '-i',
+        action='store_true',
+        help='Initialisiert die Datenbank.'
+    )
+
     # Argumente parsen
     args = parser.parse_args()
 
     if args.sync:
         print("sync process started")
+
     elif args.manifest:
         print("manifest process started")
         log = FileLogger()
@@ -50,6 +57,7 @@ def main():
 
     elif args.download:
         print("download process started")
+
     elif args.upload:
         print("upload process started")
 
