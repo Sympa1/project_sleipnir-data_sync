@@ -1,8 +1,5 @@
 from datetime import datetime
 
-from Cryptodome.SelfTest.Cipher.test_OFB import file_name
-
-
 class FileLogger:
     """
     Eine einfache Datei-Logger-Klasse zum Schreiben von Log-Nachrichten in eine Datei.

@@ -20,21 +20,20 @@ class SqliteHandler:
         :param params: Als Tupel übergebene Parameter für die SQL-Abfrage
         :return:
         """
-        def execute_query(self, query, params=None):
-            try:
-                # with ist gleich dem using in C# und sorgt dafür, dass die Verbindung geschlossen wird
-                with sqlite3.connect(self.db_path) as conn:
-                    cursor = conn.cursor()
-                    cursor.execute(query, params or ())
-                    conn.commit()
-                    return cursor.fetchall()
-            except sqlite3.IntegrityError as e:
-                print(f"Integritätsfehler: {e}")
-                raise
-            except sqlite3.OperationalError as e:
-                print(f"Operationsfehler: {e}")
-                raise
-            except Exception as e:
-                print(f"Unbekannter Fehler: {e}")
-                raise
+        try:
+            # with ist gleich dem using in C# und sorgt dafür, dass die Verbindung geschlossen wird
+            with sqlite3.connect(self.db_path) as conn:
+                cursor = conn.cursor()
+                cursor.execute(query, params or ())
+                conn.commit()
+                return cursor.fetchall()
+        except sqlite3.IntegrityError as e:
+            print(f"Integritätsfehler: {e}")
+            raise
+        except sqlite3.OperationalError as e:
+            print(f"Operationsfehler: {e}")
+            raise
+        except Exception as e:
+            print(f"Unbekannter Fehler: {e}")
+            raise
 
