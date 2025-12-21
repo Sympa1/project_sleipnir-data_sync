@@ -1,5 +1,8 @@
 from datetime import datetime
 
+from Cryptodome.SelfTest.Cipher.test_OFB import file_name
+
+
 class FileLogger:
     """
     Eine einfache Datei-Logger-Klasse zum Schreiben von Log-Nachrichten in eine Datei.
@@ -10,10 +13,17 @@ class FileLogger:
     def write_log(self, message: str):
         """
         Estellt oder öffnet die Log-Datei und schreibt eine Log-Nachricht mit Zeitstempel.
+        Der Typ der Nachricht wird aus dem Dateinamen abgeleitet.
         :param message: str
         :return:
         """
         """Schreibt eine Log-Nachricht in die Log-Datei mit Zeitstempel."""
+
+        # Durch Split entsteht eine Liste, erstes Element ist der Typ
+        message_type = self.file_name.split(".")[0].upper() + ": "
+
         with open(self.file_name, 'a') as log_file:
             timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            log_file.write(f"[{timestamp}]\nERROR: {message}\n")
+            log_file.write(f"[{timestamp}]\n {message_type} {message}\n")
+
+        print(f"📑 [{timestamp}] {message_type} {message}\n")
