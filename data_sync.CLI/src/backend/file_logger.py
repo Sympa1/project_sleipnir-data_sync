@@ -12,9 +12,8 @@ class FileLogger:
         Estellt oder öffnet die Log-Datei und schreibt eine Log-Nachricht mit Zeitstempel.
         Der Typ der Nachricht wird aus dem Dateinamen abgeleitet.
         :param message: str
-        :return:
+        :return: None
         """
-        """Schreibt eine Log-Nachricht in die Log-Datei mit Zeitstempel."""
 
         # Durch Split entsteht eine Liste, erstes Element ist der Typ
         message_type = self.file_name.split(".")[0].upper() + ": "

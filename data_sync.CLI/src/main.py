@@ -1,5 +1,5 @@
 import argparse
-from backend import FileLogger, DbSetup
+from backend import FileLogger, DbSetup, ConfigHandler
 
 def main():
     """Main Funktion for Data Synchronization CLI Tool"""
@@ -65,6 +65,11 @@ def main():
         print("Initializing database...")
         DbSetup.setup_db()
         print("Database initialized successfully.")
+        print("\n\n Please configure your path to sync in config.json before proceeding.")
+        path = input("Enter the path to sync: ")
+        config = ConfigHandler()
+        config.set_config("sync_path", path)
+        print(f"Sync path '{path}' saved to config.json.")
 
 
 if __name__ == '__main__':
