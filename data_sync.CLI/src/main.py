@@ -1,5 +1,5 @@
 import argparse
-from backend import FileLogger, DbSetup, ConfigHandler
+from backend import FileLogger, DbSetup, ConfigHandler, DbLogger
 
 def main():
     """Main Funktion for Data Synchronization CLI Tool"""

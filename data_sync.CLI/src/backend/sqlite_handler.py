@@ -1,14 +1,14 @@
 import sqlite3
 
 class SqliteHandler:
-    def __init__(self, db_path="cli_db.db"):
+    def __init__(self, db_path: str="cli_db.db"):
         """
         Initialisiert den SqliteHandler mit dem Pfad zur SQLite-Datenbank.
         :param db_path: Pfad zur SQLite-Datenbankdatei
         """
         self.db_path = db_path
 
-    def execute_query(self, query, params=None):
+    def execute_query(self, query: str, params: str=None):
         """
         Führt eine SQL-Abfrage aus und gibt die Ergebnisse zurück. Dazu wird eine Verbindung zur SQLite-Datenbank
         hergestellt und anschließend geschlossen.
