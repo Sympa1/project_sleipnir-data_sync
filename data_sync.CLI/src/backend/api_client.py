@@ -7,14 +7,14 @@ class ApiClient:
     Unterstützt GET, POST, PUT, DELETE Anfragen sowie Datei-Uploads und -Downloads.
     Anhand der Base-URL wird zwischen http und https unterschieden.
     """
-    def __init__(self, base_url):
+    def __init__(self, base_url: str):
         """
         Initialisiert den ApiClient mit der Basis-URL der API.
         :param base_url: Basis-URL der API
         """
         self.base_url = base_url
 
-    def get(self, endpoint, params=None):
+    def get(self, endpoint: str, params=None):
         """
         Führt eine GET-Anfrage an die API durch.
         :param endpoint: API-Endpunkt
@@ -25,7 +25,7 @@ class ApiClient:
         response.raise_for_status()  # Hebt eine Ausnahme bei HTTP-Fehlern hervor
         return response.json()
 
-    def post(self, endpoint, data=None, params=None):
+    def post(self, endpoint: str, data=None, params=None):
         """
         Führt eine POST-Anfrage an die API durch.
         :param endpoint: API-Endpunkt
@@ -37,7 +37,7 @@ class ApiClient:
         response.raise_for_status()  # Hebt eine Ausnahme bei HTTP-Fehlern hervor
         return response.json()
 
-    def put(self, endpoint, data=None, params=None):
+    def put(self, endpoint: str, data=None, params=None):
         """
         Führt eine PUT-Anfrage an die API durch.
         :param endpoint: API-Endpunkt
@@ -49,7 +49,7 @@ class ApiClient:
         response.raise_for_status()  # Hebt eine Ausnahme bei HTTP-Fehlern hervor
         return response.json()
 
-    def delete(self, endpoint, params=None):
+    def delete(self, endpoint: str, params=None):
         """
         Führt eine DELETE-Anfrage an die API durch.
         :param endpoint: API-Endpunkt
@@ -60,7 +60,7 @@ class ApiClient:
         response.raise_for_status()  # Hebt eine Ausnahme bei HTTP-Fehlern hervor
         return response.json()
 
-    def post_files(self, endpoint, files, params=None):
+    def post_files(self, endpoint: str, files, params=None):
         """
         Führt eine POST-Anfrage mit Datei-Upload an die API durch.
         :param endpoint: API-Endpunkt
@@ -72,7 +72,7 @@ class ApiClient:
         response.raise_for_status()
         return response.json()
 
-    def download_file(self, endpoint, params=None):
+    def download_file(self, endpoint: str, params=None):
         """
         Führt eine GET-Anfrage zum Download einer Datei durch.
         :param endpoint: API-Endpunkt
