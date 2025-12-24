@@ -1,4 +1,5 @@
 import argparse
+import os
 from backend import FileLogger, DbSetup, ConfigHandler, DbLogger
 
 def main():
@@ -51,9 +52,13 @@ def main():
         print("sync process started")
 
     elif args.manifest:
-        print("manifest process started")
-        log = FileLogger()
-        log.write_log("Manifest process initiated.")
+        if not os.path.exists("config.json"):
+            print("config.json not found. Please run the --init command first to set up the database and configuration.")
+            return
+        else:
+            print("manifest process started")
+
+
 
     elif args.download:
         print("download process started")
@@ -68,6 +73,7 @@ def main():
         print("\n\n Please configure your path to sync in config.json before proceeding.")
         path = input("Enter the path to sync: ")
         config = ConfigHandler()
+        config.set_config("api_base_url", " https://localhost:7169/api/sync")
         config.set_config("sync_path", path)
         print(f"Sync path '{path}' saved to config.json.")
 
