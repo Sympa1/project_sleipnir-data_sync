@@ -18,9 +18,24 @@ class ManifestHandler:
         :return: JSON-String des Manifests
         """
 
+        # SQL Abfrage zum Abrufen aller Datensätze
+
+        # Ausfphrung der Abfrage und Speichern der Ergebnisse in einer Variable
+
+        # manifest Array initialisieren
+        # Manifest enthält alle Datensätze als Liste von Objekten
+        manifest = []
+
+        # Durchlaufen der Datensätze und Hinzufügen zum Manifest mitztels for Schleife
+
+        return manifest
+
     def send_manifest(self):
         """
         Sendet das Manifest an die API.
         :param: None
         :return: API-Antwort als JSON
         """
+        manifest = self.create_manifest()
+        response = self.api.post("/manifest", json=manifest)
+        return response.json()
