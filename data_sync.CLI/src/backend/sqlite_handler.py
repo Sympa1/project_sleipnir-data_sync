@@ -1,5 +1,5 @@
 import sqlite3
-from .models import SyncFile, SyncEvent
+from .model import SyncFile, SyncEvent
 
 class SqliteHandler:
     def __init__(self, db_path: str="cli_db.db"):
