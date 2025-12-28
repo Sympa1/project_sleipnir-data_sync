@@ -1,4 +1,5 @@
 import sqlite3
+from .models import SyncFile, SyncEvent
 
 class SqliteHandler:
     def __init__(self, db_path: str="cli_db.db"):
@@ -36,4 +37,3 @@ class SqliteHandler:
         except Exception as e:
             print(f"Unbekannter Fehler: {e}")
             raise
-

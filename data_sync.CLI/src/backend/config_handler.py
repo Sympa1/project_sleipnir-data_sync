@@ -9,7 +9,7 @@ class ConfigHandler:
         """
         self.filename = filename
         self.data = {}
-        self.load_json() # lädt automatisch die Config beim erstellen des Objektes
+        self.load_json() # lädt automatisch die Config beim Erstellen des Objektes
 
     def load_json(self):
         """Liest das JSON File ein. Wenn die Datei nicht existiert, wird eine neue erstellt.
