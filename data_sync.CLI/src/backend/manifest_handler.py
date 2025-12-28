@@ -37,5 +37,5 @@ class ManifestHandler:
         :return: API-Antwort als JSON
         """
         manifest = self.create_manifest()
-        response = self.api.post("/manifest", data=manifest)
+        response = self.api.post("/manifest", json=manifest)
         return response.json()

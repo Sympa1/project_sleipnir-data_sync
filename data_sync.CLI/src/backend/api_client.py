@@ -25,15 +25,15 @@ class ApiClient:
         response.raise_for_status()  # Hebt eine Ausnahme bei HTTP-Fehlern hervor
         return response.json()
 
-    def post(self, endpoint: str, data=None, params=None):
+    def post(self, endpoint: str, json=None, params=None):
         """
         Führt eine POST-Anfrage an die API durch.
         :param endpoint: API-Endpunkt
-        :param data: JSON-Daten als Dictionary oder Liste (z.B. [{"FilePath": "...", "Hashvalue": "..."}])
+        :param json: JSON-Daten als Dictionary oder Liste (z.B. [{"FilePath": "...", "Hashvalue": "..."}])
         :param params: Query-Parameter als Dictionary (z.B. {"version": "1.0"})
         :return: Antwort der API als JSON
         """
-        response = requests.post(f"{self.base_url}/{endpoint}", json=data, params=params)
+        response = requests.post(f"{self.base_url}/{endpoint}", json=json, params=params)
         response.raise_for_status()  # Hebt eine Ausnahme bei HTTP-Fehlern hervor
         return response.json()
 
