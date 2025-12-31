@@ -152,7 +152,7 @@ public class SyncController : ControllerBase
     //  mehrere Dateien in einem Request übertragen.
     /// <summary>
     /// Download einer Datei anhand des Dateipfads des Servers. Der Pfad wird als Query-Parameter übergeben.
-    /// Den Serverdateipfad erält man als Response beim API Call "Manifest".
+    /// Den Serverdateipfad erhält man als Response beim API Call "Manifest".
     /// </summary>
     /// <param name="fileName"></param>
     /// <returns></returns>
