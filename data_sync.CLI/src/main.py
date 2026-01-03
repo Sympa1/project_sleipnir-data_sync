@@ -2,6 +2,8 @@ import argparse
 import os
 from backend import FileLogger, DbSetup, ConfigHandler, DbLogger
 
+# TODO: Ein neues Argument hinzufügen, um die Dateien zu Scannen.
+
 def main():
     """Main Funktion for Data Synchronization CLI Tool"""
 
