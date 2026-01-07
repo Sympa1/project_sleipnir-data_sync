@@ -1,9 +1,9 @@
-from xmlrpc.client import DateTime
+from datetime import datetime
 
 
 class SyncFileModel:
-    def __init__(self, id: int, file_name: str, file_path: str, file_size: int, hash_value: str,
-                 created_at: DateTime, file_state: str, last_modified: DateTime  = None, sync_event: list = None):
+    def __init__(self, file_name: str, file_path: str, file_size: int, hash_value: str,
+                 created_at: datetime, file_state: str = None, last_modified: datetime  = None, sync_event: list = None, id: int = None):
         self.id = id
         self.file_name = file_name
         self.file_path = file_path
@@ -22,7 +22,7 @@ class SyncFileModel:
 
 
 class SyncEventModel:
-    def __init__(self, id: int, event_type: str, event_timestamp: DateTime, event_details: str):
+    def __init__(self, id: int, event_type: str, event_timestamp: datetime, event_details: str):
         self.id = id
         self.event_type = event_type
         self.event_timestamp = event_timestamp
