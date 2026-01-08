@@ -47,11 +47,24 @@ def main():
         help='Initialisiert die Datenbank.'
     )
 
+    group.add_argument(
+        '--scan', '-c',
+        action='store_true',
+        help='Scannt das Verzeichnis und aktualisiert die Datenbank mit Datei-Informationen'
+    )
+
     # Argumente parsen
     args = parser.parse_args()
 
     if args.sync:
         print("sync process started")
+
+    elif args.scan:
+        if not os.path.exists("config.json"):
+            print("config.json not found. Please run the --init command first to set up the database and configuration.")
+            return
+        else:
+            print("scan process started")
 
     elif args.manifest:
         if not os.path.exists("config.json"):

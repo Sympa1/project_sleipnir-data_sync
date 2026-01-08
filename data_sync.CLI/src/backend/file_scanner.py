@@ -9,9 +9,10 @@ class FileScanner:
 
     def scan_files(self):
         """
-        Scannt das Verzeichnis und sammelt Informationen über alle Dateien.
-        :return:
+        Scannt das Verzeichnis rekursiv und sammelt Informationen über alle Dateien.
+        :return: Liste von SyncFileModel-Objekten mit Datei-Informationen
         """
+        file_list = []
         # Rekursiv alle Elemente (Dateien + Ordner) im base_path durchlaufen
         # rglob('*') = 'r' für recursive, '*' für alle Dateien/Ordner
         for element in self.base_path.rglob('*'):
@@ -19,7 +20,7 @@ class FileScanner:
             # Nur Dateien verarbeiten, Ordner überspringen
             if element.is_file():
                 # Datei-Metadaten einmalig auslesen (Performance-Optimierung)
-                # stat() gibt Größe, Erstellungsdatum und Änderungsdatum zurück
+                # stat() gibt Größe, Erstellungsdatum und Änderungsdatum in einem stat_result Objekt zurück
                 stats = element.stat()
                 
                 # SyncFileModel-Objekt mit allen Datei-Informationen erstellen
@@ -31,11 +32,9 @@ class FileScanner:
                     created_at=datetime.fromtimestamp(stats.st_ctime),  # Erstellungsdatum als DateTime-Objekt
                     last_modified=datetime.fromtimestamp(stats.st_mtime)  # Änderungsdatum als DateTime-Objekt
                 )
-                
-                # TODO: sync_file zu einer Liste hinzufügen
-                # TODO: Liste in die Datenbank schreiben
+                file_list.append(sync_file)
 
-        pass
+        return file_list
 
     def calculate_hash(self, file_path: str) -> str:
         """
