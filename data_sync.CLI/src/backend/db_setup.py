@@ -1,4 +1,4 @@
-from .sqlite_handler import SqliteHandler
+from .handlers.sqlite_handler import SqliteHandler
 
 class DbSetup:
     """
