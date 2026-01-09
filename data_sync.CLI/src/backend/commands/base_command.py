@@ -45,6 +45,3 @@ class BaseCommand(ABC):
             file_logger = FileLogger("error.log")
             file_logger.write_log(f"DB logging failed: {db_error}")
             file_logger.write_log(f"Original error: {error_message}")
-
-    def load_config(self):
-        pass

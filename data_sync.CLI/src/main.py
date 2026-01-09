@@ -1,6 +1,6 @@
 import argparse
 import os
-from backend import FileLogger, DbSetup, ConfigHandler, DbLogger
+from backend.commands.init_command import InitCommand
 
 # TODO: Ein neues Argument hinzufügen, um die Dateien zu Scannen.
 
@@ -82,15 +82,8 @@ def main():
         print("upload process started")
 
     elif args.init:
-        print("Initializing database...")
-        DbSetup.setup_db()
-        print("Database initialized successfully.")
-        print("\n\n Please configure your path to sync in config.json before proceeding.")
-        path = input("Enter the path to sync: ")
-        config = ConfigHandler()
-        config.set_config("api_base_url", " https://localhost:7169/api/sync")
-        config.set_config("sync_path", path)
-        print(f"Sync path '{path}' saved to config.json.")
+        init_command = InitCommand()
+        init_command.execute()
 
 
 if __name__ == '__main__':
