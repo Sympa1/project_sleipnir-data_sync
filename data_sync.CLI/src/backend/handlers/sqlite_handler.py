@@ -9,7 +9,7 @@ class SqliteHandler:
         """
         self.db_path = db_path
 
-    def execute_query(self, query: str, params: str=None):
+    def execute_query(self, query: str, params=None):
         """
         Führt eine SQL-Abfrage aus und gibt die Ergebnisse zurück. Dazu wird eine Verbindung zur SQLite-Datenbank
         hergestellt und anschließend geschlossen.

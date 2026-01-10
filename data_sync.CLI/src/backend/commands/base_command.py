@@ -29,6 +29,7 @@ class BaseCommand(ABC):
             print(error_message)
             self.handle_error(error_message)
             return False
+
         return True
 
     def handle_error(self, error_message: str):
@@ -40,6 +41,7 @@ class BaseCommand(ABC):
         try:
             # Primär: In DB loggen
             DbLogger.log(error_message)
+
         except Exception as db_error:
             # Fallback: In Datei loggen wenn DB nicht erreichbar
             file_logger = FileLogger("error.log")

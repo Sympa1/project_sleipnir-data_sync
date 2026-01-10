@@ -3,7 +3,7 @@ from datetime import datetime
 
 class SyncFileModel:
     def __init__(self, file_name: str, file_path: str, file_size: int, hash_value: str,
-                 created_at: datetime, file_state: str = None, last_modified: datetime  = None, sync_event: list = None, id: int = None):
+                 created_at: datetime, file_state: str = None   , last_modified: datetime  = None, sync_event: list = None, id: int = None):
         self.id = id
         self.file_name = file_name
         self.file_path = file_path

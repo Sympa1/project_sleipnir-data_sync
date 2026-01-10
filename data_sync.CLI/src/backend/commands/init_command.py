@@ -1,5 +1,5 @@
-from ..handlers.config_handler import ConfigHandler
 from .base_command import BaseCommand
+from ..handlers.config_handler import ConfigHandler
 from ..db_setup import DbSetup
 
 class InitCommand(BaseCommand):

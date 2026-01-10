@@ -1,8 +1,8 @@
 import argparse
 import os
 from backend.commands.init_command import InitCommand
+from backend.commands.scan_command import ScanCommand
 
-# TODO: Ein neues Argument hinzufügen, um die Dateien zu Scannen.
 
 def main():
     """Main Funktion for Data Synchronization CLI Tool"""
@@ -65,6 +65,8 @@ def main():
             return
         else:
             print("scan process started")
+            scan_command = ScanCommand()
+            scan_command.execute()
 
     elif args.manifest:
         if not os.path.exists("config.json"):

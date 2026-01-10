@@ -4,7 +4,8 @@ import os
 class ConfigHandler:
     def __init__(self, filename = "config.json"):
         """
-        Initialisiert den ConfigHandler mit dem Pfad zur Konfigurationsdatei.
+        Initialisiert den ConfigHandler mit dem Pfad zur Konfigurationsdatei und lädt die Configdatei.
+        Es können mit dem Objekt sofort die Methoden zum Lesen und Schreiben der Konfiguration verwendet werden.
         :param filename:
         """
         self.filename = filename
