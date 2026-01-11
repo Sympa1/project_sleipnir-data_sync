@@ -1,5 +1,6 @@
 import argparse
 import os
+
 from backend.commands.init_command import InitCommand
 from backend.commands.scan_command import ScanCommand
 

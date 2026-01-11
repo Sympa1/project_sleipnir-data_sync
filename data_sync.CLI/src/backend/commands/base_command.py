@@ -1,9 +1,9 @@
-from abc import ABC, abstractmethod
 import os
+
+from abc import ABC, abstractmethod
 from ..handlers.db_logger import DbLogger
 from ..handlers.file_logger import FileLogger
 
-# TODO: Die Erbenden Command-Klassen implementieren und in die main.py integrieren.
 
 class BaseCommand(ABC):
     """

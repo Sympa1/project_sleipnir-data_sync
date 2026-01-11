@@ -1,5 +1,6 @@
 from .handlers.sqlite_handler import SqliteHandler
 
+
 class DbSetup:
     """
     Klasse zum Einrichten der Datenbanktabellen für die Dateisynchronisation.

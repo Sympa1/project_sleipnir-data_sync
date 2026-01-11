@@ -1,6 +1,7 @@
 import requests
 import json
 
+
 class ApiClient:
     """
     Ein einfacher API-Client zur Kommunikation mit einer RESTful API.

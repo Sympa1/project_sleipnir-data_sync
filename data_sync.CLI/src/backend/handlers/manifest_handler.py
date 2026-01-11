@@ -1,4 +1,5 @@
 import json
+
 from datetime import datetime
 from .sqlite_handler import SqliteHandler
 from ..api_client import ApiClient
@@ -6,6 +7,10 @@ from .config_handler import ConfigHandler
 
 
 class ManifestHandler:
+    """
+    Klasse zum Erstellen und Senden von Manifests für die Datensynchronisation.
+    Das Manifest wird aus Daten in der SQLite-Datenbank erstellt und an eine API gesendet.
+    """
     def __init__(self):
         self.db_handler = SqliteHandler()
         self.config_handler = ConfigHandler()

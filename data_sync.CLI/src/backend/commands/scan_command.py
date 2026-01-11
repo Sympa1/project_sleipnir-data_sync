@@ -1,12 +1,29 @@
+import os
+
 from .base_command import BaseCommand
 from ..handlers.config_handler import ConfigHandler
 from ..file_scanner import FileScanner
 from ..handlers.sqlite_handler import SqliteHandler
 
-import os
 
 class ScanCommand(BaseCommand):
+    """
+    Kommand-Klasse zum Scannen eines Verzeichnisses und Aktualisieren der Datenbank mit Datei-Informationen.
+    1. Scannt das Verzeichnis und sammelt Datei-Informationen.
+    2. Vergleicht die gesammelten Informationen mit der Datenbank.
+    3. Aktualisiert die Datenbank basierend auf den Vergleichen:
+       - Wenn die Datei existiert und sich geändert hat, werden die Informationen aktualisiert.
+       - Wenn die Datei verschoben wurde, wird der Pfad aktualisiert.
+       - Wenn die Datei neu ist, wird sie in die Datenbank eingefügt.
+       - Wenn eine Datei in der Datenbank existiert, aber nicht mehr im Verzeichnis, wird sie als gelöscht markiert.
+    4. Gibt eine Zusammenfassung der durchgeführten Aktionen aus.
+    5. Behandelt Fehler während des Prozesses und gibt entsprechende Fehlermeldungen aus.
+    """
     def execute(self):
+        """
+        Führt den Scan-Befehl aus.
+        :return:
+        """
         if not self.validate_config():
             config_error = "Configuration validation failed. Aborting scan."
             print(config_error)
@@ -28,17 +45,13 @@ class ScanCommand(BaseCommand):
             file_scanner = FileScanner(sync_path)
             file_list = file_scanner.scan_files()
 
-
-            # TODO:
-            #  !!! WICHTIG !!! Ich muss mir noch überlegen wie ich das handhabe wenn die Datei geändert wurde und
-            #  der Pfad sich geändert hat (also verschoben wurde).
-
             db_handler = SqliteHandler()
             for file_info in file_list:
                 self._process_file(file_info, db_handler)
 
             self._mark_deleted_file(file_list, db_handler)
 
+            print("\n" + "=" * 80)
             print("Scan completed successfully.")
 
         except Exception as e:
@@ -47,9 +60,17 @@ class ScanCommand(BaseCommand):
             self.handle_error(error_message)
 
     def _process_file(self, file_info, db_handler):
+        """
+        Verarbeitet eine einzelne Datei und aktualisiert die Datenbank entsprechend.
+        :param file_info:
+        :param db_handler:
+        :return:
+        """
         # 1. Prüfe: Existiert file_path?
         result_by_path = db_handler.execute_query(
-            "SELECT hash_value FROM SyncFiles WHERE file_path = ?",
+            "SELECT hash_value "
+            "FROM SyncFiles "
+            "WHERE file_path = ?",
             (file_info.file_path,)
         )
 
@@ -66,15 +87,16 @@ class ScanCommand(BaseCommand):
         else:
             # 2. Nicht am alten Ort → Wurde sie verschoben?
             # Prüft anhand des Dateinamens + Hashwerts
-            result_by_hash = db_handler.execute_query(
-                "SELECT file_path FROM SyncFiles WHERE file_name = ? AND hash_value = ?",
-                (file_info.file_name, file_info.hash_value)
-            )
+            result_by_hash = db_handler.execute_query("SELECT file_path "
+                                                      "FROM SyncFiles "
+                                                      "WHERE file_name = ? "
+                                                        "AND hash_value = ?",
+                                                      (file_info.file_name, file_info.hash_value))
 
             # Datei wurde gefunden, wenn die Variable einen Wert hat
             # Datei wurde verschoben
             if result_by_hash:
-                self._update_file_path(db_handler,
+                self._update_file_path(db_handler, file_info,
                                        old_path=result_by_hash[0][0], # execute_query gibt eine Liste von Tupeln zurück
                                        new_path=file_info.file_path)
 
@@ -106,9 +128,11 @@ class ScanCommand(BaseCommand):
 
         db_handler.execute_query(query, query_params)
 
+        self._log_event(file_info.file_path, db_handler, event_type="modified", event_details="File content changed.")
+
         print(f"Updated file: {file_info.file_path}")
 
-    def _update_file_path(self, db_handler, old_path, new_path):
+    def _update_file_path(self, db_handler, file_info, old_path, new_path):
         """
         Aktualisiert den Datei-Pfad in der Datenbank.
         :param db_handler:
@@ -128,6 +152,8 @@ class ScanCommand(BaseCommand):
 
         db_handler.execute_query(query, query_params)
 
+        self._log_event(file_info.file_path, db_handler, event_type="modified", event_details=f"File moved from {old_path} to {new_path}.")
+
         print(f"Updated file path from {old_path} to {new_path}")
 
     def _insert_new_file(self, file_info, db_handler):
@@ -145,17 +171,19 @@ class ScanCommand(BaseCommand):
                         file_info.last_modified,
                         "new")  # Steht für den Datei-Zustand
 
-        query = ("INSERT INTO SyncFiles"
-                    "(file_name,"
-                    "file_path,"
-                    "file_size,"
-                    "hash_value,"
-                    "created_at,"
-                    "last_modified,"
-                    "file_state)"
+        query = ("INSERT INTO SyncFiles "
+                    "(file_name, "
+                    "file_path, "
+                    "file_size, "
+                    "hash_value, "
+                    "created_at, "
+                    "last_modified, "
+                    "file_state) "
                  "VALUES (?, ?, ?, ?, ?, ?, ?)")
 
         db_handler.execute_query(query, query_params)
+
+        self._log_event(file_info.file_path, db_handler, event_type="created", event_details="New file added.")
 
         print(f"Inserted new file: {file_info.file_path}")
 
@@ -177,17 +205,24 @@ class ScanCommand(BaseCommand):
         # Wird benötigt für: WHERE file_path NOT IN (?,?,?)
         placeholder = ','.join(['?'] * len(file_paths))
 
-        query = f"UPDATE SyncFiles SET file_state = 'deleted' WHERE file_path NOT IN ({placeholder})"
+        query = (f"UPDATE SyncFiles "
+                 f"SET file_state = 'deleted' "
+                 f"WHERE file_path NOT IN ({placeholder})")
 
         db_handler.execute_query(query, query_params)
 
-        query = f"SELECT file_path FROM SyncFiles WHERE file_path NOT IN ({placeholder}) AND file_state = 'deleted'"
+        query = (f"SELECT file_path "
+                 f"FROM SyncFiles "
+                 f"WHERE file_path NOT IN ({placeholder}) "
+                    f"AND file_state = 'deleted'")
         query_result = db_handler.execute_query(query, query_params)
-        print(str(query_result))
+
         if query_result:
             print(f"Marked files as deleted:")
             for row in query_result:
                 print(f"- {row[0]}")
+
+                self._log_event(row[0], db_handler, event_type="deleted", event_details="File marked as deleted.")
         else:
             print("No files to mark as deleted.")
 
@@ -200,3 +235,27 @@ class ScanCommand(BaseCommand):
         :return:
         """
         print(f"Skipping {file_info.file_path} - unchanged")
+
+    def _log_event(self, file_info_path, db_handler, event_type, event_details=None):
+        """
+        Protokolliert ein Synchronisierungsereignis in der Datenbank.
+        :param sync_file:
+        :param event_type:
+        :param db_handler:
+        :param details:
+        :return:
+        """
+        query_file_id = ("SELECT sync_file_id "
+                         "FROM SyncFiles "
+                         "WHERE file_path = ?")
+        query_result = db_handler.execute_query(query_file_id, (file_info_path,))
+
+        sync_file_id = query_result[0][0] # query_Result ist eine Liste von Tupeln
+
+        query = ("INSERT INTO SyncEvent("
+                    "sync_file_id, "
+                    "event_type, "
+                    "event_details) "
+                 "VALUES (?, ?, ?)")
+
+        db_handler.execute_query(query, (sync_file_id, event_type, event_details))

@@ -1,7 +1,12 @@
 import sqlite3
+
 from ..models import SyncFileModel, SyncEventModel
 
+
 class SqliteHandler:
+    """
+    Klasse zum Umgang mit SQLite-Datenbanken. Wird verwendet, um SQL-Abfragen auszuführen und Ergebnisse zurückzugeben.
+    """
     def __init__(self, db_path: str="cli_db.db"):
         """
         Initialisiert den SqliteHandler mit dem Pfad zur SQLite-Datenbank.

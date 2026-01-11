@@ -1,7 +1,11 @@
 import json
 import os
 
+
 class ConfigHandler:
+    """
+    Klasse zum Lesen und Schreiben von Konfigurationsdaten in einer JSON-Datei.
+    """
     def __init__(self, filename = "config.json"):
         """
         Initialisiert den ConfigHandler mit dem Pfad zur Konfigurationsdatei und lädt die Configdatei.

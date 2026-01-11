@@ -2,6 +2,9 @@ from datetime import datetime
 
 
 class SyncFileModel:
+    """
+    Repräsentiert eine Datei, die sich im Synchronisierungspfad befindet.
+    """
     def __init__(self, file_name: str, file_path: str, file_size: int, hash_value: str,
                  created_at: datetime, file_state: str = None       , last_modified: datetime  = None, sync_event: list = None, id: int = None):
         self.id = id
@@ -22,6 +25,9 @@ class SyncFileModel:
 
 
 class SyncEventModel:
+    """
+    Repräsentiert ein Ereignis, das während des Synchronisierungsprozesses aufgetreten ist.
+    """
     def __init__(self, id: int, event_type: str, event_timestamp: datetime, event_details: str):
         self.id = id
         self.event_type = event_type

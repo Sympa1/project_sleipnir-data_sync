@@ -1,8 +1,11 @@
 from datetime import datetime
 
+
 class FileLogger:
     """
-    Eine einfache Datei-Logger-Klasse zum Schreiben von Log-Nachrichten in eine Datei.
+    Klasse zum Schreiben von Log-Nachrichten in eine Datei mit Zeitstempel.
+    Der Dateiname kann beim Erstellen der Klasse angegeben werden.
+    Standardmäßig wird "error.log" verwendet.
     """
     def __init__(self, file_name:str = "error.log"):
         self.file_name = file_name

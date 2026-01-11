@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS SyncFiles (
 CREATE TABLE IF NOT EXISTS SyncEvent (
     sync_event_id INTEGER PRIMARY KEY AUTOINCREMENT,
     sync_file_id INTEGER NOT NULL,
-    event_type TEXT NOT NULL CHECK(event_type IN ('created', 'modified', 'deleted', 'error')),
+    event_type TEXT NOT NULL CHECK(event_type IN ('created', 'modified', 'deleted', 'conflict')),
     event_timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
     event_details TEXT,
     FOREIGN KEY (sync_file_id) REFERENCES SyncFiles(sync_file_id) ON DELETE CASCADE

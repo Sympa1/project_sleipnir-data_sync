@@ -1,10 +1,21 @@
 import hashlib
+
 from pathlib import Path
 from datetime import datetime
 from .models import SyncFileModel
 
+
 class FileScanner:
+    """
+    Klasse zum Scannen von Dateien in einem Verzeichnis und Sammeln von Datei-Informationen.
+    Der Scanner durchsucht rekursiv alle Unterverzeichnisse und erstellt für jede Datei ein SyncFileModel-Objekt.
+    Bei der Initialisierung wird das Basisverzeichnis festgelegt.
+    """
     def __init__(self, base_path: str):
+        """
+        Initialisiert den FileScanner mit dem Basisverzeichnis.
+        :param base_path:
+        """
         self.base_path = Path(base_path).expanduser().resolve()
 
     def scan_files(self):
@@ -55,11 +66,3 @@ class FileScanner:
         
         # Fertigen Hash als Hex-String zurückgeben
         return hasher.hexdigest()
-
-if __name__ == "__main__":
-    file_scanner = FileScanner("~/dev/data_sync.CLI/test_data")
-
-    # / Operator fügt Pfadkomponenten zusammen und nutzt automatisch das OS-spezifische Trennzeichen (\ unter Windows, / unter Linux)
-    file_hash = file_scanner.calculate_hash(str(file_scanner.base_path / "example.txt"))
-
-    print(f"SHA256 Hash: {file_hash}")
