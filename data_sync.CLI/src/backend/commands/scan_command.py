@@ -29,9 +29,7 @@ class ScanCommand(BaseCommand):
             file_list = file_scanner.scan_files()
 
 
-            # TODO: Wie speicher ich die Datei-Informationen in der DB, unter berücksichtigung von Datei-Zuständen
-            #  (neu, geändert, gelöscht, unverändert, Konflikt)?
-            #  Sprich vergleich mit bestehenden DB-Einträgen und entsprechende Updates/Einfügungen/Löschungen durchführen.
+            # TODO:
             #  !!! WICHTIG !!! Ich muss mir noch überlegen wie ich das handhabe wenn die Datei geändert wurde und
             #  der Pfad sich geändert hat (also verschoben wurde).
 
@@ -39,12 +37,7 @@ class ScanCommand(BaseCommand):
             for file_info in file_list:
                 self._process_file(file_info, db_handler)
 
-                    # if name in db:
-                    # if hash_value gleich und pfad anders -> update pfad
-                    # if hash_value anders und pfad ander -> uploade datei und update pfad + hash_value
-                    # if hash_value anders und pfad gleich -> uploade datei und update hash_value
-                    # if datei in db und nicht in dateisystem -> markiere als gelöscht
-                    # else -> neue datei -> insert into
+            self._mark_deleted_file(file_list, db_handler)
 
             print("Scan completed successfully.")
 
@@ -56,7 +49,7 @@ class ScanCommand(BaseCommand):
     def _process_file(self, file_info, db_handler):
         # 1. Prüfe: Existiert file_path?
         result_by_path = db_handler.execute_query(
-            "SELECT hash_value FROM sync_files WHERE file_path = ?",
+            "SELECT hash_value FROM SyncFiles WHERE file_path = ?",
             (file_info.file_path,)
         )
 
@@ -66,14 +59,15 @@ class ScanCommand(BaseCommand):
             db_hash_value = result_by_path[0][0]
             if db_hash_value != file_info.hash_value:
                 self._update_file(file_info, db_handler)
-            return
+            else:
+                self._skip_file(file_info, db_handler)
 
         # Datei existiert nicht am alten Ort
         else:
             # 2. Nicht am alten Ort → Wurde sie verschoben?
             # Prüft anhand des Dateinamens + Hashwerts
             result_by_hash = db_handler.execute_query(
-                "SELECT file_path FROM sync_files WHERE file_name = ? AND hash_value = ?",
+                "SELECT file_path FROM SyncFiles WHERE file_name = ? AND hash_value = ?",
                 (file_info.file_name, file_info.hash_value)
             )
 
@@ -81,13 +75,14 @@ class ScanCommand(BaseCommand):
             # Datei wurde verschoben
             if result_by_hash:
                 self._update_file_path(db_handler,
-                                       old_path=result_by_hash[0][0],
+                                       old_path=result_by_hash[0][0], # execute_query gibt eine Liste von Tupeln zurück
                                        new_path=file_info.file_path)
 
             # Datei wurde nicht gefunden
             else:
                 # Komplett neue Datei
                 self._insert_new_file(file_info, db_handler)
+
 
     def _update_file(self, file_info, db_handler):
         """
@@ -111,8 +106,29 @@ class ScanCommand(BaseCommand):
 
         db_handler.execute_query(query, query_params)
 
+        print(f"Updated file: {file_info.file_path}")
+
     def _update_file_path(self, db_handler, old_path, new_path):
-        pass
+        """
+        Aktualisiert den Datei-Pfad in der Datenbank.
+        :param db_handler:
+        :param old_path:
+        :param new_path:
+        :return:
+        """
+
+        query_params = (new_path,
+                        "modified",  # Steht für den Datei-Zustand
+                        old_path)
+
+        query = ("UPDATE SyncFiles SET "
+                    "file_path = ?, "
+                    "file_state = ? "
+                 "WHERE file_path = ?")
+
+        db_handler.execute_query(query, query_params)
+
+        print(f"Updated file path from {old_path} to {new_path}")
 
     def _insert_new_file(self, file_info, db_handler):
         """
@@ -141,5 +157,46 @@ class ScanCommand(BaseCommand):
 
         db_handler.execute_query(query, query_params)
 
-    def _mark_deleted_file(self, file_info, db_handler):
-        pass
+        print(f"Inserted new file: {file_info.file_path}")
+
+    def _mark_deleted_file(self, file_list, db_handler) :
+        """
+        Markiert die Datei in der Datenbank als gelöscht.
+        :param file_list:
+        :param db_handler:
+        :return:
+        """
+        file_paths = []
+        for file_info in file_list:
+            file_paths.append(file_info.file_path)
+
+        query_params = tuple(file_paths)
+
+        # Erstelle dynamische SQL-Platzhalter für alle Dateipfade
+        # Bei 3 Dateien: ['?', '?', '?'] → "?,?,?"
+        # Wird benötigt für: WHERE file_path NOT IN (?,?,?)
+        placeholder = ','.join(['?'] * len(file_paths))
+
+        query = f"UPDATE SyncFiles SET file_state = 'deleted' WHERE file_path NOT IN ({placeholder})"
+
+        db_handler.execute_query(query, query_params)
+
+        query = f"SELECT file_path FROM SyncFiles WHERE file_path NOT IN ({placeholder}) AND file_state = 'deleted'"
+        query_result = db_handler.execute_query(query, query_params)
+        print(str(query_result))
+        if query_result:
+            print(f"Marked files as deleted:")
+            for row in query_result:
+                print(f"- {row[0]}")
+        else:
+            print("No files to mark as deleted.")
+
+
+    def _skip_file(self, file_info, db_handler):
+        """
+        Überspringt die Datei, da keine Änderungen festgestellt wurden.
+        :param file_info:
+        :param db_handler:
+        :return:
+        """
+        print(f"Skipping {file_info.file_path} - unchanged")
