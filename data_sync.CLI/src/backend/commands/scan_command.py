@@ -31,7 +31,7 @@ class ScanCommand(BaseCommand):
             return
 
         try:
-            print("Scanning directory and updating database with file information...")
+            print("\nScanning directory and updating database with file information...")
 
             config = ConfigHandler()
             sync_path = config.get_config("sync_path")
@@ -239,10 +239,10 @@ class ScanCommand(BaseCommand):
     def _log_event(self, file_info_path, db_handler, event_type, event_details=None):
         """
         Protokolliert ein Synchronisierungsereignis in der Datenbank.
-        :param sync_file:
-        :param event_type:
+        :param file_info_path:
         :param db_handler:
-        :param details:
+        :param event_type:
+        :param event_details:
         :return:
         """
         query_file_id = ("SELECT sync_file_id "

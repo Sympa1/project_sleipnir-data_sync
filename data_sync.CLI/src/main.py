@@ -13,7 +13,7 @@ def main():
         description="Data Synchronization CLI Tool",
         add_help=True)
 
-    # Erstellt eine Gruppe von Argumenten, die sich gegenseitig ausschließen.
+    # Erstellt eine Gruppe von Argumenten/Flags, die sich gegenseitig ausschließen.
     # So kann nur eins genutzt werden.
     group = parser.add_mutually_exclusive_group(required=True)
 
@@ -54,29 +54,19 @@ def main():
         help='Scannt das Verzeichnis und aktualisiert die Datenbank mit Datei-Informationen'
     )
 
-    # Argumente parsen
+    # Argumente/Flags parsen
     args = parser.parse_args()
 
-    if args.sync:
-        print("sync process started")
+    if args.init:
+        init_command = InitCommand()
+        init_command.execute()
 
     elif args.scan:
-        if not os.path.exists("config.json"):
-            print("config.json not found. Please run the --init command first to set up the database and configuration.")
-            return
-        else:
-            print("scan process started")
-            scan_command = ScanCommand()
-            scan_command.execute()
+        scan_command = ScanCommand()
+        scan_command.execute()
 
     elif args.manifest:
-        if not os.path.exists("config.json"):
-            print("config.json not found. Please run the --init command first to set up the database and configuration.")
-            return
-        else:
-            print("manifest process started")
-
-
+        print("manifest process started")
 
     elif args.download:
         print("download process started")
@@ -84,9 +74,8 @@ def main():
     elif args.upload:
         print("upload process started")
 
-    elif args.init:
-        init_command = InitCommand()
-        init_command.execute()
+    elif args.sync:
+        print("sync process started")
 
 
 if __name__ == '__main__':
