@@ -25,19 +25,24 @@ class SyncFileModel:
 
     def to_dict(self):
         """
-        Konvertiert das SyncFileModel-Objekt in ein Wörterbuch.
+        Konvertiert das SyncFileModel-Objekt in ein Wörterbuch. Das Datum wird im ISO Format zurückgegeben.
         Ausgenommen sind hier die SyncEventModel-Objekte in der sync_event Liste.
         :return: Wörterbuch mit den Attributen des Objekts.
         """
+        # Konvertiere String zu datetime falls nötig
+        from datetime import datetime
+        
+        created_dt = self.created_at if isinstance(self.created_at, datetime) else datetime.fromisoformat(self.created_at) if self.created_at else None
+        modified_dt = self.last_modified if isinstance(self.last_modified, datetime) else datetime.fromisoformat(self.last_modified) if self.last_modified else None
+        
         return {
-            "id": self.id,
-            "file_name": self.file_name,
-            "file_path": self.file_path,
-            "file_size": self.file_size,
-            "hash_value": self.hash_value,
-            "created_at": str(self.created_at) if self.created_at else None,
-            "last_modified": str(self.last_modified) if self.last_modified else None,
-            "file_state": self.file_state
+            "fileName": self.file_name,
+            "relativePath": self.file_path,
+            "size": self.file_size,
+            "sha256": self.hash_value,
+            "createdAt": created_dt.isoformat() if created_dt else None,
+            "lastModifiedUtc": modified_dt.isoformat() if modified_dt else None,
+            "changeState": self.file_state
         }
 
 

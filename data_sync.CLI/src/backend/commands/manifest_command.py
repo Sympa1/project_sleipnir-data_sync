@@ -1,5 +1,6 @@
 import json
 
+
 from .base_command import BaseCommand
 from ..handlers.config_handler import ConfigHandler
 from ..handlers.sqlite_handler import SqliteHandler
@@ -51,7 +52,7 @@ class ManifestCommand(BaseCommand):
             manifest = self.create_manifest(db_handler)
             print(manifest)
 
-            manifest_response = self.send_manifest(api_client, manifest)
+            files_to_sync = self.send_manifest(api_client, manifest)
 
             print("\n" + "=" * 80)
             print("Manifest processing completed successfully.")
@@ -93,9 +94,16 @@ class ManifestCommand(BaseCommand):
             )
             manifest.append(sync_file.to_dict())
 
-        return json.dumps(manifest)
+        return manifest
 
     def send_manifest(self, api_client, manifest):
         response = []
+
+        try:
+            response = api_client.post(
+                endpoint="manifest", json=manifest)
+
+        except Exception as e:
+            raise RuntimeError(f"Failed to send manifest to API: {e}")
 
         return response

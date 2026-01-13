@@ -34,7 +34,10 @@ class ApiClient:
         :param params: Query-Parameter als Dictionary (z.B. {"version": "1.0"})
         :return: Antwort der API als JSON
         """
-        response = requests.post(f"{self.base_url}/{endpoint}", json=json, params=params)
+        url = f"{self.base_url}/{endpoint}"
+        
+        response = requests.post(url, json=json, params=params)
+        
         response.raise_for_status()  # Hebt eine Ausnahme bei HTTP-Fehlern hervor
         return response.json()
 
