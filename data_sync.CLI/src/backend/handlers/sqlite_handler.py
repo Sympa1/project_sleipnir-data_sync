@@ -24,7 +24,7 @@ class SqliteHandler:
                     handler.execute_query(query, ("Max", 25))
         :param query: SQL Abfrage als String
         :param params: Als Tupel übergebene Parameter für die SQL-Abfrage
-        :return:
+        :return: Eine Liste mit Tupeln als Ergebnis der SQL Abfrage. Jeder Tupel stellt eine Zeile der Abfrage dar.
         """
         try:
             # with ist gleich dem using in C# und sorgt dafür, dass die Verbindung geschlossen wird

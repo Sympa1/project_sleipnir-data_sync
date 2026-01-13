@@ -1,11 +1,14 @@
 import json
 
-
 from .base_command import BaseCommand
 from ..handlers.config_handler import ConfigHandler
 from ..handlers.sqlite_handler import SqliteHandler
 from ..api_client import ApiClient
 from ..models import SyncFileModel
+
+
+# TODO: Bei dem Aufruf der API erhalte ich den Fehler "Error during manifest processing:
+#  'str' object has no attribute 'isoformat'". Das geht um das Datumsformat des Models.
 
 
 class ManifestCommand(BaseCommand):

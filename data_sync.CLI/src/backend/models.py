@@ -29,19 +29,14 @@ class SyncFileModel:
         Ausgenommen sind hier die SyncEventModel-Objekte in der sync_event Liste.
         :return: Wörterbuch mit den Attributen des Objekts.
         """
-        # Konvertiere String zu datetime falls nötig
-        from datetime import datetime
-        
-        created_dt = self.created_at if isinstance(self.created_at, datetime) else datetime.fromisoformat(self.created_at) if self.created_at else None
-        modified_dt = self.last_modified if isinstance(self.last_modified, datetime) else datetime.fromisoformat(self.last_modified) if self.last_modified else None
         
         return {
             "fileName": self.file_name,
             "relativePath": self.file_path,
             "size": self.file_size,
             "sha256": self.hash_value,
-            "createdAt": created_dt.isoformat() if created_dt else None,
-            "lastModifiedUtc": modified_dt.isoformat() if modified_dt else None,
+            "createdAt": self.created_at.isoformat(),
+            "lastModifiedUtc": self.last_modified.isoformat(),
             "changeState": self.file_state
         }
 
