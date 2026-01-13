@@ -3,6 +3,7 @@ import os
 
 from backend.commands.init_command import InitCommand
 from backend.commands.scan_command import ScanCommand
+from backend.commands.manifest_command import ManifestCommand
 
 
 def main():
@@ -66,7 +67,9 @@ def main():
         scan_command.execute()
 
     elif args.manifest:
-        print("manifest process started")
+        manifest_command = ManifestCommand()
+        manifest_command.execute()
+
 
     elif args.download:
         print("download process started")

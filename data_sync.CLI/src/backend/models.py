@@ -23,6 +23,23 @@ class SyncFileModel:
         else:
             self.sync_event = sync_event
 
+    def to_dict(self):
+        """
+        Konvertiert das SyncFileModel-Objekt in ein Wörterbuch.
+        Ausgenommen sind hier die SyncEventModel-Objekte in der sync_event Liste.
+        :return: Wörterbuch mit den Attributen des Objekts.
+        """
+        return {
+            "id": self.id,
+            "file_name": self.file_name,
+            "file_path": self.file_path,
+            "file_size": self.file_size,
+            "hash_value": self.hash_value,
+            "created_at": str(self.created_at) if self.created_at else None,
+            "last_modified": str(self.last_modified) if self.last_modified else None,
+            "file_state": self.file_state
+        }
+
 
 class SyncEventModel:
     """
@@ -33,4 +50,3 @@ class SyncEventModel:
         self.event_type = event_type
         self.event_timestamp = event_timestamp
         self.event_details = event_details
-

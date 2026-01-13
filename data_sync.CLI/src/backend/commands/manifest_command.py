@@ -1,4 +1,4 @@
-from dns.resolver import query
+import json
 
 from .base_command import BaseCommand
 from ..handlers.config_handler import ConfigHandler
@@ -49,6 +49,8 @@ class ManifestCommand(BaseCommand):
 
             # Manifest erstellen und senden
             manifest = self.create_manifest(db_handler)
+            print(manifest)
+
             manifest_response = self.send_manifest(api_client, manifest)
 
             print("\n" + "=" * 80)
@@ -60,6 +62,11 @@ class ManifestCommand(BaseCommand):
             self.handle_error(error_message)
 
     def create_manifest(self, db_handler):
+        """
+        Erstellt das Manifest aus der lokalen Datenbank.
+        :param db_handler: Instanz des Datenbank-Handlers.
+        :return: JSON-String des Manifests.
+        """
         manifest = []
 
         query = ("SELECT file_name, "
@@ -69,23 +76,24 @@ class ManifestCommand(BaseCommand):
                     "created_at, "
                     "last_modified, "
                     "file_state "
-                 "FROM SyncFiles"
+                 "FROM SyncFiles "
                  "WHERE file_state != 'conflict'")
 
         query_result = db_handler.execute_query(query)
 
         for row in query_result:
-            manifest.append({
-                "FileName": row[0],
-                "FilePath": row[1],
-                "FileSize": row[2],
-                "HashValue": row[3],
-                "CreatedAt": row[4],
-                "LastModified": row[5],
-                "FileState": row[6]
-            })
+            sync_file = SyncFileModel(
+                file_name=row[0],
+                file_path=row[1],
+                file_size=row[2],
+                hash_value=row[3],
+                created_at=row[4],
+                last_modified=row[5],
+                file_state=row[6]
+            )
+            manifest.append(sync_file.to_dict())
 
-        return manifest
+        return json.dumps(manifest)
 
     def send_manifest(self, api_client, manifest):
         response = []
