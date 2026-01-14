@@ -53,12 +53,14 @@ class ManifestCommand(BaseCommand):
 
             # Manifest erstellen und senden
             manifest = self.create_manifest(db_handler)
-            print(manifest)
+            for element in manifest:
+                print(element)
 
             files_to_sync_json = self.send_manifest(api_client, manifest)
+            print("\n" + "=" * 80)
+            for element in files_to_sync_json:
+                print(element)
 
-            # TODO: Die Variable "files_to_sync_json" weiterverarbeiten, um die Liste der zu synchronisierenden Dateien
-            #  zu erstellen. Dazu eine Modellklasse nutzen.
             files_to_sync_list = []
             print("\n" + "=" * 80)
             print("Manifest processing completed successfully.")

@@ -2,8 +2,12 @@ using data_sync.API.DTOs;
 
 namespace data_sync.API.Services;
 
-// TODO: Das Datum (lasModified) wenn es "null" ist, macht aktuell noch Probleme wenn der HashVal nicht gleich ist.
-//  Ggf. vorher prüfen ob der Wert "null" ist.
+// TODO:
+//  - Datei löschen (ToDelet) - Logik nach Foreach-Schleife: DB-Dateien, die nicht im Manifest sind
+//  - Query-Optimierung: 3 separate Queries zu einem SELECT kombinieren (hash_value, file_path, modified_at)
+//  - Parameter-Bug: dbCommand.Parameters müssen zwischen Queries gelöscht werden (Parameters.Clear())
+//  - Nullable-Vergleiche absichern: DateTime? vor Vergleich auf HasValue prüfen (Z. 99, 104)
+//  - Ineffiziente DB-Connection: Nicht für jede Datei neue Connection öffnen
 
 public class GetFilesToSyncService
 {
@@ -30,8 +34,9 @@ public class GetFilesToSyncService
                     FileName = manifest.FileName, 
                     FilePath =  manifest.FilePath,
                     FileSize = manifest.FileSize,
-                    LastModified = manifest.LastModified,
                     Hashvalue = manifest.Hashvalue,
+                    CreatedAt = manifest.CreatedAt,
+                    LastModified = manifest.LastModified,
                     FileState = manifest.FileState,
                     ToUpload = false,
                     ToDelet = false,
@@ -45,49 +50,45 @@ public class GetFilesToSyncService
                     await using (var dbCommand = connection.CreateCommand())
                     {
                         // Optimalerweise noch zusätlich den Dateipfad prüfen
-                        dbCommand.CommandText = "SELECT hash_value FROM SyncFiles WHERE file_name = @fileName;";
-                        dbCommand.Parameters.AddWithValue("@fileName", manifest.FileName);
-                        
+                        dbCommand.CommandText = "SELECT hash_value FROM SyncFiles WHERE file_path = @filePath;";
+                        dbCommand.Parameters.AddWithValue("@filePath", manifest.FilePath);
                         string? hashFromDb = await dbCommand.ExecuteScalarAsync() as string;
-
-                        string halte = "Punkt";
                         
+                        dbCommand.CommandText = "SELECT file_path FROM SyncFiles WHERE hash_value = @hashValue;";
+                        dbCommand.Parameters.AddWithValue("@hashValue", manifest.Hashvalue);
+                        string? filePathFromDb = await dbCommand.ExecuteScalarAsync() as string;
+                        
+                        dbCommand.CommandText = "SELECT modified_at FROM SyncFiles WHERE file_path = @filePath;";
+                        dbCommand.Parameters.AddWithValue("@filePath", manifest.FilePath);
+                        string? modifiedAtFromDb = await dbCommand.ExecuteScalarAsync() as string;
+                        
+                        DateTime? lastModifiedAtFromDb = null;
+
+                        if (!string.IsNullOrEmpty(modifiedAtFromDb))
+                        {
+                            lastModifiedAtFromDb = DateTime.Parse(modifiedAtFromDb);
+                        }
+
                         if (string.IsNullOrEmpty(hashFromDb))
                         {
                             // Datei existiert nicht in DB → neue Datei, muss hochgeladen werden
-                            manifestOut.FileState = FileChangeState.New;
                             manifestOut.ToUpload = true;
                         }
                         else if (hashFromDb != manifest.Hashvalue)
                         {
                             await using (var dbCommand2 = connection.CreateCommand())
                             {
-                                DateTime? lastModifiedFromDb = null;
-                                // Optimalerweise noch zusätlich den Dateipfad prüfen
-                                dbCommand2.CommandText = "SELECT last_modified FROM SyncFiles WHERE file_name = @fileName;";
-                                dbCommand2.Parameters.AddWithValue("@fileName", manifest.FileName);
-                        
-                                string dateFromDb = await dbCommand2.ExecuteScalarAsync() as string;
-
-                                if (!string.IsNullOrEmpty(dateFromDb))
-                                { 
-                                    lastModifiedFromDb = DateTime.Parse(dateFromDb!);  
-                                }
-                            
-                                if (!lastModifiedFromDb.HasValue) // Prüft, ob der Wert null ist. Null = false / Wert = true
+                                if (!lastModifiedAtFromDb.HasValue) // Prüft, ob der Wert null ist. Null = false / Wert = true
                                 {
                                     // Kein valides Datum in DB -> behandeln (hier: Client als neuer behandeln)
-                                    manifestOut.FileState = FileChangeState.Modified;
                                     manifestOut.ToUpload = true;
                                 }
-                                else if (manifest.LastModified > lastModifiedFromDb.Value)
+                                else if (manifest.LastModified > lastModifiedAtFromDb.Value)
                                 {
-                                    manifestOut.FileState = FileChangeState.Modified;
                                     manifestOut.ToUpload = true;
                                 }
-                                else if (manifest.LastModified < lastModifiedFromDb.Value)
+                                else if (manifest.LastModified < lastModifiedAtFromDb.Value)
                                 {
-                                    manifestOut.FileState = FileChangeState.Modified;
                                     manifestOut.ToDownload = true;
                                 }
                                 else
@@ -96,25 +97,24 @@ public class GetFilesToSyncService
                                 }
                             }
                         }
+                        else if (filePathFromDb != manifest.FilePath)
+                        {
+                            // Datei wurde verschoben/umbenannt
+                            if (lastModifiedAtFromDb < manifest.LastModified)
+                            {
+                                // Client hat die aktuellere Version → hochladen
+                                manifestOut.ToUpload = true;
+                            }
+                            else if (lastModifiedAtFromDb > manifest.LastModified)
+                            {
+                                // Server hat die aktuellere Version → herunterladen
+                                manifestOut.ToDownload = true;
+                            }
+                        }
                         else
                         {
                             // Hash gleich → Datei ist synchron, nicht nötig zu synchronisieren
                             manifestOut.FileState = FileChangeState.Unchanged;
-                        }
-                        
-                        // Hier den Dateipfad vom Server abfragen und prüfen, ob die Datei dort existiert.
-
-                        await using (var dbCommand3 = connection.CreateCommand())
-                        {
-                            dbCommand3.CommandText = "SELECT file_path FROM SyncFiles WHERE file_name = @fileName;";
-                            dbCommand3.Parameters.AddWithValue("@fileName", manifest.FileName);
-                        
-                            string? fullPath = await dbCommand3.ExecuteScalarAsync() as string;
-
-                            if (string.IsNullOrEmpty(fullPath))
-                            {
-                                manifestOut.FilePath = fullPath;
-                            }
                         }
                     }
                 }

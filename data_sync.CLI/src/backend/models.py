@@ -35,8 +35,8 @@ class SyncFileModel:
             "relativePath": self.file_path,
             "size": self.file_size,
             "sha256": self.hash_value,
-            "createdAt": self.created_at.isoformat(),
-            "lastModifiedUtc": self.last_modified.isoformat(),
+            "createdAt": str(self.created_at).replace(" ", "T"),
+            "lastModified": str(self.last_modified).replace(" ", "T"),
             "changeState": self.file_state
         }
 
