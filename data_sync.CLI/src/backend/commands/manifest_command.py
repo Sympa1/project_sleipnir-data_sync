@@ -43,8 +43,14 @@ class ManifestCommand(BaseCommand):
 
             print(f"Using API base URL: {api_base_url}")
 
-            # API Client initialisieren
-            api_client = ApiClient(api_base_url)
+            # SSL-Verifikation aus Konfiguration laden (Default: True für Sicherheit)
+            verify_ssl = config_handler.get_config("verify_ssl")
+            if verify_ssl is None:
+                verify_ssl = True  # Default: SSL-Verifikation aktiviert
+            print(f"SSL verification: {'enabled' if verify_ssl else 'disabled (development mode)'}")
+
+            # API Client mit SSL-Einstellung initialisieren
+            api_client = ApiClient(api_base_url, verify_ssl)
 
             if not api_client:
                 raise ValueError("Failed to initialize API client.")
