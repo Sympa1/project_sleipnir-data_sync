@@ -7,10 +7,6 @@ from ..api_client import ApiClient
 from ..models import SyncFileModel
 
 
-# TODO: Bei dem Aufruf der API erhalte ich den Fehler "Error during manifest processing:
-#  'str' object has no attribute 'isoformat'". Das geht um das Datumsformat des Models.
-
-
 class ManifestCommand(BaseCommand):
     def execute(self):
         """
@@ -47,7 +43,9 @@ class ManifestCommand(BaseCommand):
             verify_ssl = config_handler.get_config("verify_ssl")
             if verify_ssl is None:
                 verify_ssl = True  # Default: SSL-Verifikation aktiviert
-            print(f"SSL verification: {'enabled' if verify_ssl else 'disabled (development mode)'}")
+
+            if verify_ssl is False:
+                print("Warning: SSL verification is disabled.")
 
             # API Client mit SSL-Einstellung initialisieren
             api_client = ApiClient(api_base_url, verify_ssl)
@@ -58,20 +56,22 @@ class ManifestCommand(BaseCommand):
             print("Connected to API client successfully.")
 
             # Manifest erstellen und senden
+            print("\nClient manifest:")
             manifest = self.create_manifest(db_handler)
-            for element in manifest:
-                print(element)
+            for file in manifest:
+                print(f"File Pfad: {file.get("relativePath")} - File Status: {file.get("changeState")} - File Größe: {file.get("size")} Bytes")
 
             files_to_sync_json = self.send_manifest(api_client, manifest)
-            print("\n" + "=" * 80)
-            for element in files_to_sync_json:
-                print(element)
 
-            files_to_sync_list = []
+            print("\n" + "=" * 80)
+            print("Server response - Files to sync:")
+            for file in files_to_sync_json:
+                print(f"File Pfad: {file.get("relativePath")} - File Status: {file.get("changeState")} - File Größe: {file.get("size")} Bytes")
+
             print("\n" + "=" * 80)
             print("Manifest processing completed successfully.")
 
-            return files_to_sync_list
+            return files_to_sync_json
 
         except Exception as e:
             error_message = f"Error during manifest processing: {e}"
