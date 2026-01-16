@@ -44,7 +44,7 @@ public class GetFilesToSyncService
                     await using (var dbCommand = connection.CreateCommand())
                     {
                         // Suche nach Dateipfad in DB
-                        dbCommand.CommandText = "SELECT hash_value, modified_at, file_state FROM SyncFiles WHERE file_path = @filePath;";
+                        dbCommand.CommandText = "SELECT hash_value, last_modified, file_state FROM SyncFiles WHERE file_path = @filePath;";
                         dbCommand.Parameters.AddWithValue("@filePath", manifest.FilePath);
                         
                         await using (var reader = await dbCommand.ExecuteReaderAsync())
@@ -59,7 +59,7 @@ public class GetFilesToSyncService
                                 string? fileStateFromDb = reader.IsDBNull(2) ? null : reader.GetString(2);
                                 
                                 // Prüfe ob Datei auf Server gelöscht wurde
-                                if (fileStateFromDb == "Deleted")
+                                if (fileStateFromDb == "deleted")
                                 {
                                     manifestOut.ToDelet = true;
                                     manifestOut.FileState = FileChangeState.Deleted;
@@ -94,7 +94,7 @@ public class GetFilesToSyncService
                                 dbCommand.Parameters.Clear();
                                 
                                 // Suche nach Hash (verschobene/umbenannte Datei?)
-                                dbCommand.CommandText = "SELECT file_path, modified_at FROM SyncFiles WHERE hash_value = @hashValue;";
+                                dbCommand.CommandText = "SELECT file_path, last_modified FROM SyncFiles WHERE hash_value = @hashValue;";
                                 dbCommand.Parameters.AddWithValue("@hashValue", manifest.Hashvalue);
                                 
                                 await using (var reader2 = await dbCommand.ExecuteReaderAsync())
@@ -122,8 +122,17 @@ public class GetFilesToSyncService
                                     }
                                     else
                                     {
-                                        // Weder Pfad noch Hash gefunden → neue Datei
-                                        manifestOut.ToUpload = true;
+                                        // Weder Pfad noch Hash gefunden → wenn Filestat != 'deleted' = neue Datei
+                                        //if (fileStateFromDb != "Deleted")
+                                        if (manifest.FileState == FileChangeState.Deleted)
+                                        {
+                                            manifestOut.ToDelet = true;
+                                        }
+                                        else
+                                        {
+                                            manifestOut.ToUpload = true;
+                                        }
+                                            
                                     }
                                 }
                             }
@@ -142,7 +151,7 @@ public class GetFilesToSyncService
                 await using (var dbCommand = connection.CreateCommand())
                 {
                     // Hole alle Dateipfade aus der DB
-                    dbCommand.CommandText = "SELECT file_path, file_name, file_size, hash_value, created_at, modified_at, file_state FROM SyncFiles;";
+                    dbCommand.CommandText = "SELECT file_path, file_name, file_size, hash_value, created_at, last_modified, file_state FROM SyncFiles;";
                     
                     await using (var reader = await dbCommand.ExecuteReaderAsync())
                     {
@@ -171,7 +180,7 @@ public class GetFilesToSyncService
                                     Hashvalue = hashValueFromDb,
                                     CreatedAt = createdAtFromDb,
                                     LastModified = modifiedAtFromDb,
-                                    FileState = Enum.Parse<FileChangeState>(fileStateFromDb),
+                                    FileState = Enum.Parse<FileChangeState>(fileStateFromDb, ignoreCase:true), // Enum großgeschrieben, in DB kleingeschrieben
                                     ToUpload = false,
                                     ToDelet = fileStateFromDb == "Deleted",
                                     ToDownload = fileStateFromDb != "Deleted"

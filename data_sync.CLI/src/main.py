@@ -1,9 +1,7 @@
 import argparse
 import os
 
-from backend.commands.init_command import InitCommand
-from backend.commands.scan_command import ScanCommand
-from backend.commands.manifest_command import ManifestCommand
+from backend.commands import InitCommand, ScanCommand, ManifestCommand, DownloadCommand
 
 
 def main():
@@ -70,9 +68,12 @@ def main():
         manifest_command = ManifestCommand()
         manifest_command.execute()
 
-
     elif args.download:
-        print("download process started")
+        manifest_command = ManifestCommand()
+        files_to_sync = manifest_command.execute()
+
+        download_command = DownloadCommand()
+        download_command.execute(files_to_sync)
 
     elif args.upload:
         print("upload process started")

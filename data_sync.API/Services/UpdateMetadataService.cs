@@ -72,7 +72,7 @@ public class UpdateMetadataService
                                 FileSize = reader.GetInt64(2),
                                 LastModified = reader.GetDateTime(3),
                                 Hashvalue = reader.GetString(4),
-                                FileState = Enum.Parse<FileChangeState>(reader.GetString(5))
+                                FileState = Enum.Parse<FileChangeState>(reader.GetString(5), ignoreCase:true)
                             };
                             
                             return response;
