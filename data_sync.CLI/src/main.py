@@ -79,7 +79,14 @@ def main():
         print("upload process started")
 
     elif args.sync:
-        print("sync process started")
+        scan_command = ScanCommand()
+        scan_command.execute()
+
+        manifest_command = ManifestCommand()
+        files_to_sync = manifest_command.execute()
+
+        download_command = DownloadCommand()
+        download_command.execute(files_to_sync)
 
 
 if __name__ == '__main__':

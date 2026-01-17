@@ -16,15 +16,17 @@ public class SyncController : ControllerBase
 {
     private readonly GetFilesToSyncService _filesToSyncService;
     private readonly UpdateMetadataService _updateMetadataService;
+    private readonly IWebHostEnvironment _envirement;
     
     /// <summary>
     /// Konstruktor für SyncController, der GetFilesToSyncService injiziert.
     /// </summary>
     /// <param name="filesToSyncService"></param>
-    public SyncController(GetFilesToSyncService filesToSyncService, UpdateMetadataService updateMetadataService)
+    public SyncController(GetFilesToSyncService filesToSyncService, UpdateMetadataService updateMetadataService, IWebHostEnvironment envirement)
     {
         _filesToSyncService = filesToSyncService;
         _updateMetadataService = updateMetadataService;
+        _envirement = envirement;
     }
     
     /// <summary>
@@ -159,7 +161,8 @@ public class SyncController : ControllerBase
     [HttpGet("download")]
     public async Task<IActionResult> DownloadFile([FromQuery] string filePath)
     {
-        string fullPath = Path.Combine("uploads", filePath); // Pfad zur Datei im Upload-Verzeichnis
+        string cleanFilePath = filePath.TrimStart('/', '\\');
+        string fullPath = Path.Combine(_envirement.ContentRootPath, "uploads", cleanFilePath); // Pfad zur Datei im Upload-Verzeichnis
 
         if (!System.IO.File.Exists(fullPath))
         {

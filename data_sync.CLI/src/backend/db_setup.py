@@ -36,7 +36,7 @@ class DbSetup:
         CREATE TABLE IF NOT EXISTS SyncFiles (
             sync_file_id INTEGER PRIMARY KEY AUTOINCREMENT,
             file_name TEXT NOT NULL,
-            file_path TEXT NOT NULL UNIQUE,
+            file_path TEXT NOT NULL,
             file_size INTEGER NOT NULL,
             hash_value TEXT NOT NULL,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,

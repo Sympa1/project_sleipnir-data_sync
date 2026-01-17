@@ -68,7 +68,7 @@ class ScanCommand(BaseCommand):
         """
         # 1. Prüfe: Existiert file_path?
         result_by_path = db_handler.execute_query(
-            "SELECT hash_value "
+            "SELECT hash_value, file_state "
             "FROM SyncFiles "
             "WHERE file_path = ?",
             (file_info.file_path,)
@@ -81,7 +81,12 @@ class ScanCommand(BaseCommand):
             if db_hash_value != file_info.hash_value:
                 self._update_file(file_info, db_handler)
             else:
-                self._skip_file(file_info, db_handler)
+                db_file_state = result_by_path[0][1]
+                if db_file_state == "deleted":
+                    # Datei wurde wiederhergestellt
+                    self._update_file(file_info, db_handler)
+                else:
+                    self._skip_file(file_info, db_handler)
 
         # Datei existiert nicht am alten Ort
         else:

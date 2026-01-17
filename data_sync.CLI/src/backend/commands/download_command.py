@@ -1,16 +1,22 @@
+import urllib3
+
 from pathlib import Path
 from .base_command import BaseCommand
 from ..handlers.config_handler import ConfigHandler
-from .. import api_client
+from .. import ApiClient
 
 
 class DownloadCommand(BaseCommand):
+
+    # Deaktivieren der InsecureRequestWarning, wenn SSL-Verifikation deaktiviert ist
+    urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
     def execute(self, files_to_sync):
         print("\nDownload process started")
 
         # Aufruf der API um die Dateien herunterzuladen
         config_handler = ConfigHandler()
-        sync_path = config_handler.get_sync_path()
+        sync_path = config_handler.get_config("sync_path")
         api_base_url = config_handler.get_config("api_base_url")
         verify_ssl = config_handler.get_config("verify_ssl")
         if verify_ssl is None:
@@ -19,7 +25,7 @@ class DownloadCommand(BaseCommand):
         if verify_ssl is False:
             print("Warning: SSL verification is disabled.")
 
-        api_client = api_client.ApiClient(api_base_url, verify_ssl)
+        api_client = ApiClient(api_base_url, verify_ssl)
 
         print(f"Using API base URL: {api_base_url}")
 
@@ -37,7 +43,7 @@ class DownloadCommand(BaseCommand):
                     file_content = api_client.download_file(endpoint="download", params={"filePath": file.get("relativePath")})
                     
                     relative_path = file.get("relativePath")
-                    full_path = Path(sync_path) / relative_path
+                    full_path = Path(sync_path) / relative_path.lstrip("/\\")  # Entferne führende / oder \ im Pfad
 
                     # parents = Erstelle alle Notwendigen übergeordneten Verzeichnisse
                     # exist_ok = ignoriere es wenn das Verzeichnis bereits existiert
