@@ -3,6 +3,7 @@ import urllib3
 from pathlib import Path
 from .base_command import BaseCommand
 from ..handlers.config_handler import ConfigHandler
+from ..handlers.sqlite_handler import SqliteHandler
 from .. import ApiClient
 
 
@@ -52,14 +53,16 @@ class DownloadCommand(BaseCommand):
                     # Datei speichern
                     full_path.write_bytes(file_content)
                     
-                    file_download_success.append(relative_path)
+                    file_download_success.append(file)
+
+
 
 
                 except Exception as e:
                     error_message = f"Error downloading file {file.get("fileName")}: {str(e)}"
                     print(error_message)
                     self.handle_error(error_message)
-                    file_download_failed.append(file.get("fileName"))
+                    file_download_failed.append(file)
 
 
             else:
@@ -68,4 +71,41 @@ class DownloadCommand(BaseCommand):
         print(f"Successful downloads: {len(file_download_success)}")
         print(f"Failed downloads: {len(file_download_failed)}")
 
+        self.file_scanner(file_download_success)
+
         print("Download process completed")
+
+    def file_scanner(self, file_list):
+        scanned_files = []
+
+        for file in file_list:
+            file_path = file.get("relativePath").lstrip("/\\")  # Entferne führende / oder \ im Pfad
+
+            db_handler = SqliteHandler()
+
+            query_select = ("SELECT file_state "
+                            "FROM SyncFiles "
+                            "WHERE file_path = ?")
+            result_select = db_handler.execute_query(query_select, (file_path,))
+
+            if len(result_select) > 0:
+                if result_select[0][0] != 'modified':
+                    query_update_new = ("UPDATE SyncFiles "
+                                        "SET file_state = 'new' "
+                                        "WHERE file_path = ?")
+                    db_handler.execute_query(query_update_new, (file_path,))
+                else:
+                    query_update_modified = ("UPDATE SyncFiles "
+                                             "SET file_state = 'modified' "
+                                             "WHERE file_path = ?")
+                    db_handler.execute_query(query_update_modified, (file_path,))
+            else:
+                query_insert = ("INSERT INTO SyncFiles "
+                                "(file_name, file_path, file_size, hash_value, file_state) "
+                                "VALUES (?, ?, ?, ?, ?)")
+
+                db_handler.execute_query(query_insert, (file.get("fileName"),
+                                                        file.get("filePath"),
+                                                        file.get("size"),
+                                                        file.get("sha256"),
+                                                        "new"))
