@@ -66,7 +66,7 @@ class ApiClient:
         response.raise_for_status()  # Hebt eine Ausnahme bei HTTP-Fehlern hervor
         return response.json()
 
-    def post_files(self, endpoint: str, files, params=None):
+    def upload_files(self, endpoint: str, files, params=None):
         """
         Führt eine POST-Anfrage mit Datei-Upload an die API durch.
         :param endpoint: API-Endpunkt

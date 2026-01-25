@@ -84,7 +84,7 @@ public class SyncController : ControllerBase
                 }
             }
         }
-        return Ok(new { count = files.Count, size }); // Gibt die Anzahl der hochgeladenen Dateien und deren Gesamtgröße als anonymes Objekt zurück
+        return Ok(new { status = "success", count = files.Count, size }); // Gibt die Anzahl der hochgeladenen Dateien und deren Gesamtgröße als anonymes Objekt zurück
     }
     
     /// <summary>

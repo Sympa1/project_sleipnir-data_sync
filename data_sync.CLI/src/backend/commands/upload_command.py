@@ -1,3 +1,4 @@
+import os
 from .base_command import BaseCommand
 from ..handlers.config_handler import ConfigHandler
 from .. import ApiClient
@@ -38,12 +39,14 @@ class UploadCommand(BaseCommand):
                     with open(full_path, "rb") as f:
                         file_content = f.read()
 
+                    # Extrahiere nur den Verzeichnis-Teil (ohne Dateinamen)
+                    relative_dir = os.path.dirname(relative_path)
+
                     # API-Aufruf zum Hochladen der Datei
-                    response = api_client.post_files(
+                    response = api_client.upload_files(
                         endpoint="upload",
-                        files={"file": (file.get("fileName"), file_content)},
-                        params={"filePath": relative_path}
-                    )
+                        files={"files": (file.get("fileName"), file_content)},
+                        params={"basePath": relative_dir})
 
                     if response.get("status") == "success":
                         file_upload_success.append(file)
