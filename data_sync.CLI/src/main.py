@@ -1,7 +1,7 @@
 import argparse
 import os
 
-from backend.commands import InitCommand, ScanCommand, ManifestCommand, DownloadCommand
+from backend.commands import InitCommand, ScanCommand, ManifestCommand, DownloadCommand, UploadCommand
 
 
 def main():
@@ -76,7 +76,11 @@ def main():
         download_command.execute(files_to_sync)
 
     elif args.upload:
-        print("upload process started")
+        manifest_command = ManifestCommand()
+        files_to_sync = manifest_command.execute()
+
+        upload_command = UploadCommand()
+        upload_command.execute(files_to_sync)
 
     elif args.sync:
         scan_command = ScanCommand()
