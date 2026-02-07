@@ -4,3 +4,4 @@ from .scan_command import *
 from .manifest_command import *
 from .download_command import *
 from .upload_command import *
+from .delete_command import *

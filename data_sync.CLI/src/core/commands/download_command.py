@@ -5,6 +5,7 @@ from .base_command import BaseCommand
 from ..handlers.config_handler import ConfigHandler
 from ..handlers.sqlite_handler import SqliteHandler
 from .. import ApiClient
+from ..sync_state_manager import SyncStateManager
 
 
 class DownloadCommand(BaseCommand):
@@ -61,6 +62,14 @@ class DownloadCommand(BaseCommand):
 
                     # Datei speichern
                     full_path.write_bytes(file_content)
+                    
+                    # LastSyncState aktualisieren nach erfolgreichem Download
+                    sync_state_manager = SyncStateManager()
+                    sync_state_manager.update_sync_state(
+                        file_path=file.get("relativePath"),
+                        hash_value=file.get("sha256"),
+                        file_size=file.get("size")
+                    )
                     
                     file_download_success.append(file)
 

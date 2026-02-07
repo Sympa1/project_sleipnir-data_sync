@@ -1,0 +1,1 @@
+Das ist ein Test, für gleichnamige Files, in unterschiedlichen Verzeichnissen.

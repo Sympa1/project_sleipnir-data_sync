@@ -88,3 +88,31 @@ class ApiClient:
         response = requests.get(f"{self.base_url}/{endpoint}", params=params, verify=self.verify_ssl)
         response.raise_for_status()
         return response.content
+    
+    def delete_file(self, endpoint: str, params=None):
+        """
+        Sendet DELETE-Request an die API zum Löschen einer Datei auf dem Server.
+        Diese Methode wird für die Synchronisation von Löschungen verwendet.
+        
+        :param endpoint: API-Endpunkt (typischerweise "delete")
+        :param params: Query-Parameter mit dem Dateipfad (z.B. {"filePath": "folder/file.txt"})
+        :return: JSON-Response vom Server mit Status-Information
+        :raises RuntimeError: Wenn DELETE-Request fehlschlägt
+        """
+        if params is None or "filePath" not in params:
+            raise ValueError("Parameter 'filePath' is required for delete_file()")
+        
+        url = f"{self.base_url}/{endpoint}"
+        
+        try:
+            response = requests.delete(
+                url, 
+                params=params, 
+                verify=self.verify_ssl,
+                timeout=30
+            )
+            response.raise_for_status()
+            return response.json()
+        
+        except requests.exceptions.RequestException as e:
+            raise RuntimeError(f"DELETE request failed for {params.get('filePath')}: {e}")

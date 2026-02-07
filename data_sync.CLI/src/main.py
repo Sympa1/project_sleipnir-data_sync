@@ -1,7 +1,7 @@
 import argparse
 import os
 
-from core.commands import InitCommand, ScanCommand, ManifestCommand, DownloadCommand, UploadCommand
+from core.commands import InitCommand, ScanCommand, ManifestCommand, DownloadCommand, UploadCommand, DeleteCommand
 
 
 # TODO: Macht eventuell ein Command für das Löschen von Dateien, zumindest für das löschen von Dateien auf dem Server Sinn?
@@ -53,6 +53,12 @@ def main():
     )
 
     group.add_argument(
+        '--delete', '-x',
+        action='store_true',
+        help='Startet den Löschungsprozess nach Manifestübermittlung.'
+    )
+
+    group.add_argument(
         '--init', '-i',
         action='store_true',
         help='Initialisiert die Datenbank.'
@@ -93,6 +99,13 @@ def main():
         upload_command = UploadCommand()
         upload_command.execute(files_to_sync)
 
+    elif args.delete:
+        manifest_command = ManifestCommand()
+        files_to_sync = manifest_command.execute()
+
+        delete_command = DeleteCommand()
+        delete_command.execute(files_to_sync)
+
     elif args.sync:
         scan_command = ScanCommand()
         scan_command.execute()
@@ -102,6 +115,12 @@ def main():
 
         download_command = DownloadCommand()
         download_command.execute(files_to_sync)
+
+        upload_command = UploadCommand()
+        upload_command.execute(files_to_sync)
+
+        delete_command = DeleteCommand()
+        delete_command.execute(files_to_sync)
 
 
 if __name__ == '__main__':

@@ -2,6 +2,7 @@ import os
 from .base_command import BaseCommand
 from ..handlers.config_handler import ConfigHandler
 from .. import ApiClient
+from ..sync_state_manager import SyncStateManager
 
 
 class UploadCommand(BaseCommand):
@@ -57,6 +58,14 @@ class UploadCommand(BaseCommand):
                         params={"basePath": relative_dir})
 
                     if response.get("status") == "success":
+                        # LastSyncState aktualisieren nach erfolgreichem Upload
+                        sync_state_manager = SyncStateManager()
+                        sync_state_manager.update_sync_state(
+                            file_path=file.get("relativePath"),
+                            hash_value=file.get("sha256"),
+                            file_size=file.get("size")
+                        )
+                        
                         file_upload_success.append(file)
                     else:
                         error_upload = f"Failed to upload file: {file.get('fileName')} - Reason: {response.get('message')}"

@@ -86,69 +86,6 @@ public class SyncController : ControllerBase
         }
         return Ok(new { status = "success", count = files.Count, size }); // Gibt die Anzahl der hochgeladenen Dateien und deren Gesamtgröße als anonymes Objekt zurück
     }
-    
-    /// <summary>
-    /// Nimmt nach dem Upload im Format des Manifest's die Metadaten entgegen und validiert diese.
-    /// Erst wenn die Validierung erfolgreich ist, werden die Metadaten in der DB aktualisiert.
-    /// <b>Wichtig:</b> Die Liste an Metadaten muss exakt der Liste der hochgeladenen Dateien entsprechen.
-    /// </summary>
-    /// <param name="metadata"></param>
-    /// <returns></returns>
-    [HttpPost("confirm-upload")]
-    public async Task<IActionResult> ConfirmUpload([FromBody] List<ManifestEntryDto> metadataList)
-    {
-        List <ValidationErrorDto> validationErrors = new List <ValidationErrorDto>();
-        int successCount = 0;
-        
-        foreach (var metadata in metadataList)
-        {
-            string fileName = Path.GetFileName(metadata.FilePath);
-            string filePath = Path.Combine("uploads", fileName);
-
-            // Validierung: Datei existiert?
-            if (!System.IO.File.Exists(filePath))
-            {
-                validationErrors.Add(new ValidationErrorDto {FileName = fileName, ErrorMessage = "Datei auf den Server nicht gefunden."});
-                continue;
-            }
-
-            // Validierung: Hash vergleichen (Client vs. Server)
-            string serverHash = UtilsService.CalculateFileHash(filePath);
-            if (serverHash != metadata.Hashvalue)
-            {
-                validationErrors.Add(new ValidationErrorDto {FileName = fileName, ErrorMessage = "Hashwert stimmt nicht überein."});
-                continue;
-            }
-
-            // Validierung: Dateigröße prüfen
-            var fileInfo = new FileInfo(filePath);
-            if (fileInfo.Length != metadata.FileSize)
-            {
-                validationErrors.Add(new ValidationErrorDto {FileName = fileName, ErrorMessage = "Dateigröße stimmt nicht überein."});
-                continue;
-            }
-            
-            // Erst jetzt: Metadaten aktualisieren
-            await _updateMetadataService.UpdateMetadataAsync(new ManifestEntryDto
-            {
-                FilePath = metadata.FilePath,
-                FileName = metadata.FileName,
-                FileSize = fileInfo.Length,
-                Hashvalue = serverHash,
-                CreatedAt = metadata.CreatedAt,
-                LastModified = metadata.LastModified,
-                FileState = metadata.FileState
-            });
-
-            successCount++;
-        }
-        return Ok(new ConfirmUploadResponseDto
-        {
-            SuccessCount = successCount,
-            ErrorCount = validationErrors.Count,
-            Errors = validationErrors
-        });
-    }
 
     // TODO: Eine Base64 kodierte JSON Datei wäre auch eine Möglichkeit, Dateien zu übertragen. Damit könnte man
     //  mehrere Dateien in einem Request übertragen.
@@ -180,18 +117,30 @@ public class SyncController : ControllerBase
         return File(memory, contentType, fullPath); // Gibt die Datei als Download zurück
     }
 
-    [HttpGet("confirm-download")]
-    public async Task<IActionResult> ConfirmDownload([FromQuery] string filePath)
+    [HttpDelete("delete")]
+    public async Task<IActionResult> DeleteFile([FromQuery] string filePath)
     {
-        var responseMetadata = _updateMetadataService.GetMetadataAsync();
-
-        if (responseMetadata == null)
+        if (string.IsNullOrEmpty(filePath))
         {
-            return NotFound("Metadata not found.");
+            return BadRequest("File path is required.");
         }
-        else
+        
+        string cleanFilePath = filePath.TrimStart('/', '\\');
+        string fullPath = Path.Combine(_envirement.ContentRootPath, "uploads", cleanFilePath); // Pfad zur Datei im Upload-Verzeichnis
+        
+        if (!System.IO.File.Exists(fullPath))
         {
-            return Ok(responseMetadata);
+            return NotFound("File not found.");
+        }
+        
+        try
+        {
+            System.IO.File.Delete(fullPath); // Löscht die Datei vom Server
+            return Ok("File deleted successfully.");
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Error deleting file: {ex.Message}");
         }
     }
 }
