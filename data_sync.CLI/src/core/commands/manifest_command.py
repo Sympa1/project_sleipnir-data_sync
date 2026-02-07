@@ -8,6 +8,10 @@ from ..models import SyncFileModel
 
 
 class ManifestCommand(BaseCommand):
+    """
+    Klasse für den Manifest-Befehl.
+    Diese Klasse erstellt ein Manifest der lokalen Dateien und sendet es an die API.
+    """
     def execute(self):
         """
         Führt den Manifest-Befehl aus.
@@ -113,6 +117,12 @@ class ManifestCommand(BaseCommand):
         return manifest
 
     def send_manifest(self, api_client, manifest):
+        """
+        Sendet das Manifest an die API und erhält die Antwort.
+        :param api_client:
+        :param manifest:
+        :return:
+        """
         response = []
 
         try:

@@ -9,15 +9,6 @@ from ..handlers.sqlite_handler import SqliteHandler
 class ScanCommand(BaseCommand):
     """
     Kommand-Klasse zum Scannen eines Verzeichnisses und Aktualisieren der Datenbank mit Datei-Informationen.
-    1. Scannt das Verzeichnis und sammelt Datei-Informationen.
-    2. Vergleicht die gesammelten Informationen mit der Datenbank.
-    3. Aktualisiert die Datenbank basierend auf den Vergleichen:
-       - Wenn die Datei existiert und sich geändert hat, werden die Informationen aktualisiert.
-       - Wenn die Datei verschoben wurde, wird der Pfad aktualisiert.
-       - Wenn die Datei neu ist, wird sie in die Datenbank eingefügt.
-       - Wenn eine Datei in der Datenbank existiert, aber nicht mehr im Verzeichnis, wird sie als gelöscht markiert.
-    4. Gibt eine Zusammenfassung der durchgeführten Aktionen aus.
-    5. Behandelt Fehler während des Prozesses und gibt entsprechende Fehlermeldungen aus.
     """
     def execute(self):
         """

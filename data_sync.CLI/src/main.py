@@ -1,7 +1,18 @@
 import argparse
 import os
 
-from backend.commands import InitCommand, ScanCommand, ManifestCommand, DownloadCommand, UploadCommand
+from core.commands import InitCommand, ScanCommand, ManifestCommand, DownloadCommand, UploadCommand
+
+
+# TODO: Macht eventuell ein Command für das Löschen von Dateien, zumindest für das löschen von Dateien auf dem Server Sinn?
+#  Also z.B. wenn eine Datei lokal gelöscht wurde, soll sie auch auf dem Server gelöscht werden können.
+#  Prüfen in welches Verzeichnis wie z.B. die api_client.py Datei abgelegt werden sollen.
+#  Das abgleichen, was mit der jeweiligen Datei passieren soll, vereinfachen. Ich denke da an einen if elif else Block.
+#  Da soll dann jede eventualität abgedeckt werden.
+#  Evtl. auch eine Art Strategy Pattern implementieren?
+#  ANALYSE: Im CLient gelöschte Dateien, werden vom Server erneut runtergeladen. Auf dem Server gelöschte Dateien,
+#  werden beim Client nicht gelöscht. VORAUSSETZUNG: Es wird davon ausgegangen, dass die Datein jeweils, wo Sie gelöscht
+#  wurden, auch gelöscht bleiben sollen. Es wird also nicht davon ausgegangen, dass die Dateien nur temporär gelöscht wurden.
 
 
 def main():

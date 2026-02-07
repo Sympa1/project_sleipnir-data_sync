@@ -15,7 +15,8 @@ class DbSetup:
         Initialisiert die DbSetup-Klasse und richtet die Datenbanktabellen ein.
         1. Ruft die Methode zum Einrichten der SyncFiles-Tabelle auf.
         2. Ruft die Methode zum Einrichten der SyncEvent-Tabelle auf.
-        3. Ruft die Methode zum Einrichten der FehlerProtokoll-Tabelle auf
+        3. Ruft die Methode zum Einrichten der FehlerProtokoll-Tabelle auf.
+        4. Ruft die Methode zum Einrichten der LastSyncState-Tabelle auf.
         """
 
         db_handler = SqliteHandler()
@@ -23,6 +24,7 @@ class DbSetup:
         DbSetup._setup_sync_files(db_handler)
         DbSetup._setup_sync_events(db_handler)
         DbSetup._setup_fehler_protokoll(db_handler)
+        DbSetup._setup_last_sync_state(db_handler)
 
     @staticmethod
     def _setup_sync_files(db_handler):
@@ -63,6 +65,25 @@ class DbSetup:
             event_timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
             event_details TEXT,
             FOREIGN KEY (sync_file_id) REFERENCES SyncFiles(sync_file_id) ON DELETE CASCADE
+        );
+        """
+
+        db_handler.execute_query(create_table_query)
+
+    @staticmethod
+    def _setup_last_sync_state(db_handler):
+        """
+        Erstellt die LastSyncState-Tabelle in der Datenbank, falls sie nicht bereits existiert.
+        :param db_handler:
+        :return: None
+        """
+
+        create_table_query = """
+        CREATE TABLE IF NOT EXISTS LastSyncState (
+            file_path TEXT PRIMARY KEY,
+            hash_value TEXT NOT NULL,
+            file_size INTEGER NOT NULL,
+            last_modified DATETIME NOT NULL
         );
         """
 

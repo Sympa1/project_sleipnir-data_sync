@@ -5,18 +5,18 @@ from ..models import SyncFileModel, SyncEventModel
 
 class SqliteHandler:
     """
-    Klasse zum Umgang mit SQLite-Datenbanken. Wird verwendet, um SQL-Abfragen auszuführen und Ergebnisse zurückzugeben.
+    Klasse zum Umgang mit sqlite-Datenbanken. Wird verwendet, um SQL-Abfragen auszuführen und Ergebnisse zurückzugeben.
     """
     def __init__(self, db_path: str="cli_db.db"):
         """
-        Initialisiert den SqliteHandler mit dem Pfad zur SQLite-Datenbank.
-        :param db_path: Pfad zur SQLite-Datenbankdatei
+        Initialisiert den SqliteHandler mit dem Pfad zur sqlite-Datenbank.
+        :param db_path: Pfad zur sqlite-Datenbankdatei
         """
         self.db_path = db_path
 
     def execute_query(self, query: str, params=None):
         """
-        Führt eine SQL-Abfrage aus und gibt die Ergebnisse zurück. Dazu wird eine Verbindung zur SQLite-Datenbank
+        Führt eine SQL-Abfrage aus und gibt die Ergebnisse zurück. Dazu wird eine Verbindung zur sqlite-Datenbank
         hergestellt und anschließend geschlossen.
         Fehler werden abgefangen und protokolliert.
         Beispiel für eine SELECT-Abfrage:

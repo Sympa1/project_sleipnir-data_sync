@@ -6,10 +6,6 @@ from ..db_setup import DbSetup
 class InitCommand(BaseCommand):
     """
     Kommand-Klasse zum Initialisieren der Datenbank und Konfigurieren des Synchronisierungspfads.
-    1. Initialisiert die Datenbank.
-    2. Fordert den Benutzer auf, den Pfad zur Synchronisierung einzugeben.
-    3. Speichert den Pfad und die API-Basis-URL in der Konfigurationsdatei.
-    4. Behandelt Fehler und gibt entsprechende Meldungen aus.
     """
     def execute(self):
         """

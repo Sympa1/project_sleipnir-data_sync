@@ -5,7 +5,15 @@ from .. import ApiClient
 
 
 class UploadCommand(BaseCommand):
+    """
+    Command zum Hochladen von Dateien auf den Remote-Server.
+    """
     def execute(self, files_to_sync):
+        """
+        Startet den Upload-Prozess für die angegebenen Dateien.
+        :param files_to_sync:
+        :return:
+        """
         print("\nUpload process started")
 
         # Aufruf der API um die Dateien hochzuladen

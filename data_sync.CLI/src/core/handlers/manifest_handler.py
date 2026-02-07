@@ -9,7 +9,7 @@ from .config_handler import ConfigHandler
 class ManifestHandler:
     """
     Klasse zum Erstellen und Senden von Manifests für die Datensynchronisation.
-    Das Manifest wird aus Daten in der SQLite-Datenbank erstellt und an eine API gesendet.
+    Das Manifest wird aus Daten in der sqlite-Datenbank erstellt und an eine API gesendet.
     """
     def __init__(self):
         self.db_handler = SqliteHandler()

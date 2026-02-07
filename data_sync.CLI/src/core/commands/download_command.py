@@ -8,11 +8,20 @@ from .. import ApiClient
 
 
 class DownloadCommand(BaseCommand):
+    """
+    Command-Klasse zum Herunterladen von Dateien vom Remote-Server.
+    Erbt von BaseCommand und implementiert die execute-Methode.
+    """
 
     # Deaktivieren der InsecureRequestWarning, wenn SSL-Verifikation deaktiviert ist
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
     def execute(self, files_to_sync):
+        """
+        Führt den Download der Dateien durch, die synchronisiert werden müssen.
+        :param files_to_sync:
+        :return:
+        """
         print("\nDownload process started")
 
         # Aufruf der API um die Dateien herunterzuladen
