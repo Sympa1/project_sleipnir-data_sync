@@ -82,12 +82,15 @@ public class SyncController : ControllerBase
         // Server berechnet Metadaten
         var hashValue = UtilsService.CalculateFileHash(fullPath);
         var fileInfo = new FileInfo(fullPath);
+        
+        // Relativer Pfad für DB (OHNE "uploads/")
+        var relativeFilePath = Path.Combine(basePath, fileName);
 
-        // DB aktualisieren
+        // DB aktualisieren mit relativem Pfad
         SyncFile metaData = new SyncFile
         {
             FileName = fileName,
-            FilePath = fullPath,
+            FilePath = relativeFilePath,  // ✅ Relativer Pfad ohne "uploads/"
             FileSize = fileInfo.Length,
             HashValue = hashValue,
             FileState = FileState.Modified
@@ -96,7 +99,6 @@ public class SyncController : ControllerBase
         await _updateMetadataService.UpdateMetadataAsync(metaData);
       
         // LastSyncState aktualisieren nach erfolgreichem Upload
-        var relativeFilePath = Path.Combine(basePath, fileName);
         await _syncStateService.UpdateSyncStateAsync(relativeFilePath, hashValue, fileInfo.Length);
 
         return Ok(new {
