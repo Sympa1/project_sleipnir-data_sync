@@ -62,8 +62,13 @@ class ManifestCommand(BaseCommand):
             # Manifest erstellen und senden
             print("\nClient manifest:")
             manifest = self.create_manifest(db_handler)
-            for file in manifest:
-                print(f"File Pfad: {file.get("relativePath")} - File Status: {file.get("changeState")} - File Größe: {file.get("size")} Bytes")
+            
+            if len(manifest) == 0:
+                print("⚠️  No files in local database - this is a new client or empty sync directory")
+                print("Sending empty manifest to request all files from server...")
+            else:
+                for file in manifest:
+                    print(f"File Pfad: {file.get("relativePath")} - File Status: {file.get("changeState")} - File Größe: {file.get("size")} Bytes")
 
             files_to_sync_json = self.send_manifest(api_client, manifest)
 

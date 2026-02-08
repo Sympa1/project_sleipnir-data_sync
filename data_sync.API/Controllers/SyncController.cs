@@ -43,12 +43,13 @@ public class SyncController : ControllerBase
     [HttpPost("manifest")]
     public async Task<IActionResult> PostManifestByClient([FromBody] List<ManifestEntryDto> manifests)
     {
-        if (manifests.Count == 0)
+        // Leeres Manifest ist OK - neuer Client ohne Dateien
+        if (manifests == null)
             return BadRequest("Manifest missing or invalid.");
         
-        var filesToSync = await _filesToSyncService.GetFilesToSync(manifests); // Ermittle Dateien, die synchronisiert werden müssen
+        var filesToSync = await _filesToSyncService.GetFilesToSync(manifests);
         
-        return Ok(filesToSync);  // Gib dem Client die Liste der zu synchronisierenden Dateien zurück
+        return Ok(filesToSync);
     }
     
     /// <summary>
