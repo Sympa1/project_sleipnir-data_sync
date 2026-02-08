@@ -37,7 +37,7 @@ class FileScanner:
                 # SyncFileModel-Objekt mit allen Datei-Informationen erstellen
                 sync_file = SyncFileModel(
                     file_name=element.name,  # Nur der Dateiname (z.B. "example1-deleted.txt")
-                    file_path=str(element.relative_to(self.base_path)),  # Relativer Pfad (z.B. "unterverzeichnis1/datei.txt")
+                    file_path=str(element.relative_to(self.base_path)).replace("\\", "/"),  # Normalisiere zu Forward Slashes für plattformübergreifende Kompatibilität
                     file_size=stats.st_size,  # Dateigröße in Bytes
                     hash_value=self.calculate_hash(str(element)),  # SHA256-Hash des Dateiinhalts
                     created_at=datetime.fromtimestamp(stats.st_ctime),  # Erstellungsdatum als DateTime-Objekt
