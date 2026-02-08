@@ -112,6 +112,12 @@ def main():
 
         manifest_command = ManifestCommand()
         files_to_sync = manifest_command.execute()
+        
+        # Prüfe ob Manifest erfolgreich war
+        if files_to_sync is None:
+            print("\n⚠️ Manifest processing failed. Cannot proceed with sync.")
+            print("Please check your connection to the API server.")
+            return
 
         download_command = DownloadCommand()
         download_command.execute(files_to_sync)
