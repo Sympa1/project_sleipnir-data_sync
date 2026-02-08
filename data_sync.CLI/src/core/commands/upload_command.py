@@ -54,7 +54,7 @@ class UploadCommand(BaseCommand):
                     # API-Aufruf zum Hochladen der Datei
                     response = api_client.upload_files(
                         endpoint="upload",
-                        files={"files": (file.get("fileName"), file_content)},
+                        files={"file": (file.get("fileName"), file_content)},
                         params={"basePath": relative_dir})
 
                     if response.get("status") == "success":

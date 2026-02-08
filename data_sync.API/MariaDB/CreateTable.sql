@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS SyncFiles (
 CREATE TABLE IF NOT EXISTS SyncEvent (
     sync_event_id INT AUTO_INCREMENT PRIMARY KEY,
     sync_file_id INT NOT NULL,
-    event_type ENUM('created', 'modified', 'deleted', 'error') NOT NULL,
+    event_type ENUM('new', 'modified', 'deleted', 'error') NOT NULL,
     event_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     event_details TEXT,
     FOREIGN KEY (sync_file_id) REFERENCES SyncFiles(sync_file_id) ON DELETE CASCADE
@@ -30,6 +30,13 @@ CREATE TABLE IF NOT EXISTS FehlerProtokoll (
     fehler_protokoll_id INT AUTO_INCREMENT PRIMARY KEY,
     fehler_beschreibung TEXT NOT NULL,
     fehler_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS LastSyncState (
+    file_path VARCHAR(768) PRIMARY KEY,
+    hash_value VARCHAR(64) NOT NULL,
+    file_size BIGINT NOT NULL,
+    last_synced_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
 INSERT INTO SyncFiles (file_name, file_path, file_size, hash_value, file_state) VALUES

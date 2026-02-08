@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using data_sync.API.DTOs;
+using data_sync.API.Models;
 using data_sync.API.Services;
 using Mysqlx.Crud;
 
@@ -16,16 +17,21 @@ public class SyncController : ControllerBase
 {
     private readonly GetFilesToSyncService _filesToSyncService;
     private readonly UpdateMetadataService _updateMetadataService;
+    private readonly SyncStateService _syncStateService;
     private readonly IWebHostEnvironment _envirement;
     
     /// <summary>
-    /// Konstruktor für SyncController, der GetFilesToSyncService injiziert.
+    /// Konstruktor für SyncController, der Services injiziert.
     /// </summary>
-    /// <param name="filesToSyncService"></param>
-    public SyncController(GetFilesToSyncService filesToSyncService, UpdateMetadataService updateMetadataService, IWebHostEnvironment envirement)
+    public SyncController(
+        GetFilesToSyncService filesToSyncService, 
+        UpdateMetadataService updateMetadataService,
+        SyncStateService syncStateService,
+        IWebHostEnvironment envirement)
     {
         _filesToSyncService = filesToSyncService;
         _updateMetadataService = updateMetadataService;
+        _syncStateService = syncStateService;
         _envirement = envirement;
     }
     
@@ -53,38 +59,51 @@ public class SyncController : ControllerBase
     /// <param name="basePath">Der Dateipfad für die Datei(en)</param>
     /// <returns></returns>
     [HttpPost("upload")]
-    public async Task<IActionResult> UploadFile(List<IFormFile> files, [FromQuery] string basePath = "")
+    public async Task<IActionResult> UploadFile(IFormFile file, [FromQuery] string basePath = "")
     {
-        if (files == null || files.Count == 0)
-        {
-            return BadRequest("No files uploaded.");
-        }
-        
-        // TODO: Die Verzeichnisstruktur muss später noch gespiegelt werden.
-        // Erstellen des Upload-Verzeichnisses, falls es nicht existiert
+        if (file == null || file.Length == 0)
+            return BadRequest("No file uploaded.");
+
         var uploadPath = Path.Combine("uploads", basePath);
+        
         if (!Directory.Exists(uploadPath))
-        {
             Directory.CreateDirectory(uploadPath);
-        }
 
-        //long size = files.Sum(f => f.Length); // Gesamtgröße aller hochgeladenen Dateien in Bytes
-        string size = $"{files.Sum(f => f.Length)} Bytes";
+        var fileName = Path.GetFileName(file.FileName);
+        var fullPath = Path.Combine(uploadPath, fileName);
 
-        foreach (var file in files)
+        // Datei speichern
+        using (var stream = System.IO.File.Create(fullPath))
         {
-            if (file.Length > 0) // Ermittelt die Dateigröße in Bytes
-            {
-                var fileName = Path.GetFileName(file.FileName); // Extrahiert den Dateinamen
-                var fullPath = Path.Combine(uploadPath, fileName);
-                
-                using (var stream = System.IO.File.Create(Path.Combine(fullPath))) // Erstellt einen Dateistream zum Speichern der Datei
-                {
-                    await file.CopyToAsync(stream); // Kopiert den Inhalt der hochgeladenen Datei in den Dateistream
-                }
-            }
+            await file.CopyToAsync(stream);
         }
-        return Ok(new { status = "success", count = files.Count, size }); // Gibt die Anzahl der hochgeladenen Dateien und deren Gesamtgröße als anonymes Objekt zurück
+
+        // Server berechnet Metadaten
+        var hashValue = UtilsService.CalculateFileHash(fullPath);
+        var fileInfo = new FileInfo(fullPath);
+
+        // DB aktualisieren
+        SyncFile metaData = new SyncFile
+        {
+            FileName = fileName,
+            FilePath = fullPath,
+            FileSize = fileInfo.Length,
+            HashValue = hashValue,
+            FileState = FileState.Modified
+        };
+        
+        await _updateMetadataService.UpdateMetadataAsync(metaData);
+      
+        // LastSyncState aktualisieren nach erfolgreichem Upload
+        var relativeFilePath = Path.Combine(basePath, fileName);
+        await _syncStateService.UpdateSyncStateAsync(relativeFilePath, hashValue, fileInfo.Length);
+
+        return Ok(new {
+            status = "success",
+            fileName = fileName,
+            hash = hashValue
+        });
+
     }
 
     // TODO: Eine Base64 kodierte JSON Datei wäre auch eine Möglichkeit, Dateien zu übertragen. Damit könnte man
@@ -99,7 +118,7 @@ public class SyncController : ControllerBase
     public async Task<IActionResult> DownloadFile([FromQuery] string filePath)
     {
         string cleanFilePath = filePath.TrimStart('/', '\\');
-        string fullPath = Path.Combine(_envirement.ContentRootPath, "uploads", cleanFilePath); // Pfad zur Datei im Upload-Verzeichnis
+        string fullPath = Path.Combine(_envirement.ContentRootPath, "uploads", cleanFilePath);
 
         if (!System.IO.File.Exists(fullPath))
         {
@@ -109,12 +128,17 @@ public class SyncController : ControllerBase
         var memory = new MemoryStream();
         using (var stream = new FileStream(fullPath, FileMode.Open))
         {
-            await stream.CopyToAsync(memory); // Kopiert den Inhalt der Datei in den MemoryStream
+            await stream.CopyToAsync(memory);
         }
-        memory.Position = 0; // Setzt die Position des MemoryStreams auf den Anfang zurück
+        memory.Position = 0;
 
-        string contentType = "application/octet-stream"; // Allgemeiner MIME-Typ für Binärdateien
-        return File(memory, contentType, fullPath); // Gibt die Datei als Download zurück
+        // LastSyncState aktualisieren nach erfolgreichem Download
+        var hashValue = UtilsService.CalculateFileHash(fullPath);
+        var fileInfo = new FileInfo(fullPath);
+        await _syncStateService.UpdateSyncStateAsync(cleanFilePath, hashValue, fileInfo.Length);
+
+        string contentType = "application/octet-stream";
+        return File(memory, contentType, fullPath);
     }
 
     [HttpDelete("delete")]
@@ -136,7 +160,14 @@ public class SyncController : ControllerBase
         try
         {
             System.IO.File.Delete(fullPath); // Löscht die Datei vom Server
-            return Ok("File deleted successfully.");
+            
+            // LastSyncState löschen (Datei ist beidseitig gelöscht)
+            await _syncStateService.DeleteSyncStateAsync(cleanFilePath);
+            
+            // Optional: Auch SyncFiles aktualisieren
+            // TODO: UpdateMetadataService sollte auch DeleteMetadata() haben
+            
+            return Ok(new { status = "success", message = "File deleted successfully." });
         }
         catch (Exception ex)
         {

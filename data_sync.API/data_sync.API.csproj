@@ -15,7 +15,7 @@
 
 
     <ItemGroup>
-      <Folder Include="uploads\" />
+      <_ContentIncludedByDefault Remove="Tests\Postman\Manifest.json" />
     </ItemGroup>
 
 
