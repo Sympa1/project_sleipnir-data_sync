@@ -123,7 +123,7 @@ class DownloadCommand(BaseCommand):
                                 "VALUES (?, ?, ?, ?, ?)")
 
                 db_handler.execute_query(query_insert, (file.get("fileName"),
-                                                        file.get("filePath"),
+                                                        file.get("relativePath"),  # ✅ Korrigiert!
                                                         file.get("size"),
                                                         file.get("sha256"),
                                                         "new"))
