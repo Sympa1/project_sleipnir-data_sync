@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using data_sync.API.DTOs;
+using data_sync.API.Models;
 using data_sync.API.Services;
 using Mysqlx.Crud;
 
@@ -16,15 +17,22 @@ public class SyncController : ControllerBase
 {
     private readonly GetFilesToSyncService _filesToSyncService;
     private readonly UpdateMetadataService _updateMetadataService;
+    private readonly SyncStateService _syncStateService;
+    private readonly IWebHostEnvironment _envirement;
     
     /// <summary>
-    /// Konstruktor für SyncController, der GetFilesToSyncService injiziert.
+    /// Konstruktor für SyncController, der Services injiziert.
     /// </summary>
-    /// <param name="filesToSyncService"></param>
-    public SyncController(GetFilesToSyncService filesToSyncService, UpdateMetadataService updateMetadataService)
+    public SyncController(
+        GetFilesToSyncService filesToSyncService, 
+        UpdateMetadataService updateMetadataService,
+        SyncStateService syncStateService,
+        IWebHostEnvironment envirement)
     {
         _filesToSyncService = filesToSyncService;
         _updateMetadataService = updateMetadataService;
+        _syncStateService = syncStateService;
+        _envirement = envirement;
     }
     
     /// <summary>
@@ -35,12 +43,13 @@ public class SyncController : ControllerBase
     [HttpPost("manifest")]
     public async Task<IActionResult> PostManifestByClient([FromBody] List<ManifestEntryDto> manifests)
     {
-        if (manifests.Count == 0)
+        // Leeres Manifest ist OK - neuer Client ohne Dateien
+        if (manifests == null)
             return BadRequest("Manifest missing or invalid.");
         
-        var filesToSync = await _filesToSyncService.GetFilesToSync(manifests); // Ermittle Dateien, die synchronisiert werden müssen
+        var filesToSync = await _filesToSyncService.GetFilesToSync(manifests);
         
-        return Ok(filesToSync);  // Gib dem Client die Liste der zu synchronisierenden Dateien zurück
+        return Ok(filesToSync);
     }
     
     /// <summary>
@@ -51,115 +60,68 @@ public class SyncController : ControllerBase
     /// <param name="basePath">Der Dateipfad für die Datei(en)</param>
     /// <returns></returns>
     [HttpPost("upload")]
-    public async Task<IActionResult> UploadFile(List<IFormFile> files, [FromQuery] string basePath = "")
+    public async Task<IActionResult> UploadFile(IFormFile file, [FromQuery] string basePath = "")
     {
-        if (files == null || files.Count == 0)
-        {
-            return BadRequest("No files uploaded.");
-        }
-        
-        // TODO: Die Verzeichnisstruktur muss später noch gespiegelt werden.
-        // Erstellen des Upload-Verzeichnisses, falls es nicht existiert
+        if (file == null || file.Length == 0)
+            return BadRequest("No file uploaded.");
+
         var uploadPath = Path.Combine("uploads", basePath);
-        if (!Directory.Exists(uploadPath))
-        {
-            Directory.CreateDirectory(uploadPath);
-        }
-
-        //long size = files.Sum(f => f.Length); // Gesamtgröße aller hochgeladenen Dateien in Bytes
-        string size = $"{files.Sum(f => f.Length)} Bytes";
-
-        foreach (var file in files)
-        {
-            if (file.Length > 0) // Ermittelt die Dateigröße in Bytes
-            {
-                var fileName = Path.GetFileName(file.FileName); // Extrahiert den Dateinamen
-                var fullPath = Path.Combine(uploadPath, fileName);
-                
-                using (var stream = System.IO.File.Create(Path.Combine(fullPath))) // Erstellt einen Dateistream zum Speichern der Datei
-                {
-                    await file.CopyToAsync(stream); // Kopiert den Inhalt der hochgeladenen Datei in den Dateistream
-                }
-            }
-        }
-        return Ok(new { count = files.Count, size }); // Gibt die Anzahl der hochgeladenen Dateien und deren Gesamtgröße als anonymes Objekt zurück
-    }
-    
-    /// <summary>
-    /// Nimmt nach dem Upload im Format des Manifest's die Metadaten entgegen und validiert diese.
-    /// Erst wenn die Validierung erfolgreich ist, werden die Metadaten in der DB aktualisiert.
-    /// <b>Wichtig:</b> Die Liste an Metadaten muss exakt der Liste der hochgeladenen Dateien entsprechen.
-    /// </summary>
-    /// <param name="metadata"></param>
-    /// <returns></returns>
-    [HttpPost("confirm-upload")]
-    public async Task<IActionResult> ConfirmUpload([FromBody] List<ManifestEntryDto> metadataList)
-    {
-        List <ValidationErrorDto> validationErrors = new List <ValidationErrorDto>();
-        int successCount = 0;
         
-        foreach (var metadata in metadataList)
+        if (!Directory.Exists(uploadPath))
+            Directory.CreateDirectory(uploadPath);
+
+        var fileName = Path.GetFileName(file.FileName);
+        var fullPath = Path.Combine(uploadPath, fileName);
+
+        // Datei speichern
+        using (var stream = System.IO.File.Create(fullPath))
         {
-            string fileName = Path.GetFileName(metadata.FilePath);
-            string filePath = Path.Combine("uploads", fileName);
-
-            // Validierung: Datei existiert?
-            if (!System.IO.File.Exists(filePath))
-            {
-                validationErrors.Add(new ValidationErrorDto {FileName = fileName, ErrorMessage = "Datei auf den Server nicht gefunden."});
-                continue;
-            }
-
-            // Validierung: Hash vergleichen (Client vs. Server)
-            string serverHash = UtilsService.CalculateFileHash(filePath);
-            if (serverHash != metadata.Hashvalue)
-            {
-                validationErrors.Add(new ValidationErrorDto {FileName = fileName, ErrorMessage = "Hashwert stimmt nicht überein."});
-                continue;
-            }
-
-            // Validierung: Dateigröße prüfen
-            var fileInfo = new FileInfo(filePath);
-            if (fileInfo.Length != metadata.FileSize)
-            {
-                validationErrors.Add(new ValidationErrorDto {FileName = fileName, ErrorMessage = "Dateigröße stimmt nicht überein."});
-                continue;
-            }
-            
-            // Erst jetzt: Metadaten aktualisieren
-            await _updateMetadataService.UpdateMetadataAsync(new ManifestEntryDto
-            {
-                FilePath = metadata.FilePath,
-                FileName = metadata.FileName,
-                FileSize = fileInfo.Length,
-                Hashvalue = serverHash,
-                CreatedAt = metadata.CreatedAt,
-                LastModified = metadata.LastModified,
-                FileState = metadata.FileState
-            });
-
-            successCount++;
+            await file.CopyToAsync(stream);
         }
-        return Ok(new ConfirmUploadResponseDto
+
+        // Server berechnet Metadaten
+        var hashValue = UtilsService.CalculateFileHash(fullPath);
+        var fileInfo = new FileInfo(fullPath);
+        
+        // Relativer Pfad für DB (OHNE "uploads/")
+        var relativeFilePath = Path.Combine(basePath, fileName);
+
+        // DB aktualisieren mit relativem Pfad
+        SyncFile metaData = new SyncFile
         {
-            SuccessCount = successCount,
-            ErrorCount = validationErrors.Count,
-            Errors = validationErrors
+            FileName = fileName,
+            FilePath = relativeFilePath,  // ✅ Relativer Pfad ohne "uploads/"
+            FileSize = fileInfo.Length,
+            HashValue = hashValue,
+            FileState = FileState.Modified
+        };
+        
+        await _updateMetadataService.UpdateMetadataAsync(metaData);
+      
+        // LastSyncState aktualisieren nach erfolgreichem Upload
+        await _syncStateService.UpdateSyncStateAsync(relativeFilePath, hashValue, fileInfo.Length);
+
+        return Ok(new {
+            status = "success",
+            fileName = fileName,
+            hash = hashValue
         });
+
     }
 
     // TODO: Eine Base64 kodierte JSON Datei wäre auch eine Möglichkeit, Dateien zu übertragen. Damit könnte man
     //  mehrere Dateien in einem Request übertragen.
     /// <summary>
     /// Download einer Datei anhand des Dateipfads des Servers. Der Pfad wird als Query-Parameter übergeben.
-    /// Den Serverdateipfad erält man als Response beim API Call "Manifest".
+    /// Den Serverdateipfad erhält man als Response beim API Call "Manifest".
     /// </summary>
     /// <param name="fileName"></param>
     /// <returns></returns>
     [HttpGet("download")]
     public async Task<IActionResult> DownloadFile([FromQuery] string filePath)
     {
-        string fullPath = Path.Combine("uploads", filePath); // Pfad zur Datei im Upload-Verzeichnis
+        string cleanFilePath = filePath.TrimStart('/', '\\');
+        string fullPath = Path.Combine(_envirement.ContentRootPath, "uploads", cleanFilePath);
 
         if (!System.IO.File.Exists(fullPath))
         {
@@ -169,26 +131,58 @@ public class SyncController : ControllerBase
         var memory = new MemoryStream();
         using (var stream = new FileStream(fullPath, FileMode.Open))
         {
-            await stream.CopyToAsync(memory); // Kopiert den Inhalt der Datei in den MemoryStream
+            await stream.CopyToAsync(memory);
         }
-        memory.Position = 0; // Setzt die Position des MemoryStreams auf den Anfang zurück
+        memory.Position = 0;
 
-        string contentType = "application/octet-stream"; // Allgemeiner MIME-Typ für Binärdateien
-        return File(memory, contentType, fullPath); // Gibt die Datei als Download zurück
+        // LastSyncState aktualisieren nach erfolgreichem Download
+        var hashValue = UtilsService.CalculateFileHash(fullPath);
+        var fileInfo = new FileInfo(fullPath);
+        await _syncStateService.UpdateSyncStateAsync(cleanFilePath, hashValue, fileInfo.Length);
+
+        string contentType = "application/octet-stream";
+        return File(memory, contentType, fullPath);
     }
 
-    [HttpGet("confirm-download")]
-    public async Task<IActionResult> ConfirmDownload([FromQuery] string filePath)
+    [HttpDelete("delete")]
+    public async Task<IActionResult> DeleteFile([FromQuery] string filePath)
     {
-        var responseMetadata = _updateMetadataService.GetMetadataAsync();
-
-        if (responseMetadata == null)
+        if (string.IsNullOrEmpty(filePath))
         {
-            return NotFound("Metadata not found.");
+            return BadRequest("File path is required.");
         }
-        else
+        
+        string cleanFilePath = filePath.TrimStart('/', '\\');
+        string fullPath = Path.Combine(_envirement.ContentRootPath, "uploads", cleanFilePath); // Pfad zur Datei im Upload-Verzeichnis
+        
+        if (!System.IO.File.Exists(fullPath))
         {
-            return Ok(responseMetadata);
+            return NotFound("File not found.");
+        }
+        
+        try
+        {
+            System.IO.File.Delete(fullPath); // Löscht die Datei vom Server
+            
+            // LastSyncState löschen (Datei ist beidseitig gelöscht)
+            await _syncStateService.DeleteSyncStateAsync(cleanFilePath);
+            
+            // SyncFiles auf 'deleted' setzen (damit andere Clients wissen, dass gelöscht wurde)
+            var deletedFile = new SyncFile
+            {
+                FileName = Path.GetFileName(cleanFilePath),
+                FilePath = cleanFilePath,
+                FileSize = 0,
+                HashValue = string.Empty,
+                FileState = FileState.Deleted
+            };
+            await _updateMetadataService.UpdateMetadataAsync(deletedFile);
+            
+            return Ok(new { status = "success", message = "File deleted successfully." });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Error deleting file: {ex.Message}");
         }
     }
 }

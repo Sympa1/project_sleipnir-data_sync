@@ -1,5 +1,5 @@
 using data_sync.API.Services;
-using data_sync.API.Tests;
+//using data_sync.API.Tests;
 
 // .env einmalig beim Start laden via EnvLoadeService (sucht Projektstamm).
 EnvLoadeService.LoadDotEnv();
@@ -21,7 +21,7 @@ builder.Services.AddControllers()
 
 if (testMode)
 {
-    builder.Services.AddScoped<TestService>();
+    //builder.Services.AddScoped<TestService>();
 }
 
 // NOTE: Damit die Ressourcen wieder freigegeben werden, wenn der Scope endet, muss IDisposable implementiert sein.
@@ -32,6 +32,9 @@ builder.Services.AddScoped<GetFilesToSyncService>();
 builder.Services.AddScoped<MariaDbService>();
 
 builder.Services.AddScoped<UpdateMetadataService>();
+
+// Registriere SyncStateService für LastSyncState-Verwaltung
+builder.Services.AddScoped<SyncStateService>();
 
 var app = builder.Build();
 
@@ -56,15 +59,15 @@ FileLogService log = new FileLogService("Db-Startup.log");
     }
 
 // Testmodus prüfen (Programmargumente)
-if (testMode)
-{
-    using (var scope = app.Services.CreateScope())
-    {
-        var testService = scope.ServiceProvider.GetRequiredService<TestService>();
-        // Hier können verschiedene Testmethoden aufgerufen werden
-        testService.ChoiceTest(1); // Beispiel: Testvariante 1 ausführen
-    }
-}
+// if (testMode)
+// {
+//     using (var scope = app.Services.CreateScope())
+//     {
+//         var testService = scope.ServiceProvider.GetRequiredService<TestService>();
+//         // Hier können verschiedene Testmethoden aufgerufen werden
+//         testService.ChoiceTest(1); // Beispiel: Testvariante 1 ausführen
+//     }
+// }
 
 app.UseHttpsRedirection();
 app.UseAuthorization();

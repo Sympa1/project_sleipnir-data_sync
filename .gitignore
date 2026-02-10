@@ -13,3 +13,6 @@ data_sync.API/.env/
 data_sync.API/.env
 # Ignore project-level .env example (use .env locally; don't commit secrets)
 .env
+copilot-instructions.md
+config.json
+cli_db.db

@@ -9,7 +9,8 @@ public static class UtilsService
                 using (var stream = System.IO.File.OpenRead(filePath))
                 {
                     var hash = sha256.ComputeHash(stream);
-                    return Convert.ToHexString(hash);
+                    // Lowercase für Kompatibilität mit Python-Client
+                    return Convert.ToHexString(hash).ToLowerInvariant();
                 }
             }
         }

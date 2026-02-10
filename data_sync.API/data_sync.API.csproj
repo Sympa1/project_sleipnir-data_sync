@@ -14,4 +14,9 @@
     </ItemGroup>
 
 
+    <ItemGroup>
+      <_ContentIncludedByDefault Remove="Tests\Postman\Manifest.json" />
+    </ItemGroup>
+
+
 </Project>
