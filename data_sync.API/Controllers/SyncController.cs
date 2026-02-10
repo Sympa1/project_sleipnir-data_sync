@@ -167,8 +167,16 @@ public class SyncController : ControllerBase
             // LastSyncState löschen (Datei ist beidseitig gelöscht)
             await _syncStateService.DeleteSyncStateAsync(cleanFilePath);
             
-            // Optional: Auch SyncFiles aktualisieren
-            // TODO: UpdateMetadataService sollte auch DeleteMetadata() haben
+            // SyncFiles auf 'deleted' setzen (damit andere Clients wissen, dass gelöscht wurde)
+            var deletedFile = new SyncFile
+            {
+                FileName = Path.GetFileName(cleanFilePath),
+                FilePath = cleanFilePath,
+                FileSize = 0,
+                HashValue = string.Empty,
+                FileState = FileState.Deleted
+            };
+            await _updateMetadataService.UpdateMetadataAsync(deletedFile);
             
             return Ok(new { status = "success", message = "File deleted successfully." });
         }

@@ -1,4 +1,5 @@
 using data_sync.API.DTOs;
+using Microsoft.Extensions.Logging;
 
 namespace data_sync.API.Services;
 
@@ -6,10 +7,12 @@ namespace data_sync.API.Services;
 public class GetFilesToSyncService
 {
     private readonly MariaDbService _dbService;
+    private readonly ILogger<GetFilesToSyncService> _logger;
     
-    public GetFilesToSyncService(MariaDbService mariaDbService)
+    public GetFilesToSyncService(MariaDbService mariaDbService, ILogger<GetFilesToSyncService> logger)
     {
         _dbService = mariaDbService;
+        _logger = logger;
     }
     
     /// <summary>
@@ -58,6 +61,12 @@ public class GetFilesToSyncService
                                 DateTime? modifiedAtFromDb = reader.IsDBNull(1) ? null : reader.GetDateTime(1);
                                 string? fileStateFromDb = reader.IsDBNull(2) ? null : reader.GetString(2);
                                 
+                                // DEBUG Logging
+                                _logger.LogInformation($"Comparing file: {manifest.FilePath}");
+                                _logger.LogInformation($"  Client hash: {manifest.Hashvalue}");
+                                _logger.LogInformation($"  Server hash: {hashFromDb}");
+                                _logger.LogInformation($"  Equal: {hashFromDb == manifest.Hashvalue}");
+                                
                                 // Prüfe ob Datei auf Server gelöscht wurde
                                 if (fileStateFromDb == "deleted")
                                 {
@@ -67,13 +76,16 @@ public class GetFilesToSyncService
                                 else if (hashFromDb == manifest.Hashvalue)
                                 {
                                     // Hash gleich → Datei ist synchron
+                                    _logger.LogInformation($"  Decision: UNCHANGED (hashes match)");
                                     manifestOut.FileState = FileChangeState.Unchanged;
                                 }
                                 else
                                 {
                                     // Hash unterschiedlich → Konflikt-Auflösung per Timestamp
+                                    _logger.LogInformation($"  Decision: Comparing timestamps (hashes differ)");
                                     if (modifiedAtFromDb.HasValue && manifest.LastModified > modifiedAtFromDb.Value)
                                     {
+                                        _logger.LogInformation($"  Decision: TO_UPLOAD (client newer)");
                                         manifestOut.ToUpload = true;
                                     }
                                     else if (modifiedAtFromDb.HasValue && manifest.LastModified < modifiedAtFromDb.Value)
@@ -101,22 +113,39 @@ public class GetFilesToSyncService
                                 {
                                     if (await reader2.ReadAsync())
                                     {
-                                        // Datei mit gleichem Hash aber anderem Pfad gefunden → verschoben/umbenannt
+                                        // Datei mit gleichem Hash aber anderem Pfad gefunden
+                                        string existingFilePath = reader2.GetString(0);
                                         DateTime? modifiedAtFromDb = reader2.IsDBNull(1) ? null : reader2.GetDateTime(1);
                                         
-                                        if (modifiedAtFromDb.HasValue && manifest.LastModified > modifiedAtFromDb.Value)
+                                        // Prüfe ob es wirklich eine Verschiebung ist (gleicher Dateiname)
+                                        string existingFileName = Path.GetFileName(existingFilePath);
+                                        string manifestFileName = Path.GetFileName(manifest.FilePath);
+                                        
+                                        if (existingFileName == manifestFileName)
                                         {
-                                            // Client hat neuere Version → hochladen
-                                            manifestOut.ToUpload = true;
-                                        }
-                                        else if (modifiedAtFromDb.HasValue && manifest.LastModified < modifiedAtFromDb.Value)
-                                        {
-                                            // Server hat neuere Version → herunterladen
-                                            manifestOut.ToDownload = true;
+                                            // Gleicher Name + Hash → wahrscheinlich verschoben/umbenannt
+                                            _logger.LogInformation($"Possible file move detected: {existingFilePath} -> {manifest.FilePath}");
+                                            
+                                            if (modifiedAtFromDb.HasValue && manifest.LastModified > modifiedAtFromDb.Value)
+                                            {
+                                                // Client hat neuere Version → hochladen
+                                                manifestOut.ToUpload = true;
+                                            }
+                                            else if (modifiedAtFromDb.HasValue && manifest.LastModified < modifiedAtFromDb.Value)
+                                            {
+                                                // Server hat neuere Version → herunterladen
+                                                manifestOut.ToDownload = true;
+                                            }
+                                            else
+                                            {
+                                                // Timestamps gleich → hochladen (Client-Änderung akzeptieren)
+                                                manifestOut.ToUpload = true;
+                                            }
                                         }
                                         else
                                         {
-                                            // Timestamps gleich → hochladen (Client-Änderung akzeptieren)
+                                            // Unterschiedlicher Name → neue Datei mit gleichem Inhalt (Kopie/Duplikat)
+                                            _logger.LogInformation($"New file with existing content: {manifest.FilePath} (duplicate of {existingFilePath})");
                                             manifestOut.ToUpload = true;
                                         }
                                     }

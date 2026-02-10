@@ -47,8 +47,14 @@ Mein Hauptentwicklungssystem ist Manjaro (Linux), wobei die Android App aller vo
     - Implementierung Manifest-Command ✅
     - Implementierung Upload-Command ✅
     - Implementierung Download-Command ✅
+    - Implementierung Delete-Command ✅
     - Implementierung Sync Command (Facade Pattern für alle bisherigen Aktionen) ✅
-    - Testing der REST API mit dem CLI Tool ⌛
+    - Three-Way-Merge Logik (LastSyncState Tabelle) ✅
+    - Plattformübergreifende Hash-Kompatibilität (lowercase) ✅
+    - Intelligente Duplikat-Erkennung (gleichnamige Dateien in unterschiedlichen Ordnern) ✅
+    - Pfad-Normalisierung (Windows/Linux kompatibel) ✅
+    - Bidirektionale Löschungs-Synchronisation ✅
+    - Testing der REST API mit dem CLI Tool ✅
 - 0.0.4 Android / Windows GUI
     - Lokale SQLite Datenbank 🕓
     - GUI Framework: MAUI 🕓
@@ -93,25 +99,22 @@ Detaillierte Informationen zur Verwendung des CLI Tools finden Sie in [Docs/cli_
 **Schnellstart:**
 ```bash
 # Datenbank initialisieren
-cd data_sync.CLI/src
-python main.py --init
+cd data_sync.CLI
+python src/main.py --init
 
 # Verzeichnis scannen
-python main.py --scan
+python src/main.py --scan
 
-# Dateien hochladen
-python main.py --upload
-
-# Dateien herunterladen
-python main.py --download
+# Vollständige Synchronisation (Scan + Download + Upload + Delete)
+python src/main.py --sync
 ```
 
 ### API
 Die REST API läuft auf `https://localhost:7169` (Development) und bietet folgende Endpunkte:
-- `POST /api/sync/manifest` - Manifest-Abgleich
+- `POST /api/sync/manifest` - Manifest-Abgleich mit Three-Way-Merge
 - `POST /api/sync/upload` - Datei-Upload
 - `GET /api/sync/download` - Datei-Download
-- `POST /api/sync/confirm-upload` - Upload-Validierung
+- `DELETE /api/sync/delete` - Datei-Löschung
 
 ## Voraussetzungen
 

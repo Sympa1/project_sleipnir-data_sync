@@ -89,12 +89,24 @@ class ScanCommand(BaseCommand):
                                                         "AND hash_value = ?",
                                                       (file_info.file_name, file_info.hash_value))
 
-            # Datei wurde gefunden, wenn die Variable einen Wert hat
-            # Datei wurde verschoben
+            # Datei wurde gefunden
             if result_by_hash:
-                self._update_file_path(db_handler, file_info,
-                                       old_path=result_by_hash[0][0], # execute_query gibt eine Liste von Tupeln zurück
-                                       new_path=file_info.file_path)
+                old_file_path = result_by_hash[0][0]
+                
+                # Prüfe: Ist es wirklich eine Verschiebung?
+                # Nur wenn das Verzeichnis gleich ist (gleicher Dateiname im gleichen Ordner)
+                old_dir = os.path.dirname(old_file_path)
+                new_dir = os.path.dirname(file_info.file_path)
+                
+                if old_dir == new_dir:
+                    # Gleicher Ordner → wahrscheinlich Umbenennung/Verschiebung
+                    self._update_file_path(db_handler, file_info,
+                                           old_path=old_file_path,
+                                           new_path=file_info.file_path)
+                else:
+                    # Unterschiedlicher Ordner → neue Datei (Kopie/Duplikat)
+                    print(f"New file (duplicate of {old_file_path}): {file_info.file_path}")
+                    self._insert_new_file(file_info, db_handler)
 
             # Datei wurde nicht gefunden
             else:

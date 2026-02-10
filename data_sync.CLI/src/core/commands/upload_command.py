@@ -36,7 +36,15 @@ class UploadCommand(BaseCommand):
 
         for file in files_to_sync:
             # Prüfen, ob die Datei hochgeladen werden muss
-            if file.get("toUpload") is True:
+            # Entweder: toUpload = True ODER changeState = "New"
+            change_state = file.get("changeState", "").lower()
+            should_upload = file.get("toUpload") is True or change_state == "new"
+            
+            # Überspringe gelöschte Dateien
+            if change_state == "deleted":
+                continue
+            
+            if should_upload:
                 print(f"Upload File: {file.get('fileName')} - File Status: {file.get('changeState')} - File Größe: {file.get('size')} Bytes")
 
                 # Wenn ja Upload starten
