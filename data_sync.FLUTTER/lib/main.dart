@@ -52,8 +52,12 @@ class _MyHomePageState extends State<MyHomePage> {
             // Button zum setzen des Sync-Verzeichnis
             ElevatedButton(onPressed: () {},
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xff0a7177),
-                  foregroundColor: Color(0xff2b2929),
+                  backgroundColor: Theme.of(context).brightness == Brightness.dark
+                      ? Color(0xff01696e)  // Dark Mode Farbe
+                      : Color(0xffeff5f5), // Light Mode Farbe
+                  foregroundColor: Theme.of(context).brightness == Brightness.dark
+                      ? Color(0xff2b2929)  // Dark Mode Farbe
+                      : Color(0xff01696e), // Light Mode Farbe
                 ),
                 child: Text('Sync-Verzeichnis auswählen')),
 
