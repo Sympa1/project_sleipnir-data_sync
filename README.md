@@ -55,8 +55,8 @@ Mein Hauptentwicklungssystem ist Manjaro (Linux).
     - Pfad-Normalisierung (Windows/Linux kompatibel) ✅
     - Bidirektionale Löschungs-Synchronisation ✅
     - Testing der REST API mit dem CLI Tool ✅
-- 0.0.4 Android / Linux / Windows App
-    - GUI Framework: Flutter ⌛
+- 0.0.4 Android / Linux / Windows App - GUI Framework Flutter
+    - Einarbeitung in Flutter ⌛
     - Lokale SQLite Datenbank 🕓
     - Lokale Berechnung des Dateihashes 🕓
     - Kommunikation, inkl. Manifest, mit der REST API zum Synchronisieren 🕓
@@ -74,7 +74,7 @@ Mein Hauptentwicklungssystem ist Manjaro (Linux).
 - Einfache Konfliktlösung - letzte Änderung wird übernommen
 - Manuelle Synchronisation - der User startet den Vorgang (Download / Upload Buttons)
 
-## Zukünftige Features
+## Zukünftige mögliche Features
 - Ein Backupsystem
 - Eine Authentifizierung
 - Biometrie Login bei der Android App
