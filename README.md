@@ -1,14 +1,14 @@
 # Data Sync
-Dieses Projekt ist daraus entstanden, dass ich Dateien -in meinem Fall Obsidian Notizen- Zwischen meinen verschieden Endgeräten synchronisieren möchte. Dafür muss ich verschiedene Betriebssysteme, Windows, Linux (Manjaro) und Android bedienen.
-Ich verspreche mir davon zusätzlich, einiges im Bereich DevOPS bzw. CI/CD, Mobile und Desktopapp zu lernen. Aber auch beim Datenbankdesign und bei der REST API, bin ich sicher viel hinzu zu lernen.
-Mein Hauptentwicklungssystem ist Manjaro (Linux), wobei die Android App aller voraussiecht nach unter Windows entwickelt werden wird.
+Dieses Projekt ist daraus entstanden, dass ich Dateien – in meinem Fall Obsidian Notizen – zwischen meinen verschiedenen Endgeräten synchronisieren möchte. Dafür muss ich verschiedene Betriebssysteme, Windows, Linux (Manjaro) und Android bedienen.
+Ich verspreche mir davon zusätzlich, einiges im Bereich DevOps bzw. CI/CD, Mobile- und Desktop-App-Entwicklung zu lernen. Aber auch beim Datenbankdesign und bei der REST API bin ich sicher, viel hinzuzulernen.
+Mein Hauptentwicklungssystem ist Manjaro (Linux).
 
 ## Technische Details
 **Geplante Technologien/Frameworks:**
 - C# ASP .NET Core für das Backend
 - Direkter Zugriff auf MariaDB (MySQL‑Protokoll) über ADO.NET (`MySql.Data` / `MySqlConnector`) statt eines ORMs
-- C# MAUI für die Android- und nach Möglichkeit Windows App
-- Python /CustomTKinter/QT für das Manjaro (Linux) Frontend
+- Flutter/Dart für die Android-, Linux- und Windows-App
+- Python für das CLI Tool (Linux)
 
 ## Roadmap
 **Status-Legende:**
@@ -55,9 +55,9 @@ Mein Hauptentwicklungssystem ist Manjaro (Linux), wobei die Android App aller vo
     - Pfad-Normalisierung (Windows/Linux kompatibel) ✅
     - Bidirektionale Löschungs-Synchronisation ✅
     - Testing der REST API mit dem CLI Tool ✅
-- 0.0.4 Android / Windows GUI
+- 0.0.4 Android / Linux / Windows App
+    - GUI Framework: Flutter ⌛
     - Lokale SQLite Datenbank 🕓
-    - GUI Framework: MAUI 🕓
     - Lokale Berechnung des Dateihashes 🕓
     - Kommunikation, inkl. Manifest, mit der REST API zum Synchronisieren 🕓
 - 0.1.0 Testing
@@ -76,10 +76,12 @@ Mein Hauptentwicklungssystem ist Manjaro (Linux), wobei die Android App aller vo
 
 ## Zukünftige Features
 - Ein Backupsystem
-- Eine Authentifizierung 
+- Eine Authentifizierung
 - Biometrie Login bei der Android App
 - Auto Sync
 - Intelligente Konfliktlösung
+- Windows Forms Admin-App (optional)
+- Admin Dashboard mit Statistiken und später User Management (optional)
 
 ## Branching \& GitLab Flow
 
@@ -204,6 +206,13 @@ data_sync/
 │   ├── SQLite/
 │   │   └── CreateTable.sql          # SQLite Schema
 │   └── test_data/                   # Test-Verzeichnis
+│
+├── data_sync.FLUTTER/               # Flutter App (Android, Linux, Windows)
+│   ├── lib/
+│   ├── android/
+│   ├── linux/
+│   ├── windows/
+│   └── pubspec.yaml
 │
 ├── config.json                      # CLI Konfiguration
 ├── cli_db.db                        # SQLite Datenbank (generiert)

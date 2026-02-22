@@ -1,13 +1,13 @@
 # Backend System Design
 Das Backend dient als zentraler Server für die Synchronisation von Dateien zwischen verschiedenen Endgeräten (Windows, Linux und Android).
-Der Server koordiniert den Abgleich von Dateien und löst Konflikte zwischen verschieden Clients (Aktuell mit Methode - letzte Änderung gewinnt).
+Der Server koordiniert den Abgleich von Dateien und löst Konflikte zwischen verschiedenen Clients (aktuell mit der Methode – letzte Änderung gewinnt).
 
 ## REST API Architektur
-Im Kern wird vom CLient ein Manifest an den Server gesendet, welcher daraufhin die Unterschiede ermittelt und dem Client mitteilt, welche Dateien hoch- oder heruntergeladen werden müssen.
+Im Kern wird vom Client ein Manifest an den Server gesendet, welcher daraufhin die Unterschiede ermittelt und dem Client mitteilt, welche Dateien hoch- oder heruntergeladen werden müssen.
 Mit einem Manifest meine ich eine Liste aller Dateien mit Metadaten (Hash, Name, etc.).
 
-Durch dieses Vorgehen erhoffe ich mir einen sehr effizienten Abgleich der Dateien, lager aber zudem die Konfliktbehandlung auf dem Server aus, wodurch ich diese nicht in jeden Client integrieren muss.
-Das möchte ich auch als vorbereitende Maßnahme für z.B. eine intelligente Konfliktlösung in der Zukunft so implemtieren.
+Durch dieses Vorgehen erhoffe ich mir einen sehr effizienten Abgleich der Dateien, lagere aber zudem die Konfliktbehandlung auf den Server aus, wodurch ich diese nicht in jeden Client integrieren muss.
+Das möchte ich auch als vorbereitende Maßnahme für z.B. eine intelligente Konfliktlösung in der Zukunft so implementieren.
 
 ```
 Client                Server               Database

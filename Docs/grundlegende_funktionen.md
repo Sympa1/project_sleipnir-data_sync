@@ -3,7 +3,7 @@
 #### Kernproblem
 Ich möchte meine Obsidian Notizen zwischen Windows, Manjaro (Linux) und Android synchronisieren.
 #### Lösungsansatz
-Cross-Plattform Data Sync mit zentralen Server zum Daten verteilen, mit lokalen Clients.
+Cross-Plattform Data Sync mit zentralem Server zum Datenverteilen, mit lokalen Clients.
 
 ## MVP Definition
 #### Ziel

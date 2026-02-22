@@ -16,3 +16,12 @@ data_sync.API/.env
 copilot-instructions.md
 config.json
 cli_db.db
+
+# Flutter/Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+**/build/
+*.metadata
+**/android/local.properties
