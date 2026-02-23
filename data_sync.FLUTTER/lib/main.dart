@@ -48,7 +48,9 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: Column(
           mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
+            SizedBox(height: 30),
             // Button zum setzen des Sync-Verzeichnis
             ElevatedButton(onPressed: () {},
                 style: ElevatedButton.styleFrom(
@@ -62,13 +64,69 @@ class _MyHomePageState extends State<MyHomePage> {
                 child: Text('Sync-Verzeichnis auswählen')),
 
             // Log-Textbox
-            Expanded(child: Text('Log')),
+            SizedBox(height: 15),
+            Text('Log: ', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            SizedBox(height: 15),  // ← Abstand zwischen Label und Box
+
+            Expanded(
+                child: Container(
+                    width: MediaQuery.of(context).size.width * 0.8,  // ← 80% der Bildschirmbreite
+                    margin: EdgeInsets.all(10),
+                    padding: EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text('Log content...')
+                )
+            ),
 
             // Syncaction Buttons
-            ElevatedButton(onPressed: () {}, child: Text('Download')),
-            ElevatedButton(onPressed: () {}, child: Text('Upload')),
-            ElevatedButton(onPressed: () {}, child: Text('Sync')),
+            Row(
+                mainAxisAlignment: MainAxisAlignment.center,  // ← Zentriert die Buttons horizontal
+                children: [
+                  ElevatedButton(onPressed: () {},
+                  style: ElevatedButton.styleFrom(
+                    minimumSize: Size(120, 40),  // ← width, height
+                    backgroundColor: Theme.of(context).brightness == Brightness.dark
+                      ? Color(0xff01696e)  // Dark Mode Farbe
+                      : Color(0xffeff5f5), // Light Mode Farbe
+                    foregroundColor: Theme.of(context).brightness == Brightness.dark
+                      ? Color(0xff2b2929)  // Dark Mode Farbe
+                      : Color(0xff01696e), // Light Mode Farbe
+                  ),
+                  child: Text('Download')),
 
+                  SizedBox(width: 15),  // ← Abstand zwischen Buttons
+
+                  ElevatedButton(onPressed: () {},
+                      style: ElevatedButton.styleFrom(
+                        minimumSize: Size(120, 40),  // ← width, height
+                        backgroundColor: Theme.of(context).brightness == Brightness.dark
+                            ? Color(0xff01696e)  // Dark Mode Farbe
+                            : Color(0xffeff5f5), // Light Mode Farbe
+                        foregroundColor: Theme.of(context).brightness == Brightness.dark
+                            ? Color(0xff2b2929)  // Dark Mode Farbe
+                            : Color(0xff01696e), // Light Mode Farbe
+                      ),
+                      child: Text('Upload')),
+
+                  SizedBox(width: 15),
+
+                  ElevatedButton(onPressed: () {},
+                      style: ElevatedButton.styleFrom(
+                        minimumSize: Size(120, 40),  // ← width, height
+                        backgroundColor: Theme.of(context).brightness == Brightness.dark
+                            ? Color(0xff01696e)  // Dark Mode Farbe
+                            : Color(0xffeff5f5), // Light Mode Farbe
+                        foregroundColor: Theme.of(context).brightness == Brightness.dark
+                            ? Color(0xff2b2929)  // Dark Mode Farbe
+                            : Color(0xff01696e), // Light Mode Farbe
+                      ),
+                      child: Text('Sync')),
+                ]
+            ),
+            SizedBox(height: 60)
           ]
       ),
     );
