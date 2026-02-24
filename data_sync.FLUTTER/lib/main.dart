@@ -58,7 +58,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       ? Color(0xff01696e)  // Dark Mode Farbe
                       : Color(0xffeff5f5), // Light Mode Farbe
                   foregroundColor: Theme.of(context).brightness == Brightness.dark
-                      ? Color(0xff2b2929)  // Dark Mode Farbe
+                      ? Color(0xff151c1d)  // Dark Mode Farbe
                       : Color(0xff01696e), // Light Mode Farbe
                 ),
                 child: Text('Sync-Verzeichnis auswählen')),
@@ -76,7 +76,10 @@ class _MyHomePageState extends State<MyHomePage> {
                     decoration: BoxDecoration(
                     border: Border.all(color: Colors.grey),
                     borderRadius: BorderRadius.circular(8),
-                  ),
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? Colors.grey[800]  // Dunkler Modus: dunkelgrau
+                            : Colors.grey[100] , // Heller Modus: sehr helles Grau
+                    ),
                   child: Text('Log content...')
                 )
             ),
@@ -92,7 +95,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       ? Color(0xff01696e)  // Dark Mode Farbe
                       : Color(0xffeff5f5), // Light Mode Farbe
                     foregroundColor: Theme.of(context).brightness == Brightness.dark
-                      ? Color(0xff2b2929)  // Dark Mode Farbe
+                      ? Color(0xff151c1d)  // Dark Mode Farbe
                       : Color(0xff01696e), // Light Mode Farbe
                   ),
                   child: Text('Download')),
@@ -106,7 +109,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             ? Color(0xff01696e)  // Dark Mode Farbe
                             : Color(0xffeff5f5), // Light Mode Farbe
                         foregroundColor: Theme.of(context).brightness == Brightness.dark
-                            ? Color(0xff2b2929)  // Dark Mode Farbe
+                            ? Color(0xff151c1d)  // Dark Mode Farbe
                             : Color(0xff01696e), // Light Mode Farbe
                       ),
                       child: Text('Upload')),
@@ -120,7 +123,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             ? Color(0xff01696e)  // Dark Mode Farbe
                             : Color(0xffeff5f5), // Light Mode Farbe
                         foregroundColor: Theme.of(context).brightness == Brightness.dark
-                            ? Color(0xff2b2929)  // Dark Mode Farbe
+                            ? Color(0xff151c1d)  // Dark Mode Farbe
                             : Color(0xff01696e), // Light Mode Farbe
                       ),
                       child: Text('Sync')),
