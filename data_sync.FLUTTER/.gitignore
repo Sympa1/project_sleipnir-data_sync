@@ -44,5 +44,15 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
+# Build-Ausgaben (APK, AAB, IPA)
+**/*.apk
+**/*.aab
+**/*.ipa
+**/flutter-apk/
+**/flutter-aab/
+
 # Persönliche Notizen
 FORTSCHRITT.md
+
+# Temporäre Bilddateien (z.B. aus Bildbearbeitungs-Apps)
+img/*~*.png
