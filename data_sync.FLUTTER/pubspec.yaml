@@ -89,6 +89,9 @@ flutter:
   # For details regarding fonts from package dependencies,
 
 flutter_launcher_icons:
-  image_path: "img/final.png"
+  image_path: "img/final_filled.png"
   android: true
   ios: true
+  remove_alpha_ios: true
+  adaptive_icon_background: "#1f636a"
+  adaptive_icon_foreground: "img/final_adaptive_fg.png"
