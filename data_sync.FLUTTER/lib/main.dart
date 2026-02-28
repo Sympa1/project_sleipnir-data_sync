@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'pages/sync_page.dart';
+import 'pages/settings_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -11,19 +13,19 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Data_Sync',
-        theme: ThemeData(           // ← Helles Design
-          colorScheme: ColorScheme.fromSeed(seedColor: Color(0xFF19abb3)),
-        ),
+      title: 'Data Sync',
+      theme: ThemeData(
+        // ← Helles Design
+        colorScheme: ColorScheme.fromSeed(seedColor: Color(0xFF19abb3)),
+      ),
 
-        darkTheme: ThemeData(       // ← Dunkles Design
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: Color(0xFF19abb3),
-            brightness: Brightness.dark,
-          ),
-        ),
-        themeMode: ThemeMode.system,  // ← Eigene Property, NEBEN theme/darkTheme
-      home: const MyHomePage(title: 'Data_Sync'),
+      darkTheme: ThemeData(
+        // ← Dunkles Design
+        colorScheme: ColorScheme.fromSeed(seedColor: Color(0xFF19abb3), brightness: Brightness.dark),
+      ),
+      themeMode: ThemeMode.system,
+      // ← Eigene Property, NEBEN theme/darkTheme
+      home: const MyHomePage(title: 'Data Sync'),
     );
   }
 }
@@ -38,99 +40,38 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  int _selectedIndex = 0;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
-      ),
-      body: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            SizedBox(height: 30),
-            // Button zum setzen des Sync-Verzeichnis
-            ElevatedButton(onPressed: () {},
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context).brightness == Brightness.dark
-                      ? Color(0xff01696e)  // Dark Mode Farbe
-                      : Color(0xffeff5f5), // Light Mode Farbe
-                  foregroundColor: Theme.of(context).brightness == Brightness.dark
-                      ? Color(0xff151c1d)  // Dark Mode Farbe
-                      : Color(0xff01696e), // Light Mode Farbe
-                ),
-                child: Text('Sync-Verzeichnis auswählen')),
-
-            // Log-Textbox
-            SizedBox(height: 15),
-            Text('Log: ', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-            SizedBox(height: 15),  // ← Abstand zwischen Label und Box
-
-            Expanded(
-                child: Container(
-                    width: MediaQuery.of(context).size.width * 0.8,  // ← 80% der Bildschirmbreite
-                    margin: EdgeInsets.all(10),
-                    padding: EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey),
-                    borderRadius: BorderRadius.circular(8),
-                        color: Theme.of(context).brightness == Brightness.dark
-                            ? Colors.grey[800]  // Dunkler Modus: dunkelgrau
-                            : Colors.grey[100] , // Heller Modus: sehr helles Grau
-                    ),
-                  child: Text('Log content...')
-                )
-            ),
-
-            // Syncaction Buttons
-            Row(
-                mainAxisAlignment: MainAxisAlignment.center,  // ← Zentriert die Buttons horizontal
-                children: [
-                  ElevatedButton(onPressed: () {},
-                  style: ElevatedButton.styleFrom(
-                    minimumSize: Size(120, 40),  // ← width, height
-                    backgroundColor: Theme.of(context).brightness == Brightness.dark
-                      ? Color(0xff01696e)  // Dark Mode Farbe
-                      : Color(0xffeff5f5), // Light Mode Farbe
-                    foregroundColor: Theme.of(context).brightness == Brightness.dark
-                      ? Color(0xff151c1d)  // Dark Mode Farbe
-                      : Color(0xff01696e), // Light Mode Farbe
-                  ),
-                  child: Text('Download')),
-
-                  SizedBox(width: 15),  // ← Abstand zwischen Buttons
-
-                  ElevatedButton(onPressed: () {},
-                      style: ElevatedButton.styleFrom(
-                        minimumSize: Size(120, 40),  // ← width, height
-                        backgroundColor: Theme.of(context).brightness == Brightness.dark
-                            ? Color(0xff01696e)  // Dark Mode Farbe
-                            : Color(0xffeff5f5), // Light Mode Farbe
-                        foregroundColor: Theme.of(context).brightness == Brightness.dark
-                            ? Color(0xff151c1d)  // Dark Mode Farbe
-                            : Color(0xff01696e), // Light Mode Farbe
-                      ),
-                      child: Text('Upload')),
-
-                  SizedBox(width: 15),
-
-                  ElevatedButton(onPressed: () {},
-                      style: ElevatedButton.styleFrom(
-                        minimumSize: Size(120, 40),  // ← width, height
-                        backgroundColor: Theme.of(context).brightness == Brightness.dark
-                            ? Color(0xff01696e)  // Dark Mode Farbe
-                            : Color(0xffeff5f5), // Light Mode Farbe
-                        foregroundColor: Theme.of(context).brightness == Brightness.dark
-                            ? Color(0xff151c1d)  // Dark Mode Farbe
-                            : Color(0xff01696e), // Light Mode Farbe
-                      ),
-                      child: Text('Sync')),
-                ]
-            ),
-            SizedBox(height: 60)
-          ]
+      appBar: AppBar(backgroundColor: Theme.of(context).colorScheme.inversePrimary, title: Text(widget.title)),
+      /*
+       * IndexedStack zeigt immer nur die Seite an, deren Index mit _selectedIndex übereinstimmt.
+       * Im Gegensatz zu einer if-Abfrage werden aber ALLE Seiten im Speicher gehalten –
+       * auch die gerade nicht sichtbaren. Das hat einen wichtigen Vorteil:
+       */
+      body: IndexedStack(index: _selectedIndex, children: [SyncPage(), SettingsPage()]),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedIndex, // Markiert den aktuell aktiven Tab
+        onTap: (index) {
+          // Wird aufgerufen wenn ein Tab angetippt wird
+          setState(() {
+            // Löst einen UI-Neuaufbau aus
+            _selectedIndex = index; // Speichert welcher Tab aktiv ist
+          });
+        },
+        items: const [
+          // Liste der sichtbaren Tab-Einträge
+          BottomNavigationBarItem(
+            icon: Icon(Icons.sync), // Icon des ersten Tabs
+            label: 'Sync', // Beschriftung des ersten Tabs
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.settings), // Icon des zweiten Tabs
+            label: 'Einstellungen', // Beschriftung des zweiten Tabs
+          ),
+        ],
       ),
     );
   }
