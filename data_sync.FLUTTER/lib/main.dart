@@ -17,11 +17,19 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         // ← Helles Design
         colorScheme: ColorScheme.fromSeed(seedColor: Color(0xFF19abb3)),
+        bottomNavigationBarTheme: BottomNavigationBarThemeData(
+          backgroundColor: Color(0xffeff5f5),
+          selectedItemColor: Color(0xff01696e),
+        ),
       ),
 
       darkTheme: ThemeData(
         // ← Dunkles Design
         colorScheme: ColorScheme.fromSeed(seedColor: Color(0xFF19abb3), brightness: Brightness.dark),
+        bottomNavigationBarTheme: BottomNavigationBarThemeData(
+          backgroundColor: Color(0xff151c1d),
+          selectedItemColor: Color(0xff19abb3),
+        ),
       ),
       themeMode: ThemeMode.system,
       // ← Eigene Property, NEBEN theme/darkTheme
@@ -52,26 +60,30 @@ class _MyHomePageState extends State<MyHomePage> {
        * auch die gerade nicht sichtbaren. Das hat einen wichtigen Vorteil:
        */
       body: IndexedStack(index: _selectedIndex, children: [SyncPage(), SettingsPage()]),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex, // Markiert den aktuell aktiven Tab
-        onTap: (index) {
-          // Wird aufgerufen wenn ein Tab angetippt wird
-          setState(() {
-            // Löst einen UI-Neuaufbau aus
-            _selectedIndex = index; // Speichert welcher Tab aktiv ist
-          });
-        },
-        items: const [
-          // Liste der sichtbaren Tab-Einträge
-          BottomNavigationBarItem(
-            icon: Icon(Icons.sync), // Icon des ersten Tabs
-            label: 'Sync', // Beschriftung des ersten Tabs
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings), // Icon des zweiten Tabs
-            label: 'Einstellungen', // Beschriftung des zweiten Tabs
-          ),
-        ],
+      bottomNavigationBar: ClipRRect(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        child: BottomNavigationBar(
+          
+          currentIndex: _selectedIndex, // Markiert den aktuell aktiven Tab
+          onTap: (index) {
+            // Wird aufgerufen wenn ein Tab angetippt wird
+            setState(() {
+              // Löst einen UI-Neuaufbau aus
+              _selectedIndex = index; // Speichert welcher Tab aktiv ist
+            });
+          },
+          items: const [
+            // Liste der sichtbaren Tab-Einträge
+            BottomNavigationBarItem(
+              icon: Icon(Icons.sync), // Icon des ersten Tabs
+              label: 'Sync', // Beschriftung des ersten Tabs
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.settings), // Icon des zweiten Tabs
+              label: 'Einstellungen', // Beschriftung des zweiten Tabs
+            ),
+          ],
+        ),
       ),
     );
   }
