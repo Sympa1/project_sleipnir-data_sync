@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'pages/sync_page.dart';
-import 'pages/settings_page.dart';
+import 'screens/sync_page.dart';
+import 'screens/settings_page.dart';
 
 void main() {
   runApp(const MyApp());

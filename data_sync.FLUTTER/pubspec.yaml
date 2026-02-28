@@ -1,61 +1,58 @@
+# Projekt-Metadaten
+# Der Name wird als App-Identifier verwendet
 name: data_sync_flutter
 description: "A new Flutter project."
-# The following line prevents the package from being accidentally published to
-# pub.dev using `flutter pub publish`. This is preferred for private packages.
-publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
-# The following defines the version and build number for your application.
-# A version number is three numbers separated by dots, like 1.2.43
-# followed by an optional build number separated by a +.
-# Both the version and the builder number may be overridden in flutter
-# build by specifying --build-name and --build-number, respectively.
-# In Android, build-name is used as versionName while build-number used as versionCode.
-# Read more about Android versioning at https://developer.android.com/studio/publish/versioning
-# In iOS, build-name is used as CFBundleShortVersionString while build-number is used as CFBundleVersion.
-# Read more about iOS versioning at
-# https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-# In Windows, build-name is used as the major, minor, and patch parts
-# of the product and file versions while build-number is used as the build suffix.
+# publish_to: 'none' verhindert, dass das Projekt auf pub.dev veröffentlicht wird
+# Das ist wichtig für private Projekte, die nicht für andere Entwickler gedacht sind
+publish_to: 'none'
+
+# Versionierung: major.minor.patch+build_number
+# Beispiel: 1.0.0+1 = Version 1.0.0, Build-Nummer 1
+# Diese Version wird im App-Store und beim Release verwendet
+# Die Nummer nach dem + ist die interne Build-Nummer (wird bei jedem Build erhöht)
 version: 1.0.0+1
 
+# Festlegung der Dart/Flutter SDK Version für dieses Projekt
+# ^3.11.0 bedeutet: "Version 3.11.0 oder neuer, aber nicht 4.0"
+# Das ^ Symbol schützt vor Breaking Changes in neuen Hauptversionen
 environment:
   sdk: ^3.11.0
 
-# Dependencies specify other packages that your package needs in order to work.
-# To automatically upgrade your package dependencies to the latest versions
-# consider running `flutter pub upgrade --major-versions`. Alternatively,
-# dependencies can be manually updated by changing the version numbers below to
-# the latest version available on pub.dev. To see which dependencies have newer
-# versions available, run `flutter pub outdated`.
+# DEPENDENCIES (Abhängigkeiten) - Pakete, die deine App braucht um zu funktionieren
+# Diese sind immer im Paket enthalten, wenn deine App verteilt wird
 dependencies:
   flutter:
     sdk: flutter
 
-  # The following adds the Cupertino Icons font to your application.
-  # Use with the CupertinoIcons class for iOS style icons.
+  # Icon-Bibliothek für iOS-Style Icons (Cupertino Design)
   cupertino_icons: ^1.0.8
+  
+  # SQLite Datenbankzugriff - wird zum Speichern von Einstellungen und Logs verwendet
+  # Ermöglicht lokale Datenbank ohne Internet-Verbindung
+  sqflite: ^2.3.0
 
+# DEV_DEPENDENCIES - Pakete nur für die Entwicklung (nicht in Release-Build enthalten)
+# Diese brauchst du während der Entwicklung, aber nicht wenn andere deine App nutzen
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
-  # The "flutter_lints" package below contains a set of recommended lints to
-  # encourage good coding practices. The lint set provided by the package is
-  # activated in the `analysis_options.yaml` file located at the root of your
-  # package. See that file for information about deactivating specific lint
-  # rules and activating additional ones.
+  # Code-Analyse Tool - prüft auf Best Practices und Style-Probleme
   flutter_lints: ^6.0.0
+  
+  # Generiert App-Icons aus einer PNG-Datei für alle Plattformen
   flutter_launcher_icons: ^0.13.1
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
-# The following section is specific to Flutter packages.
+# FLUTTER-SPEZIFISCHE KONFIGURATION
+# Dieser Abschnitt definiert, welche Flutter-Features und Assets deine App braucht
 flutter:
 
-  # The following line ensures that the Material Icons font is
-  # included with your application, so that you can use the icons in
-  # the material Icons class.
+  # Material Design Icons aktivieren
+  # uses-material-design: true ermöglicht die Material Icons Font (Icons.download, Icons.upload, etc.)
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
@@ -88,10 +85,19 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
 
+# flutter_launcher_icons Konfiguration
+# Konvertiert eine PNG-Datei automatisch in die Icon-Formate aller Plattformen
 flutter_launcher_icons:
+  # Eingabe-Bild als Quelle für alle Plattformen-Icons
   image_path: "img/final_filled.png"
+  
+  # Für diese Plattformen Icons generieren
   android: true
   ios: true
+  
+  # iOS-spezifisch: Removes alpha (Transparenz) für iOS Kompatibilität
   remove_alpha_ios: true
+  
+  # Adaptive Icon für Android (verschiedene Bildschirm-Größen)
   adaptive_icon_background: "#1f636a"
   adaptive_icon_foreground: "img/final_adaptive_fg.png"
