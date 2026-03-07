@@ -6,7 +6,6 @@
 ///
 /// Die Klasse ist immutable (unveränderlich). Um Einstellungen zu ändern,
 /// muss ein neues Settings-Objekt erstellt werden.
-///
 class Settings {
   final String? syncPath;       // ? bedeutet nullable (kann null sein)
   final String? apiUrl;

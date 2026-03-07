@@ -31,6 +31,14 @@ dependencies:
   # SQLite Datenbankzugriff - wird zum Speichern von Einstellungen und Logs verwendet
   # Ermöglicht lokale Datenbank ohne Internet-Verbindung
   sqflite: ^2.3.0
+  
+  # Path Provider - ermöglicht Zugriff auf Systemverzeichnisse (Dokumentspeicher, Temp, etc.)
+  # Wird genutzt um den Pfad für die SQLite-Datenbankdatei zu bestimmen
+  path_provider: ^2.1.0
+  
+  # Path - utility Funktionen für Dateipfade
+  # Wird genutzt um Dateipfade korrekt zu kombinieren (plattformunabhängig)
+  path: ^1.9.0
 
 # DEV_DEPENDENCIES - Pakete nur für die Entwicklung (nicht in Release-Build enthalten)
 # Diese brauchst du während der Entwicklung, aber nicht wenn andere deine App nutzen

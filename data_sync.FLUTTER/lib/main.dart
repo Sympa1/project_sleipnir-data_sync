@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'screens/sync_page.dart';
 import 'screens/settings_page.dart';
 
+
+/// Die Haupt-Applikation
 void main() {
   runApp(const MyApp());
 }
 
+/// Die Applikation
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
