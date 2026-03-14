@@ -30,14 +30,16 @@ class SqliteHandler {
     return _instance;
   }
   
-  /// Initialisiert die Datenbankverbindung
+  /// Lazy Initialization - initialisiert die Datenbank BEIM ERSTEN ZUGRIFF
   /// 
   /// Parameter:
-  /// - [databaseName]: Der Name der DB-Datei (Standard: 'data_sync.db')
+  /// - [databaseName]: Der Name der DB-Datei (Standard: 'data_sync_app.db')
   ///
-  /// Diese Methode muss EINMAL beim App-Start aufgerufen werden!
-  /// Danach sind alle DB-Operationen verfügbar.
-  Future<void> initialize({String databaseName = 'data_sync_app.db'}) async {
+  /// Diese Methode wird automatisch aufgerufen, wenn die DB zum ersten Mal gebraucht wird.
+  /// Der Benutzer sieht kein Loading-Screen - die App ist sofort ready.
+  /// 
+  /// Vorteil: Schnellerer App-Start, DB wird nur bei Bedarf geladen
+  Future<void> _initialize({String databaseName = 'data_sync_app.db'}) async {
     if (_isInitialized) {
       return; // Bereits initialisiert, nichts tun
     }
@@ -86,10 +88,13 @@ class SqliteHandler {
     ''');
   }
   
-  /// Modulare Methode zur Ausführung von SQL-Queries
+  /// Modulare Methode zur Ausführung von SQL-Queries mit automatischer Lazy-Initialization
   /// 
   /// Diese Methode ist der Kern der Modularität. Sie führt beliebige SQL-Befehle aus
   /// und gibt optional Ergebnisse zurück.
+  ///
+  /// WICHTIG: Bei der ERSTEN Nutzung wird die DB automatisch initialisiert!
+  /// Das passiert im Hintergrund - der User merkt es nicht.
   ///
   /// Parameter:
   /// - [query]: Die SQL-Abfrage als String (z.B. "SELECT * FROM settings WHERE key = ?")
@@ -127,8 +132,10 @@ class SqliteHandler {
     List<dynamic>? params,
     bool returnResult = true,
   }) async {
+    // Lazy Initialization: Wenn noch nicht initialisiert, mach das jetzt
+    // Das passiert automatisch beim ersten Datenbankzugriff
     if (!_isInitialized) {
-      throw Exception('Datenbank wurde nicht initialisiert! Rufe initialize() auf.');
+      await _initialize();
     }
     
     try {
