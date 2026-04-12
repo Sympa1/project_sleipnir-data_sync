@@ -25,3 +25,11 @@ cli_db.db
 **/build/
 *.metadata
 **/android/local.properties
+
+# Python
+**/__pycache__/
+*.py[cod]
+
+# Laufzeitdaten und Logs
+data_sync.CLI/src/error.log
+data_sync.API/uploads/

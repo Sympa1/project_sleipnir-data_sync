@@ -1,86 +1,106 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
+/// Sync-Seite mit Download-, Upload- und Sync-Aktionen
 class SyncPage extends StatelessWidget {
   const SyncPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          SizedBox(height: 30),
-
-          // Log-Textbox
-          SizedBox(height: 15),
-          Text('Log: ', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-          SizedBox(height: 15),  // ← Abstand zwischen Label und Box
-
-          Expanded(
-              child: Container(
-                  width: MediaQuery.of(context).size.width * 0.8,  // ← 80% der Bildschirmbreite
-                  margin: EdgeInsets.all(10),
-                  padding: EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey),
-                    borderRadius: BorderRadius.circular(8),
-                    color: Theme.of(context).brightness == Brightness.dark
-                        ? Colors.grey[800]  // Dunkler Modus: dunkelgrau
-                        : Colors.grey[100] , // Heller Modus: sehr helles Grau
-                  ),
-                  child: SingleChildScrollView(
-                      child: Text('Log content...')
-                  )
-              )
-          ),
-
-          // Syncaction Buttons
+          // Log-Bereich Überschrift
           Row(
-              mainAxisAlignment: MainAxisAlignment.center,  // ← Zentriert die Buttons horizontal
-              children: [
-                ElevatedButton(onPressed: () {},
-                    style: ElevatedButton.styleFrom(
-                      minimumSize: Size(120, 40),  // ← width, height
-                      backgroundColor: Theme.of(context).brightness == Brightness.dark
-                          ? Color(0xff01696e)  // Dark Mode Farbe
-                          : Color(0xffeff5f5), // Light Mode Farbe
-                      foregroundColor: Theme.of(context).brightness == Brightness.dark
-                          ? Color(0xff151c1d)  // Dark Mode Farbe
-                          : Color(0xff01696e), // Light Mode Farbe
-                    ),
-                    child: Text('Download')),
-
-                SizedBox(width: 15),  // ← Abstand zwischen Buttons
-
-                ElevatedButton(onPressed: () {},
-                    style: ElevatedButton.styleFrom(
-                      minimumSize: Size(120, 40),  // ← width, height
-                      backgroundColor: Theme.of(context).brightness == Brightness.dark
-                          ? Color(0xff01696e)  // Dark Mode Farbe
-                          : Color(0xffeff5f5), // Light Mode Farbe
-                      foregroundColor: Theme.of(context).brightness == Brightness.dark
-                          ? Color(0xff151c1d)  // Dark Mode Farbe
-                          : Color(0xff01696e), // Light Mode Farbe
-                    ),
-                    child: Text('Upload')),
-
-                SizedBox(width: 15),
-
-                ElevatedButton(onPressed: () {},
-                    style: ElevatedButton.styleFrom(
-                      minimumSize: Size(120, 40),  // ← width, height
-                      backgroundColor: Theme.of(context).brightness == Brightness.dark
-                          ? Color(0xff01696e)  // Dark Mode Farbe
-                          : Color(0xffeff5f5), // Light Mode Farbe
-                      foregroundColor: Theme.of(context).brightness == Brightness.dark
-                          ? Color(0xff151c1d)  // Dark Mode Farbe
-                          : Color(0xff01696e), // Light Mode Farbe
-                    ),
-                    child: Text('Sync')),
-              ]
+            children: [
+              Icon(Icons.terminal_outlined, size: 16, color: colorScheme.onSurfaceVariant),
+              const SizedBox(width: 6),
+              Text(
+                'Log',
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
           ),
-          SizedBox(height: 60)
-        ]
+          const SizedBox(height: 8),
+
+          // Log-Ausgabebereich
+          Expanded(
+            child: Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: colorScheme.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: SingleChildScrollView(
+                child: Text(
+                  'Bereit.',
+                  style: GoogleFonts.jetBrainsMono(
+                    fontSize: 13,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Aktions-Buttons
+          Row(
+            children: [
+              // FilledButton.tonal = weniger betont (sekundäre Aktion)
+              Expanded(
+                child: FilledButton.tonal(
+                  onPressed: () {},
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.download_outlined, size: 18),
+                      SizedBox(width: 6),
+                      Text('Download'),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: FilledButton.tonal(
+                  onPressed: () {},
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.upload_outlined, size: 18),
+                      SizedBox(width: 6),
+                      Text('Upload'),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              // FilledButton = primäre Aktion (stärker hervorgehoben)
+              Expanded(
+                child: FilledButton(
+                  onPressed: () {},
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.sync, size: 18),
+                      SizedBox(width: 6),
+                      Text('Sync'),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+        ],
+      ),
     );
   }
 }

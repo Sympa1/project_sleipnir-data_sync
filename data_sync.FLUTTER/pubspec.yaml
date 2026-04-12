@@ -40,6 +40,9 @@ dependencies:
   # Wird genutzt um Dateipfade korrekt zu kombinieren (plattformunabhängig)
   path: ^1.9.0
   file_picker: ^10.3.10
+  
+  # Google Fonts - ermöglicht das Laden von Google-Schriften (z.B. Inter, JetBrains Mono)
+  google_fonts: ^6.2.1
 
 # DEV_DEPENDENCIES - Pakete nur für die Entwicklung (nicht in Release-Build enthalten)
 # Diese brauchst du während der Entwicklung, aber nicht wenn andere deine App nutzen

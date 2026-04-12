@@ -1,50 +1,52 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'screens/sync_page.dart';
 import 'screens/settings_page.dart';
+import 'theme/app_colors.dart';
 
 
-/// Die Haupt-Applikation
+/// Einstiegspunkt der App
 void main() {
   runApp(const MyApp());
 }
 
-/// Die Applikation
+/// Die Haupt-Applikation
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Data Sync',
+
+      // Helles Design mit Inter-Schrift
       theme: ThemeData(
-        // ← Helles Design
-        colorScheme: ColorScheme.fromSeed(seedColor: Color(0xFF19abb3)),
-        bottomNavigationBarTheme: BottomNavigationBarThemeData(
-          backgroundColor: Color(0xffeff5f5),
-          selectedItemColor: Color(0xff01696e),
-        ),
+        colorScheme: ColorScheme.fromSeed(seedColor: AppColors.primary),
+        textTheme: GoogleFonts.interTextTheme(),
+        useMaterial3: true,
       ),
 
+      // Dunkles Design mit Inter-Schrift
       darkTheme: ThemeData(
-        // ← Dunkles Design
-        colorScheme: ColorScheme.fromSeed(seedColor: Color(0xFF19abb3), brightness: Brightness.dark),
-        bottomNavigationBarTheme: BottomNavigationBarThemeData(
-          backgroundColor: Color(0xff151c1d),
-          selectedItemColor: Color(0xff19abb3),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: AppColors.primary,
+          brightness: Brightness.dark,
         ),
+        textTheme: GoogleFonts.interTextTheme(
+          ThemeData(brightness: Brightness.dark).textTheme,
+        ),
+        useMaterial3: true,
       ),
+
       themeMode: ThemeMode.system,
-      // ← Eigene Property, NEBEN theme/darkTheme
-      home: const MyHomePage(title: 'Data Sync'),
+      home: const MyHomePage(),
     );
   }
 }
 
+/// Haupt-Navigation der App mit Bottom-Bar
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  final String title;
+  const MyHomePage({super.key});
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
@@ -53,40 +55,45 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   int _selectedIndex = 0;
 
+  // Titel-Texte passend zum aktiven Tab
+  static const _titles = ['Sync', 'Einstellungen'];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(backgroundColor: Theme.of(context).colorScheme.inversePrimary, title: Text(widget.title)),
+      appBar: AppBar(
+        title: Text(_titles[_selectedIndex]),
+        centerTitle: false,
+      ),
+
       /*
        * IndexedStack zeigt immer nur die Seite an, deren Index mit _selectedIndex übereinstimmt.
        * Im Gegensatz zu einer if-Abfrage werden aber ALLE Seiten im Speicher gehalten –
-       * auch die gerade nicht sichtbaren. Das hat einen wichtigen Vorteil:
+       * auch die gerade nicht sichtbaren. Das verhindert, dass der State verloren geht.
        */
-      body: IndexedStack(index: _selectedIndex, children: [SyncPage(), SettingsPage()]),
-      bottomNavigationBar: ClipRRect(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-        child: BottomNavigationBar(
-          
-          currentIndex: _selectedIndex, // Markiert den aktuell aktiven Tab
-          onTap: (index) {
-            // Wird aufgerufen wenn ein Tab angetippt wird
-            setState(() {
-              // Löst einen UI-Neuaufbau aus
-              _selectedIndex = index; // Speichert welcher Tab aktiv ist
-            });
-          },
-          items: const [
-            // Liste der sichtbaren Tab-Einträge
-            BottomNavigationBarItem(
-              icon: Icon(Icons.sync), // Icon des ersten Tabs
-              label: 'Sync', // Beschriftung des ersten Tabs
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.settings), // Icon des zweiten Tabs
-              label: 'Einstellungen', // Beschriftung des zweiten Tabs
-            ),
-          ],
-        ),
+      body: IndexedStack(
+        index: _selectedIndex,
+        children: const [SyncPage(), SettingsPage()],
+      ),
+
+      // NavigationBar ist der moderne M3-Ersatz für BottomNavigationBar
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: _selectedIndex,
+        onDestinationSelected: (index) {
+          setState(() => _selectedIndex = index);
+        },
+        destinations: const [
+          NavigationDestination(
+            icon: Icon(Icons.sync_outlined),
+            selectedIcon: Icon(Icons.sync),
+            label: 'Sync',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.settings_outlined),
+            selectedIcon: Icon(Icons.settings),
+            label: 'Einstellungen',
+          ),
+        ],
       ),
     );
   }
