@@ -69,7 +69,11 @@ FileLogService log = new FileLogService("Db-Startup.log");
 //     }
 // }
 
-app.UseHttpsRedirection();
+// In der lokalen Entwicklung soll HTTP ohne Zertifikatsumleitung nutzbar bleiben.
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
 app.UseAuthorization();
 app.MapControllers();
 

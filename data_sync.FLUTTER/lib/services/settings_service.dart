@@ -138,7 +138,7 @@ class SettingsService {
   /// Liest ALLE Einstellungen auf einmal
   /// 
   /// Rückgabe:
-  /// - Settings: Ein Objekt mit allen bekannten Einstellungen (syncPath, apiUrl)
+  /// - Settings: Ein Objekt mit allen bekannten Einstellungen
   /// - Werte, die nicht in der DB existieren, sind null
   /// 
   /// Beispiel:
@@ -159,10 +159,16 @@ class SettingsService {
       // Lese apiUrl aus der DB
       final apiUrl = await getSetting('apiUrl');
 
+      // Lese die lokale TLS-Ausnahme aus der DB
+      final allowInsecureTlsForLocalhost =
+          await getSetting('allowInsecureTlsForLocalhost');
+
       // Erstelle ein Settings-Objekt mit den gelesenen Werten
       return Settings(
         syncPath: syncPath,
         apiUrl: apiUrl,
+        allowInsecureTlsForLocalhost:
+            allowInsecureTlsForLocalhost?.toLowerCase() == 'true',
       );
     } catch (e) {
       // Bei Fehler: Werfe Exception mit aussagekräftiger Meldung

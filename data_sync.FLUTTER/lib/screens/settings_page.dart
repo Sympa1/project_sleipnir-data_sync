@@ -1,11 +1,13 @@
+import 'dart:io';
+
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/material.dart';
 import 'package:data_sync_flutter/models/settings.dart';
 import 'package:data_sync_flutter/services/settings_service.dart';
-
+import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 /// Die Settings-Seite der App
-/// 
+///
 /// Diese Seite ermöglicht es dem User, seine Synchronisierungseinstellungen zu konfigurieren:
 /// - Sync-Verzeichnis: Der lokale Ordner, der synchronisiert werden soll
 /// - API-URL: Die Adresse des Sync-Backend-Servers
@@ -18,63 +20,61 @@ class SettingsPage extends StatefulWidget {
 
 class _SettingsPageState extends State<SettingsPage> {
   /// Die aktuellen Einstellungen der App
-  /// 
+  ///
   /// Statt zwei separate Variablen zu haben (syncPath, apiUrl),
   /// nutzen wir das Settings-Modell. Das ist sauberer und macht es
   /// einfacher, die Settings später an andere Services zu übergeben.
   Settings? settings;
+  bool _isLoading = true;
 
   /// Diese Methode wird aufgerufen, wenn die SettingsPage erstellt wird
-  /// 
+  ///
   /// Sie ist Teil des StatefulWidget Lifecycle:
   /// 1. Widget erstellen → initState()
   /// 2. initState() → build()
   /// 3. build() → UI wird angezeigt
-  /// 
+  ///
   /// Hier laden wir die Settings aus der Datenbank.
   @override
   void initState() {
-    super.initState();  // Wichtig: Immer super.initState() aufrufen!
-    
+    super.initState(); // Wichtig: Immer super.initState() aufrufen!
+
     // Lade die gespeicherten Einstellungen aus der Datenbank
     _loadSettings();
   }
 
-  /// Lädt die Einstellungen aus der Datenbank
-  /// 
-  /// Diese Methode fragt den SettingsService ab:
-  /// - Sie ruft getAllSettings() auf
-  /// - Das gibt ein Settings-Objekt mit syncPath und apiUrl zurück
-  /// - Wir speichern das Objekt in der Variable 'settings'
-  /// - setState() teilt Flutter mit: "Zeichne die UI mit den neuen Werten!"
+  /// Lädt die gespeicherten Einstellungen und aktualisiert den Ladezustand.
   Future<void> _loadSettings() async {
     try {
       // Rufe den Service auf, um alle Einstellungen zu laden
       final loadedSettings = await SettingsService().getAllSettings();
-      
+
+      // Verhindert setState nach dispose.
+      if (!mounted) {
+        return;
+      }
+
       // Teile Flutter mit, dass sich die Daten geändert haben
       setState(() {
         settings = loadedSettings;
+        _isLoading = false;
       });
-      
-      // Zum Debuggen: Zeige in der Konsole, was geladen wurde
-      print('Settings geladen - Sync-Pfad: ${settings?.syncPath}, API-URL: ${settings?.apiUrl}');
     } catch (e) {
-      // Fehlerbehandlung: Wenn das Laden fehlschlägt
-      print('Fehler beim Laden der Settings: $e');
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        _isLoading = false;
+      });
+
+      _showMessage('Einstellungen konnten nicht geladen werden.', isError: true);
     }
   }
 
-  /// Öffnet einen Dialog zum Eingeben der API-URL
-  ///
-  /// Ablauf:
-  /// 1. AlertDialog mit TextField öffnen (vorbefüllt mit aktueller URL)
-  /// 2. User gibt URL ein und klickt "Speichern"
-  /// 3. setState() → UI aktualisiert sich
-  /// 4. URL wird in der Datenbank gespeichert
-  /// 5. Feedback via SnackBar
+  /// Öffnet einen Dialog zur Bearbeitung der API-URL.
   Future<void> _enterApiUrl() async {
-    // Controller hält den Text im TextField – so können wir ihn später auslesen
+    // Vorbelegung mit dem aktuell gespeicherten Wert.
     final controller = TextEditingController(text: settings?.apiUrl ?? '');
 
     final enteredUrl = await showDialog<String>(
@@ -84,7 +84,7 @@ class _SettingsPageState extends State<SettingsPage> {
         content: TextField(
           controller: controller,
           decoration: InputDecoration(
-            hintText: 'z.B. https://mein-server.de/api',
+            hintText: 'z.B. http://localhost:5009 oder https://mein-server.de/api',
           ),
           keyboardType: TextInputType.url,
           autofocus: true,
@@ -102,152 +102,594 @@ class _SettingsPageState extends State<SettingsPage> {
       ),
     );
 
-    // Dialog wurde mit "Abbrechen" geschlossen oder URL ist leer
+    if (!mounted) {
+      return;
+    }
+
+    // Abbruch oder leere Eingabe erzeugen keine Änderung.
     if (enteredUrl == null || enteredUrl.isEmpty) return;
 
-    setState(() {
-      settings = Settings(
-        syncPath: settings?.syncPath,
-        apiUrl: enteredUrl,
-      );
-    });
+    // Akzeptiert nur vollständige HTTP- oder HTTPS-Adressen.
+    if (!_isValidApiUrl(enteredUrl)) {
+      _showMessage('Bitte gib eine gueltige API-URL ein.', isError: true);
+      return;
+    }
+
+      setState(() {
+        settings = Settings(
+          syncPath: settings?.syncPath,
+          apiUrl: enteredUrl,
+          allowInsecureTlsForLocalhost:
+              settings?.allowInsecureTlsForLocalhost ?? false,
+        );
+      });
 
     try {
       await SettingsService().saveSetting('apiUrl', enteredUrl);
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('API-URL gespeichert: $enteredUrl'),
-          duration: Duration(seconds: 2),
-        ),
-      );
+      if (!mounted) {
+        return;
+      }
 
-      print('API-URL gespeichert: $enteredUrl');
+      _showMessage('API-URL gespeichert.');
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Fehler beim Speichern: $e'),
-          duration: Duration(seconds: 3),
-          backgroundColor: Colors.red,
-        ),
-      );
-      print('Fehler beim Speichern der API-URL: $e');
+      if (!mounted) {
+        return;
+      }
+
+      _showMessage('API-URL konnte nicht gespeichert werden.', isError: true);
     }
   }
 
-  /// Öffnet einen Datei-Dialog zum Auswählen eines Synchronisierungsverzeichnisses
-  /// 
-  /// Diese Methode wird aufgerufen, wenn der User auf "Ändern" klickt.
-  /// Sie öffnet den nativen Datei-Browser des Betriebssystems (Windows/Linux/Android).
-  /// 
-  /// Ablauf:
-  /// 1. FilePicker öffnet einen Dialog zum Ordner wählen
-  /// 2. Wenn der User einen Ordner wählt: wird es in settings gespeichert
-  /// 3. setState() teilt Flutter mit: "Zeichne die UI mit den neuen Werten!"
-  /// 4. Der neue Pfad wird in der Datenbank gespeichert
-  /// 5. Der User bekommt ein Feedback via SnackBar
+  /// Öffnet den Dialog zur Auswahl des lokalen Sync-Verzeichnisses.
   Future<void> _selectSyncDirectory() async {
-    // Öffne den Datei-Dialog und warte auf das Ergebnis
-    // getDirectoryPath() gibt null zurück, wenn der User "Abbrechen" klickt
+    try {
+      if (Platform.isAndroid) {
+        await _ensureAndroidFileAccess();
+      }
+    } catch (e) {
+      if (!mounted) {
+        return;
+      }
+
+      _showMessage(e.toString(), isError: true);
+      return;
+    }
+
     final selectedPath = await FilePicker.platform.getDirectoryPath();
 
-    if (selectedPath != null) {
-      // Der User hat einen Ordner ausgewählt
-      
-      // setState() wird verwendet um Flutter zu sagen:
-      // "Die Daten haben sich geändert, zeichne die UI!"
+    // Abbruch oder dispose erzeugen keine Änderung.
+    if (!mounted || selectedPath == null) {
+      return;
+    }
+
       setState(() {
-        // Erstelle ein neues Settings-Objekt mit dem gewählten Pfad
-        // Behalte die alte API-URL (settings?.apiUrl), damit sie nicht gelöscht wird
+        // Übernimmt den neuen Pfad und behält die übrigen Werte bei.
         settings = Settings(
           syncPath: selectedPath,
-          apiUrl: settings?.apiUrl,  // ← Behalte den alten Wert
+          apiUrl: settings?.apiUrl,
+          allowInsecureTlsForLocalhost:
+              settings?.allowInsecureTlsForLocalhost ?? false,
         );
       });
-      
-      // Speichere den neuen Pfad in der Datenbank
-      try {
-        await SettingsService().saveSetting('syncPath', selectedPath);
-        
-        // Zeige dem User eine Erfolgsmeldung
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Sync-Verzeichnis gespeichert: $selectedPath'),
-            duration: Duration(seconds: 2),
-          ),
-        );
-        
-        // Zum Debuggen: Zeige den neuen Pfad in der Konsole
-        print('Sync-Pfad gespeichert: $selectedPath');
-      } catch (e) {
-        // Fehlerbehandlung: Wenn das Speichern fehlschlägt
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Fehler beim Speichern: $e'),
-            duration: Duration(seconds: 3),
-            backgroundColor: Colors.red,
-          ),
-        );
-        print('Fehler beim Speichern des Sync-Pfads: $e');
+
+    // Speichere den neuen Pfad in der Datenbank
+    try {
+      await SettingsService().saveSetting('syncPath', selectedPath);
+
+      if (!mounted) {
+        return;
       }
-    } else {
-      // Der User hat "Abbrechen" geklickt
-      print('Kein Verzeichnis ausgewählt');
+
+      _showMessage(
+        Platform.isAndroid
+            ? 'Sync-Verzeichnis gespeichert. Auf Android sollte das ein sichtbarer Ordner wie Documents/data_sync sein.'
+            : 'Sync-Verzeichnis gespeichert.',
+      );
+    } catch (e) {
+      if (!mounted) {
+        return;
+      }
+
+      _showMessage(
+        'Sync-Verzeichnis konnte nicht gespeichert werden.',
+        isError: true,
+      );
     }
+  }
+
+  /// Fordert auf Android den Vollzugriff auf den gemeinsamen Speicher an.
+  Future<void> _ensureAndroidFileAccess() async {
+    final currentStatus = await Permission.manageExternalStorage.status;
+
+    if (currentStatus.isGranted) {
+      return;
+    }
+
+    final requestedStatus = await Permission.manageExternalStorage.request();
+
+    if (requestedStatus.isGranted) {
+      return;
+    }
+
+    throw Exception(
+      'Android braucht "Alle Dateien verwalten", damit ein sichtbarer Ordner '
+      'wie Documents/data_sync voll synchronisiert werden kann. Bitte die '
+      'Berechtigung erlauben und das Verzeichnis danach erneut auswaehlen.',
+    );
+  }
+
+  /// Prüft auf eine vollständige HTTP- oder HTTPS-URL.
+  bool _isValidApiUrl(String value) {
+    final uri = Uri.tryParse(value);
+
+    return uri != null &&
+        uri.hasScheme &&
+        (uri.scheme == 'http' || uri.scheme == 'https') &&
+        uri.host.isNotEmpty;
+  }
+
+  /// Speichert, ob lokale HTTPS-Zertifikate fuer localhost akzeptiert werden.
+  Future<void> _toggleLocalhostCertificateOverride(bool value) async {
+    final currentSettings = settings ?? Settings();
+
+    setState(() {
+      settings = Settings(
+        syncPath: currentSettings.syncPath,
+        apiUrl: currentSettings.apiUrl,
+        allowInsecureTlsForLocalhost: value,
+      );
+    });
+
+    try {
+      await SettingsService().saveSetting(
+        'allowInsecureTlsForLocalhost',
+        value.toString(),
+      );
+
+      if (!mounted) {
+        return;
+      }
+
+      _showMessage(
+        value
+            ? 'Lokale HTTPS-Zertifikate fuer localhost sind aktiviert.'
+            : 'Lokale HTTPS-Zertifikate fuer localhost sind deaktiviert.',
+      );
+    } catch (e) {
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        settings = Settings(
+          syncPath: currentSettings.syncPath,
+          apiUrl: currentSettings.apiUrl,
+          allowInsecureTlsForLocalhost:
+              currentSettings.allowInsecureTlsForLocalhost,
+        );
+      });
+
+      _showMessage(
+        'Die TLS-Einstellung konnte nicht gespeichert werden.',
+        isError: true,
+      );
+    }
+  }
+
+  /// Zeigt eine einheitliche Rückmeldung für Erfolg oder Fehler.
+  void _showMessage(String message, {bool isError = false}) {
+    final backgroundColor = isError
+        ? Theme.of(context).colorScheme.error
+        : null;
+    final foregroundColor = isError
+        ? Theme.of(context).colorScheme.onError
+        : null;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: backgroundColor,
+        action: isError
+            ? SnackBarAction(
+                label: 'Schliessen',
+                textColor: foregroundColor,
+                onPressed: () {},
+              )
+            : null,
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final usesAndroidSharedDirectory = Platform.isAndroid;
+    // Beide Werte bestimmen den Einrichtungsstand im Kopfbereich.
+    final hasApiUrl = settings?.apiUrl?.isNotEmpty ?? false;
+    final hasSyncPath = settings?.syncPath?.isNotEmpty ?? false;
+    final completedSteps = (hasApiUrl ? 1 : 0) + (hasSyncPath ? 1 : 0);
+
     return ListView(
+      // Hält Abstand zur unteren Navigation.
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 120),
       children: [
-        // Abschnitt: Verbindung
-        _SectionHeader(label: 'Verbindung'),
-        ListTile(
-          leading: const Icon(Icons.language_outlined),
-          title: const Text('API-URL'),
-          subtitle: Text(
-            settings?.apiUrl ?? 'Nicht gesetzt',
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
+        // Fasst Einrichtungsstand und kurze Einordnung zusammen.
+        Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: colorScheme.surface,
+            borderRadius: BorderRadius.circular(32),
           ),
-          trailing: const Icon(Icons.chevron_right),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  CircleAvatar(
+                    radius: 24,
+                    backgroundColor: colorScheme.primaryContainer,
+                    foregroundColor: colorScheme.onPrimaryContainer,
+                    child: const Icon(Icons.settings_suggest_outlined),
+                  ),
+                  const Spacer(),
+                  _StatusChip(
+                    label: '$completedSteps von 2 fertig',
+                    isComplete: completedSteps == 2,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              Text(
+                'Alles Wichtige an einem Ort',
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Hier richtest du die Verbindung zum Backend und dein lokales Sync-Verzeichnis ein. Sobald beides gesetzt ist, ist die App bereit fuer den ersten echten Lauf.',
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                  height: 1.45,
+                ),
+              ),
+              const SizedBox(height: 18),
+              _OverviewRow(
+                icon: Icons.language_outlined,
+                title: 'API-URL',
+                isComplete: hasApiUrl,
+              ),
+              const SizedBox(height: 12),
+              _OverviewRow(
+                icon: Icons.folder_outlined,
+                title: 'Sync-Verzeichnis',
+                isComplete: hasSyncPath,
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 20),
+        // Enthält die bearbeitbaren Einstellungen.
+        Text(
+          'Konfiguration',
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        const SizedBox(height: 12),
+        _SettingCard(
+          icon: Icons.language_outlined,
+          title: 'API-URL',
+          value: settings?.apiUrl ?? 'Noch keine Adresse hinterlegt',
+          description:
+              'Die Android-App nutzt diese Adresse spaeter fuer Upload, Download und den Manifest-Abgleich.',
+          actionLabel: hasApiUrl ? 'Adresse aendern' : 'Adresse eintragen',
+          isComplete: hasApiUrl,
+          isLoading: _isLoading,
           onTap: _enterApiUrl,
         ),
-        const Divider(indent: 56),
-
-        // Abschnitt: Dateisystem
-        _SectionHeader(label: 'Dateisystem'),
-        ListTile(
-          leading: const Icon(Icons.folder_outlined),
-          title: const Text('Sync-Verzeichnis'),
-          subtitle: Text(
-            settings?.syncPath ?? 'Kein Verzeichnis ausgewählt',
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          trailing: const Icon(Icons.chevron_right),
+        const SizedBox(height: 12),
+        _SettingCard(
+          icon: Icons.folder_outlined,
+          title: 'Sync-Verzeichnis',
+          value: settings?.syncPath ?? 'Noch kein Verzeichnis ausgewaehlt',
+          description:
+              usesAndroidSharedDirectory
+                  ? 'Auf Android kannst du mit der zusaetzlichen Berechtigung einen sichtbaren Ordner wie Documents/data_sync verwenden. So bleiben die Dateien ausserhalb der App auffindbar.'
+                  : 'Dieser Ordner ist die lokale Quelle fuer Dateien, die hoch- oder heruntergeladen werden sollen.',
+          actionLabel: usesAndroidSharedDirectory
+              ? (hasSyncPath
+                    ? 'Sichtbaren Ordner aendern'
+                    : 'Sichtbaren Ordner waehlen')
+              : (hasSyncPath
+                    ? 'Verzeichnis aendern'
+                    : 'Verzeichnis waehlen'),
+          isComplete: hasSyncPath,
+          isLoading: _isLoading,
           onTap: _selectSyncDirectory,
+        ),
+        const SizedBox(height: 12),
+        _ToggleSettingCard(
+          icon: Icons.https_outlined,
+          title: 'Lokale HTTPS-Zertifikate erlauben',
+          description:
+              'Erlaubt fuer https://localhost und https://127.0.0.1 auch selbstsignierte Zertifikate. Fuer die Entwicklung ist sonst meist http://localhost:5009 die einfachere Wahl.',
+          value: settings?.allowInsecureTlsForLocalhost ?? false,
+          isLoading: _isLoading,
+          onChanged: _toggleLocalhostCertificateOverride,
         ),
       ],
     );
   }
 }
 
-/// Abschnitts-Überschrift für die Einstellungsseite
-class _SectionHeader extends StatelessWidget {
-  const _SectionHeader({required this.label});
+/// Zeigt den Einrichtungsstatus einer einzelnen Voraussetzung.
+class _OverviewRow extends StatelessWidget {
+  const _OverviewRow({
+    required this.icon,
+    required this.title,
+    required this.isComplete,
+  });
 
-  final String label;
+  final IconData icon;
+  final String title;
+  final bool isComplete;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 20, 16, 4),
-      child: Text(
-        label.toUpperCase(),
-        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-          color: Theme.of(context).colorScheme.primary,
-          letterSpacing: 1.0,
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Row(
+      children: [
+        Container(
+          width: 42,
+          height: 42,
+          decoration: BoxDecoration(
+            color: colorScheme.surfaceContainerHighest,
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: Icon(icon, color: colorScheme.onSurfaceVariant),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(
+            title,
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+        _StatusChip(
+          label: isComplete ? 'Fertig' : 'Offen',
+          isComplete: isComplete,
+        ),
+      ],
+    );
+  }
+}
+
+/// Visuell hervorgehobene Karte fuer eine einzelne Einstellung.
+class _SettingCard extends StatelessWidget {
+  const _SettingCard({
+    required this.icon,
+    required this.title,
+    required this.value,
+    required this.description,
+    required this.actionLabel,
+    required this.isComplete,
+    required this.isLoading,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String title;
+  final String value;
+  final String description;
+  final String actionLabel;
+  final bool isComplete;
+  final bool isLoading;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Card(
+      child: InkWell(
+        onTap: isLoading ? null : onTap,
+        borderRadius: BorderRadius.circular(28),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: colorScheme.primaryContainer,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Icon(
+                      icon,
+                      color: colorScheme.onPrimaryContainer,
+                    ),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          title,
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        _StatusChip(
+                          label: isComplete ? 'Eingerichtet' : 'Noch offen',
+                          isComplete: isComplete,
+                        ),
+                      ],
+                    ),
+                  ),
+                  Icon(
+                    Icons.chevron_right_rounded,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 18),
+              Text(
+                value,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                description,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                  height: 1.4,
+                ),
+              ),
+              const SizedBox(height: 18),
+              Text(
+                isLoading ? 'Wird geladen ...' : actionLabel,
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  color: isLoading
+                      ? colorScheme.onSurfaceVariant
+                      : colorScheme.primary,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Schalterkarte fuer boolesche Einstellungen.
+class _ToggleSettingCard extends StatelessWidget {
+  const _ToggleSettingCard({
+    required this.icon,
+    required this.title,
+    required this.description,
+    required this.value,
+    required this.isLoading,
+    required this.onChanged,
+  });
+
+  final IconData icon;
+  final String title;
+  final String description;
+  final bool value;
+  final bool isLoading;
+  final ValueChanged<bool> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: colorScheme.primaryContainer,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Icon(
+                    icon,
+                    color: colorScheme.onPrimaryContainer,
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Text(
+                    title,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                Switch(
+                  value: value,
+                  onChanged: isLoading ? null : onChanged,
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(
+              value ? 'Aktiviert' : 'Deaktiviert',
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              description,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+                height: 1.4,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Kleine Statusanzeige fuer Karten und Uebersichten.
+class _StatusChip extends StatelessWidget {
+  const _StatusChip({
+    required this.label,
+    required this.isComplete,
+  });
+
+  final String label;
+  final bool isComplete;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final backgroundColor = isComplete
+        ? colorScheme.primaryContainer
+        : colorScheme.surfaceContainerHighest;
+    final foregroundColor = isComplete
+        ? colorScheme.onPrimaryContainer
+        : colorScheme.onSurfaceVariant;
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        child: Text(
+          label,
+          style: Theme.of(context).textTheme.labelLarge?.copyWith(
+            color: foregroundColor,
+            fontWeight: FontWeight.w700,
+          ),
         ),
       ),
     );

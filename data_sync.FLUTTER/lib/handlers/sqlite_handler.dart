@@ -45,16 +45,19 @@ class SqliteHandler {
     }
     
     try {
-      // Hole das Anwendungsdokumentenverzeichnis (wo die App ihre Daten speichert)
-      final documentsDirectory = await getApplicationDocumentsDirectory();
-      final databasePath = join(documentsDirectory.path, databaseName);
+      // Nutzt das plattformspezifische App-Datenverzeichnis statt des Benutzer-Dokumentenordners.
+      final applicationSupportDirectory = await getApplicationSupportDirectory();
+      await applicationSupportDirectory.create(recursive: true);
+      final databasePath = join(applicationSupportDirectory.path, databaseName);
       
       // Öffne die Datenbank
       // Wenn sie nicht existiert, wird sie erstellt
       _database = await openDatabase(
         databasePath,
-        version: 1,
+        version: 2,
         onCreate: _onCreate,
+        onUpgrade: _onUpgrade,
+        onOpen: (db) async => _createTables(db),
       );
       
       _isInitialized = true;
@@ -68,6 +71,11 @@ class SqliteHandler {
   /// Wird automatisch aufgerufen von [initialize], wenn die DB noch nicht existiert.
   /// Ruft [createTables] auf, um alle Tabellen zu initialisieren.
   Future<void> _onCreate(Database db, int version) async {
+    await _createTables(db);
+  }
+
+  /// Stellt sicher, dass neue Tabellen auch in bestehenden Datenbanken angelegt werden.
+  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
     await _createTables(db);
   }
   
@@ -84,6 +92,17 @@ class SqliteHandler {
         id INTEGER PRIMARY KEY,
         key TEXT UNIQUE NOT NULL,
         value TEXT
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS last_sync_state (
+        file_path TEXT PRIMARY KEY,
+        file_name TEXT NOT NULL,
+        file_size INTEGER NOT NULL,
+        hash_value TEXT NOT NULL,
+        created_at TEXT NOT NULL,
+        last_modified TEXT NOT NULL
       )
     ''');
   }
@@ -144,8 +163,18 @@ class SqliteHandler {
         final results = await _database.rawQuery(query, params);
         return results;
       } else {
-        // INSERT, UPDATE, DELETE - keine Ergebnisse
-        await _database.rawInsert(query, params);
+        // INSERT, UPDATE und DELETE werden abhängig vom SQL-Befehl ausgeführt.
+        final normalizedQuery = query.trimLeft().toUpperCase();
+
+        if (normalizedQuery.startsWith('INSERT')) {
+          await _database.rawInsert(query, params);
+        } else if (normalizedQuery.startsWith('UPDATE')) {
+          await _database.rawUpdate(query, params);
+        } else if (normalizedQuery.startsWith('DELETE')) {
+          await _database.rawDelete(query, params);
+        } else {
+          await _database.execute(query, params);
+        }
         return [];
       }
     } catch (e) {

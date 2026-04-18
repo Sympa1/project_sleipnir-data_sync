@@ -40,9 +40,17 @@ dependencies:
   # Wird genutzt um Dateipfade korrekt zu kombinieren (plattformunabhängig)
   path: ^1.9.0
   file_picker: ^10.3.10
+
+  # HTTP-Client für Manifest-, Upload-, Download- und Delete-Requests
+  http: ^1.2.2
+
+  # SHA256-Hashing für das lokale Datei-Manifest
+  crypto: ^3.0.5
   
   # Google Fonts - ermöglicht das Laden von Google-Schriften (z.B. Inter, JetBrains Mono)
   google_fonts: ^6.2.1
+  sqflite_common_ffi: ^2.4.0+2
+  permission_handler: ^12.0.1
 
 # DEV_DEPENDENCIES - Pakete nur für die Entwicklung (nicht in Release-Build enthalten)
 # Diese brauchst du während der Entwicklung, aber nicht wenn andere deine App nutzen
