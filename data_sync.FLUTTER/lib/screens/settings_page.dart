@@ -319,68 +319,71 @@ class _SettingsPageState extends State<SettingsPage> {
     // Beide Werte bestimmen den Einrichtungsstand im Kopfbereich.
     final hasApiUrl = settings?.apiUrl?.isNotEmpty ?? false;
     final hasSyncPath = settings?.syncPath?.isNotEmpty ?? false;
+    final isConfigured = hasApiUrl && hasSyncPath;
     final completedSteps = (hasApiUrl ? 1 : 0) + (hasSyncPath ? 1 : 0);
 
     return ListView(
       // Hält Abstand zur unteren Navigation.
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 120),
       children: [
-        // Fasst Einrichtungsstand und kurze Einordnung zusammen.
-        Container(
-          padding: const EdgeInsets.all(24),
-          decoration: BoxDecoration(
-            color: colorScheme.surface,
-            borderRadius: BorderRadius.circular(32),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  CircleAvatar(
-                    radius: 24,
-                    backgroundColor: colorScheme.primaryContainer,
-                    foregroundColor: colorScheme.onPrimaryContainer,
-                    child: const Icon(Icons.settings_suggest_outlined),
-                  ),
-                  const Spacer(),
-                  _StatusChip(
-                    label: '$completedSteps von 2 fertig',
-                    isComplete: completedSteps == 2,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              Text(
-                'Alles Wichtige an einem Ort',
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.w700,
+        if (!isConfigured) ...[
+          // Fasst Einrichtungsstand und kurze Einordnung zusammen.
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: colorScheme.surface,
+              borderRadius: BorderRadius.circular(32),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 24,
+                      backgroundColor: colorScheme.primaryContainer,
+                      foregroundColor: colorScheme.onPrimaryContainer,
+                      child: const Icon(Icons.settings_suggest_outlined),
+                    ),
+                    const Spacer(),
+                    _StatusChip(
+                      label: '$completedSteps von 2 fertig',
+                      isComplete: completedSteps == 2,
+                    ),
+                  ],
                 ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Hier richtest du die Verbindung zum Backend und dein lokales Sync-Verzeichnis ein. Sobald beides gesetzt ist, ist die App bereit fuer den ersten echten Lauf.',
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                  height: 1.45,
+                const SizedBox(height: 20),
+                Text(
+                  'Alles Wichtige an einem Ort',
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 18),
-              _OverviewRow(
-                icon: Icons.language_outlined,
-                title: 'API-URL',
-                isComplete: hasApiUrl,
-              ),
-              const SizedBox(height: 12),
-              _OverviewRow(
-                icon: Icons.folder_outlined,
-                title: 'Sync-Verzeichnis',
-                isComplete: hasSyncPath,
-              ),
-            ],
+                const SizedBox(height: 8),
+                Text(
+                  'Hier richtest du die Verbindung zum Backend und dein lokales Sync-Verzeichnis ein. Sobald beides gesetzt ist, ist die App bereit fuer den ersten echten Lauf.',
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                    height: 1.45,
+                  ),
+                ),
+                const SizedBox(height: 18),
+                _OverviewRow(
+                  icon: Icons.language_outlined,
+                  title: 'API-URL',
+                  isComplete: hasApiUrl,
+                ),
+                const SizedBox(height: 12),
+                _OverviewRow(
+                  icon: Icons.folder_outlined,
+                  title: 'Sync-Verzeichnis',
+                  isComplete: hasSyncPath,
+                ),
+              ],
+            ),
           ),
-        ),
-        const SizedBox(height: 20),
+          const SizedBox(height: 20),
+        ],
         // Enthält die bearbeitbaren Einstellungen.
         Text(
           'Konfiguration',
