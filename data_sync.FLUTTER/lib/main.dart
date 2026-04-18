@@ -54,8 +54,9 @@ class MyApp extends StatelessWidget {
       brightness: brightness,
       colorScheme: colorScheme,
       // Verwendet projektweite Hintergrundfarben statt der Standardwerte.
-      scaffoldBackgroundColor:
-          isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
+      scaffoldBackgroundColor: isDark
+          ? AppColors.surfaceDark
+          : AppColors.surfaceLight,
       textTheme: GoogleFonts.interTextTheme(
         ThemeData(brightness: brightness).textTheme,
       ),
@@ -77,9 +78,7 @@ class MyApp extends StatelessWidget {
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         // Einheitlicher Radius für Karten im gesamten UI.
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(28),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
       ),
       dividerTheme: DividerThemeData(
         color: colorScheme.outlineVariant,
@@ -102,10 +101,7 @@ class MyApp extends StatelessWidget {
         // Hebt das aktive Eingabefeld über die Primärfarbe hervor.
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
-          borderSide: BorderSide(
-            color: colorScheme.primary,
-            width: 1.5,
-          ),
+          borderSide: BorderSide(color: colorScheme.primary, width: 1.5),
         ),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
@@ -128,9 +124,7 @@ class MyApp extends StatelessWidget {
       // Floating-SnackBars behalten Abstand zur unteren Navigation.
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(18),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
       ),
       navigationBarTheme: NavigationBarThemeData(
         height: 72,
@@ -216,7 +210,10 @@ class _MyHomePageState extends State<MyHomePage> {
         bottom: false,
         child: IndexedStack(
           index: _selectedIndex,
-          children: const [SyncPage(), SettingsPage()],
+          children: [
+            SyncPage(isVisible: _selectedIndex == 0),
+            const SettingsPage(),
+          ],
         ),
       ),
 

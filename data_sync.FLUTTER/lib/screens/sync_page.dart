@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:data_sync_flutter/models/settings.dart';
 import 'package:data_sync_flutter/services/settings_service.dart';
 import 'package:data_sync_flutter/services/sync_service.dart';
 import 'package:flutter/material.dart';
@@ -7,7 +8,10 @@ import 'package:google_fonts/google_fonts.dart';
 
 /// Sync-Seite mit Download-, Upload- und Sync-Aktionen
 class SyncPage extends StatefulWidget {
-  const SyncPage({super.key});
+  const SyncPage({super.key, this.isVisible = true, this.loadSettings});
+
+  final bool isVisible;
+  final Future<Settings> Function()? loadSettings;
 
   @override
   State<SyncPage> createState() => _SyncPageState();
@@ -26,6 +30,7 @@ class _SyncPageState extends State<SyncPage> {
   String _statusLabel = 'Noch nicht eingerichtet';
   IconData _statusIcon = Icons.hourglass_bottom_rounded;
   bool _settingsLoaded = false;
+  bool _isConfigured = false;
 
   @override
   void initState() {
@@ -33,9 +38,22 @@ class _SyncPageState extends State<SyncPage> {
     unawaited(_loadStatus());
   }
 
+  @override
+  void didUpdateWidget(covariant SyncPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    // Laedt den Status neu, sobald die Seite nach Einstellungs-Aenderungen
+    // wieder sichtbar wird.
+    if (widget.isVisible && !oldWidget.isVisible) {
+      unawaited(_loadStatus());
+    }
+  }
+
   /// Lädt den aktuellen Einrichtungsstand für den Kopfbereich.
   Future<void> _loadStatus() async {
-    final settings = await _settingsService.getAllSettings();
+    final settings =
+        await (widget.loadSettings?.call() ??
+            _settingsService.getAllSettings());
 
     if (!mounted) {
       return;
@@ -46,8 +64,11 @@ class _SyncPageState extends State<SyncPage> {
         (settings.syncPath?.trim().isNotEmpty ?? false);
 
     setState(() {
+      _isConfigured = isConfigured;
       _statusLabel = isConfigured ? 'Bereit' : 'Noch nicht eingerichtet';
-      _statusIcon = isConfigured ? Icons.check_circle_outline : Icons.hourglass_bottom_rounded;
+      _statusIcon = isConfigured
+          ? Icons.check_circle_outline
+          : Icons.hourglass_bottom_rounded;
       _settingsLoaded = true;
     });
   }
@@ -62,87 +83,88 @@ class _SyncPageState extends State<SyncPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Trennt den Kopfbereich visuell vom restlichen Inhalt.
-          Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(32),
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  colorScheme.primaryContainer,
-                  colorScheme.surface,
+          if (!_isConfigured) ...[
+            // Trennt den Kopfbereich visuell vom restlichen Inhalt.
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(32),
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [colorScheme.primaryContainer, colorScheme.surface],
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      // Verwendet eine eigene Fläche für das Status-Icon.
+                      CircleAvatar(
+                        radius: 24,
+                        backgroundColor: colorScheme.surface.withValues(
+                          alpha: 0.7,
+                        ),
+                        foregroundColor: colorScheme.primary,
+                        child: const Icon(Icons.cloud_sync_outlined),
+                      ),
+                      const Spacer(),
+                      // Zeigt den aktuellen Einrichtungsstand direkt im Kopfbereich an.
+                      _StatusPill(
+                        label: _isRunning ? 'Sync laeuft' : _statusLabel,
+                        icon: _isRunning ? Icons.sync : _statusIcon,
+                        backgroundColor: colorScheme.surface,
+                        foregroundColor: colorScheme.onSurface,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    'Bereit fuer den ersten Abgleich',
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Lege zuerst API-URL und Sync-Verzeichnis fest. Danach startest du Download, Upload oder einen kompletten Sync direkt von hier.',
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                      height: 1.45,
+                    ),
+                  ),
+                  const SizedBox(height: 18),
+                  Wrap(
+                    spacing: 10,
+                    runSpacing: 10,
+                    children: const [
+                      _InfoChip(
+                        icon: Icons.link_rounded,
+                        label: 'API verbinden',
+                      ),
+                      _InfoChip(
+                        icon: Icons.folder_open_rounded,
+                        label: 'Ordner waehlen',
+                      ),
+                      _InfoChip(
+                        icon: Icons.terminal_rounded,
+                        label: 'Log im Blick behalten',
+                      ),
+                    ],
+                  ),
                 ],
               ),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    // Verwendet eine eigene Fläche für das Status-Icon.
-                    CircleAvatar(
-                      radius: 24,
-                      backgroundColor: colorScheme.surface.withValues(alpha: 0.7),
-                      foregroundColor: colorScheme.primary,
-                      child: const Icon(Icons.cloud_sync_outlined),
-                    ),
-                    const Spacer(),
-                    // Zeigt den aktuellen Einrichtungsstand direkt im Kopfbereich an.
-                    _StatusPill(
-                      label: _isRunning ? 'Sync laeuft' : _statusLabel,
-                      icon: _isRunning ? Icons.sync : _statusIcon,
-                      backgroundColor: colorScheme.surface,
-                      foregroundColor: colorScheme.onSurface,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 20),
-                Text(
-                  'Bereit fuer den ersten Abgleich',
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Lege zuerst API-URL und Sync-Verzeichnis fest. Danach startest du Download, Upload oder einen kompletten Sync direkt von hier.',
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                    height: 1.45,
-                  ),
-                ),
-                const SizedBox(height: 18),
-                Wrap(
-                  spacing: 10,
-                  runSpacing: 10,
-                  children: const [
-                    _InfoChip(
-                      icon: Icons.link_rounded,
-                      label: 'API verbinden',
-                    ),
-                    _InfoChip(
-                      icon: Icons.folder_open_rounded,
-                      label: 'Ordner waehlen',
-                    ),
-                    _InfoChip(
-                      icon: Icons.terminal_rounded,
-                      label: 'Log im Blick behalten',
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-           const SizedBox(height: 20),
+            const SizedBox(height: 20),
+          ],
           // Reserviert einen eigenen Bereich für Status- und Log-Ausgaben.
-           Card(
-             child: Padding(
-               padding: const EdgeInsets.all(20),
-               child: Column(
-                 crossAxisAlignment: CrossAxisAlignment.start,
-                 children: [
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   Row(
                     children: [
                       Icon(
@@ -153,40 +175,39 @@ class _SyncPageState extends State<SyncPage> {
                       const SizedBox(width: 8),
                       Text(
                         'Aktivitaetsprotokoll',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w700,
-                        ),
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(fontWeight: FontWeight.w700),
                       ),
                     ],
                   ),
                   const SizedBox(height: 14),
-                   Container(
-                     width: double.infinity,
-                     padding: const EdgeInsets.all(16),
-                     decoration: BoxDecoration(
-                       color: colorScheme.surfaceContainerHighest,
-                       borderRadius: BorderRadius.circular(24),
-                     ),
-                     child: Column(
-                       crossAxisAlignment: CrossAxisAlignment.start,
-                       children: _logs
-                           .map(
-                             (entry) => Padding(
-                               padding: const EdgeInsets.only(bottom: 10),
-                               child: _LogLine.fromEntry(entry),
-                             ),
-                           )
-                           .toList(),
-                     ),
-                   ),
-                   const SizedBox(height: 12),
-                   Text(
-                     _settingsLoaded
-                         ? 'Das Protokoll zeigt den aktuellen Ablauf von Manifest, Upload, Download und Loeschungen.'
-                         : 'Lade aktuellen Einrichtungsstand ...',
-                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                       color: colorScheme.onSurfaceVariant,
-                     ),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: colorScheme.surfaceContainerHighest,
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: _logs
+                          .map(
+                            (entry) => Padding(
+                              padding: const EdgeInsets.only(bottom: 10),
+                              child: _LogLine.fromEntry(entry),
+                            ),
+                          )
+                          .toList(),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    _settingsLoaded
+                        ? 'Das Protokoll zeigt den aktuellen Ablauf von Manifest, Upload, Download und Loeschungen.'
+                        : 'Lade aktuellen Einrichtungsstand ...',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
                   ),
                 ],
               ),
@@ -196,54 +217,55 @@ class _SyncPageState extends State<SyncPage> {
           // Gruppiert die verfügbaren Sync-Aktionen.
           Text(
             'Aktionen',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w700,
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+          ),
+          const SizedBox(height: 12),
+          _ActionCard(
+            icon: Icons.sync_rounded,
+            title: 'Kompletten Sync starten',
+            subtitle:
+                'Fuehrt Manifest, Download, Upload und Loeschungen nacheinander aus.',
+            isPrimary: true,
+            enabled: !_isRunning,
+            showProgress: _isRunning,
+            onTap: () => _runAction(
+              actionLabel: 'Sync',
+              action: () => _syncService.runFullSync(onLog: _appendLog),
             ),
           ),
           const SizedBox(height: 12),
-           _ActionCard(
-             icon: Icons.sync_rounded,
-             title: 'Kompletten Sync starten',
-             subtitle: 'Fuehrt Manifest, Download, Upload und Loeschungen nacheinander aus.',
-             isPrimary: true,
-             enabled: !_isRunning,
-             showProgress: _isRunning,
-             onTap: () => _runAction(
-               actionLabel: 'Sync',
-               action: () => _syncService.runFullSync(onLog: _appendLog),
-             ),
-           ),
-           const SizedBox(height: 12),
-           // Download und Upload bleiben als gleichrangige Aktionen zusammen.
-           Row(
-             children: [
-               Expanded(
-                 child: _ActionCard(
-                   icon: Icons.download_rounded,
-                   title: 'Download',
-                   subtitle: 'Hole Daten vom Server.',
-                   enabled: !_isRunning,
-                   onTap: () => _runAction(
-                     actionLabel: 'Download',
-                     action: () => _syncService.runDownload(onLog: _appendLog),
-                   ),
-                 ),
-               ),
-               const SizedBox(width: 12),
-               Expanded(
-                 child: _ActionCard(
-                   icon: Icons.upload_rounded,
-                   title: 'Upload',
-                   subtitle: 'Sende lokale Daten hoch.',
-                   enabled: !_isRunning,
-                   onTap: () => _runAction(
-                     actionLabel: 'Upload',
-                     action: () => _syncService.runUpload(onLog: _appendLog),
-                   ),
-                 ),
-               ),
-             ],
-           ),
+          // Download und Upload bleiben als gleichrangige Aktionen zusammen.
+          Row(
+            children: [
+              Expanded(
+                child: _ActionCard(
+                  icon: Icons.download_rounded,
+                  title: 'Download',
+                  subtitle: 'Hole Daten vom Server.',
+                  enabled: !_isRunning,
+                  onTap: () => _runAction(
+                    actionLabel: 'Download',
+                    action: () => _syncService.runDownload(onLog: _appendLog),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _ActionCard(
+                  icon: Icons.upload_rounded,
+                  title: 'Upload',
+                  subtitle: 'Sende lokale Daten hoch.',
+                  enabled: !_isRunning,
+                  onTap: () => _runAction(
+                    actionLabel: 'Upload',
+                    action: () => _syncService.runUpload(onLog: _appendLog),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );
@@ -345,10 +367,7 @@ class _StatusPill extends StatelessWidget {
 
 /// Kompakte Hinweis-Chips fuer den Hero-Bereich.
 class _InfoChip extends StatelessWidget {
-  const _InfoChip({
-    required this.icon,
-    required this.label,
-  });
+  const _InfoChip({required this.icon, required this.label});
 
   final IconData icon;
   final String label;
@@ -372,9 +391,9 @@ class _InfoChip extends StatelessWidget {
             const SizedBox(width: 8),
             Text(
               label,
-              style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                color: colorScheme.onSurface,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.labelLarge?.copyWith(color: colorScheme.onSurface),
             ),
           ],
         ),

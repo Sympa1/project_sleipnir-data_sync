@@ -12,7 +12,9 @@ import 'package:permission_handler/permission_handler.dart';
 /// - Sync-Verzeichnis: Der lokale Ordner, der synchronisiert werden soll
 /// - API-URL: Die Adresse des Sync-Backend-Servers
 class SettingsPage extends StatefulWidget {
-  const SettingsPage({super.key});
+  const SettingsPage({super.key, this.loadSettings});
+
+  final Future<Settings> Function()? loadSettings;
 
   @override
   State<SettingsPage> createState() => _SettingsPageState();
@@ -47,7 +49,9 @@ class _SettingsPageState extends State<SettingsPage> {
   Future<void> _loadSettings() async {
     try {
       // Rufe den Service auf, um alle Einstellungen zu laden
-      final loadedSettings = await SettingsService().getAllSettings();
+      final loadedSettings =
+          await (widget.loadSettings?.call() ??
+              SettingsService().getAllSettings());
 
       // Verhindert setState nach dispose.
       if (!mounted) {
@@ -68,7 +72,10 @@ class _SettingsPageState extends State<SettingsPage> {
         _isLoading = false;
       });
 
-      _showMessage('Einstellungen konnten nicht geladen werden.', isError: true);
+      _showMessage(
+        'Einstellungen konnten nicht geladen werden.',
+        isError: true,
+      );
     }
   }
 
@@ -84,18 +91,22 @@ class _SettingsPageState extends State<SettingsPage> {
         content: TextField(
           controller: controller,
           decoration: InputDecoration(
-            hintText: 'z.B. http://localhost:5009 oder https://mein-server.de/api',
+            hintText:
+                'z.B. http://localhost:5009 oder https://mein-server.de/api',
           ),
           keyboardType: TextInputType.url,
           autofocus: true,
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(), // Abbrechen → null zurückgeben
+            onPressed: () =>
+                Navigator.of(context).pop(), // Abbrechen → null zurückgeben
             child: Text('Abbrechen'),
           ),
           TextButton(
-            onPressed: () => Navigator.of(context).pop(controller.text.trim()), // Wert zurückgeben
+            onPressed: () => Navigator.of(
+              context,
+            ).pop(controller.text.trim()), // Wert zurückgeben
             child: Text('Speichern'),
           ),
         ],
@@ -115,14 +126,14 @@ class _SettingsPageState extends State<SettingsPage> {
       return;
     }
 
-      setState(() {
-        settings = Settings(
-          syncPath: settings?.syncPath,
-          apiUrl: enteredUrl,
-          allowInsecureTlsForLocalhost:
-              settings?.allowInsecureTlsForLocalhost ?? false,
-        );
-      });
+    setState(() {
+      settings = Settings(
+        syncPath: settings?.syncPath,
+        apiUrl: enteredUrl,
+        allowInsecureTlsForLocalhost:
+            settings?.allowInsecureTlsForLocalhost ?? false,
+      );
+    });
 
     try {
       await SettingsService().saveSetting('apiUrl', enteredUrl);
@@ -163,15 +174,15 @@ class _SettingsPageState extends State<SettingsPage> {
       return;
     }
 
-      setState(() {
-        // Übernimmt den neuen Pfad und behält die übrigen Werte bei.
-        settings = Settings(
-          syncPath: selectedPath,
-          apiUrl: settings?.apiUrl,
-          allowInsecureTlsForLocalhost:
-              settings?.allowInsecureTlsForLocalhost ?? false,
-        );
-      });
+    setState(() {
+      // Übernimmt den neuen Pfad und behält die übrigen Werte bei.
+      settings = Settings(
+        syncPath: selectedPath,
+        apiUrl: settings?.apiUrl,
+        allowInsecureTlsForLocalhost:
+            settings?.allowInsecureTlsForLocalhost ?? false,
+      );
+    });
 
     // Speichere den neuen Pfad in der Datenbank
     try {
@@ -373,9 +384,9 @@ class _SettingsPageState extends State<SettingsPage> {
         // Enthält die bearbeitbaren Einstellungen.
         Text(
           'Konfiguration',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w700,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
         ),
         const SizedBox(height: 12),
         _SettingCard(
@@ -394,17 +405,14 @@ class _SettingsPageState extends State<SettingsPage> {
           icon: Icons.folder_outlined,
           title: 'Sync-Verzeichnis',
           value: settings?.syncPath ?? 'Noch kein Verzeichnis ausgewaehlt',
-          description:
-              usesAndroidSharedDirectory
-                  ? 'Auf Android kannst du mit der zusaetzlichen Berechtigung einen sichtbaren Ordner wie Documents/data_sync verwenden. So bleiben die Dateien ausserhalb der App auffindbar.'
-                  : 'Dieser Ordner ist die lokale Quelle fuer Dateien, die hoch- oder heruntergeladen werden sollen.',
+          description: usesAndroidSharedDirectory
+              ? 'Auf Android kannst du mit der zusaetzlichen Berechtigung einen sichtbaren Ordner wie Documents/data_sync verwenden. So bleiben die Dateien ausserhalb der App auffindbar.'
+              : 'Dieser Ordner ist die lokale Quelle fuer Dateien, die hoch- oder heruntergeladen werden sollen.',
           actionLabel: usesAndroidSharedDirectory
               ? (hasSyncPath
                     ? 'Sichtbaren Ordner aendern'
                     : 'Sichtbaren Ordner waehlen')
-              : (hasSyncPath
-                    ? 'Verzeichnis aendern'
-                    : 'Verzeichnis waehlen'),
+              : (hasSyncPath ? 'Verzeichnis aendern' : 'Verzeichnis waehlen'),
           isComplete: hasSyncPath,
           isLoading: _isLoading,
           onTap: _selectSyncDirectory,
@@ -455,9 +463,9 @@ class _OverviewRow extends StatelessWidget {
         Expanded(
           child: Text(
             title,
-            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
           ),
         ),
         _StatusChip(
@@ -513,10 +521,7 @@ class _SettingCard extends StatelessWidget {
                       color: colorScheme.primaryContainer,
                       borderRadius: BorderRadius.circular(16),
                     ),
-                    child: Icon(
-                      icon,
-                      color: colorScheme.onPrimaryContainer,
-                    ),
+                    child: Icon(icon, color: colorScheme.onPrimaryContainer),
                   ),
                   const SizedBox(width: 14),
                   Expanded(
@@ -525,9 +530,8 @@ class _SettingCard extends StatelessWidget {
                       children: [
                         Text(
                           title,
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w700,
-                          ),
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(fontWeight: FontWeight.w700),
                         ),
                         const SizedBox(height: 4),
                         _StatusChip(
@@ -548,9 +552,9 @@ class _SettingCard extends StatelessWidget {
                 value,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
               ),
               const SizedBox(height: 8),
               Text(
@@ -615,10 +619,7 @@ class _ToggleSettingCard extends StatelessWidget {
                     color: colorScheme.primaryContainer,
                     borderRadius: BorderRadius.circular(16),
                   ),
-                  child: Icon(
-                    icon,
-                    color: colorScheme.onPrimaryContainer,
-                  ),
+                  child: Icon(icon, color: colorScheme.onPrimaryContainer),
                 ),
                 const SizedBox(width: 14),
                 Expanded(
@@ -629,18 +630,15 @@ class _ToggleSettingCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                Switch(
-                  value: value,
-                  onChanged: isLoading ? null : onChanged,
-                ),
+                Switch(value: value, onChanged: isLoading ? null : onChanged),
               ],
             ),
             const SizedBox(height: 12),
             Text(
               value ? 'Aktiviert' : 'Deaktiviert',
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 8),
             Text(
@@ -659,10 +657,7 @@ class _ToggleSettingCard extends StatelessWidget {
 
 /// Kleine Statusanzeige fuer Karten und Uebersichten.
 class _StatusChip extends StatelessWidget {
-  const _StatusChip({
-    required this.label,
-    required this.isComplete,
-  });
+  const _StatusChip({required this.label, required this.isComplete});
 
   final String label;
   final bool isComplete;
