@@ -62,8 +62,12 @@ public class SyncController : ControllerBase
     [HttpPost("upload")]
     public async Task<IActionResult> UploadFile(IFormFile file, [FromQuery] string basePath = "")
     {
-        if (file == null || file.Length == 0)
+        // Eine leere Datei ist fuer den Dateisync ein gueltiger Zustand.
+        if (file == null)
             return BadRequest("No file uploaded.");
+
+        if (string.IsNullOrWhiteSpace(file.FileName))
+            return BadRequest("Uploaded file name is missing.");
 
         var uploadPath = Path.Combine("uploads", basePath);
         
@@ -186,4 +190,3 @@ public class SyncController : ControllerBase
         }
     }
 }
-
