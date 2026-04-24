@@ -11,6 +11,12 @@ bool testMode = false;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.WebHost.ConfigureKestrel(options =>
+{
+    // Deaktiviert die minimale Datenrate fuer eingehende Request-Bodies.
+    options.Limits.MinRequestBodyDataRate = null;
+});
+
 // Add services to the container.
 builder.Services.AddControllers()
     // JSON-Deserialisierung: PascalCase (statt default camelCase) akzeptieren
