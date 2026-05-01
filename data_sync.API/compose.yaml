@@ -1,0 +1,28 @@
+services:
+  api:
+    container_name: data-sync-api
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "${API_PORT:-5000}:5000"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      EnableHttpsEndpoint: "false"
+      EnableHttpsRedirection: "false"
+      ServerEndpoints__Http__Url: http://0.0.0.0:5000
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT:-3306}
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - ./uploads:/app/uploads
+    restart: unless-stopped
+    networks:
+      - database-network
+
+networks:
+  database-network:
+    external: true
+    name: ${DB_NETWORK_NAME}

@@ -6,9 +6,21 @@ Mein Hauptentwicklungssystem ist Manjaro (Linux).
 ## Technische Details
 **Geplante Technologien/Frameworks:**
 - C# ASP .NET Core für das Backend
-- Direkter Zugriff auf MariaDB (MySQL‑Protokoll) über ADO.NET (`MySql.Data` / `MySqlConnector`) statt eines ORMs
+- Direkter Zugriff auf MariaDB (MySQL‑Protokoll) über ADO.NET (`MySql.Data`) statt eines ORMs
 - Flutter/Dart für die Android-, Linux- und Windows-App
 - Python für das CLI Tool (Linux)
+
+## Einsatz von KI im Projekt
+
+Ich nutze KI in diesem Projekt bewusst als **Lern- und Sparringspartner**. Mir ist wichtig, dass ich mir die Loesungen **nicht einfach vorkauen lasse**, sondern sie mit gezielten Hinweisen, einfachen Beispielen und Erklaerungen selbst erarbeite.
+
+- Ich nutze KI vor allem fuer Denkimpulse statt fuer komplette Fertigloesungen.
+- Ich lasse mir lieber den naechsten sinnvollen Schritt oder ein vereinfachtes Beispiel zeigen, damit ich die eigentliche Loesung selbst herleiten kann.
+- Ich nutze KI, um Zusammenhaenge zwischen Code, API, Datenbank und Dokumentation besser zu verstehen.
+- Ich nutze KI auch als Feedbackgeber, um Unklarheiten, Inkonsistenzen und Verbesserungsmoeglichkeiten frueher zu erkennen.
+- Ich pruefe Vorschlaege immer kritisch und passe sie an mein Projekt und meinen Lernstand an.
+
+Das ist für mich wichtig, weil das Projekt nicht nur ein Werkzeug werden soll, sondern auch ein **Lernprojekt** und ein **nachvollziehbares Portfolio-Element**.
 
 ## Roadmap
 **Status-Legende:**
@@ -29,7 +41,7 @@ Mein Hauptentwicklungssystem ist Manjaro (Linux).
     - MariaDB Accounts (Admin & Client) anlegen und Berechtigungen erteilen ✅
     - Create Table SQL‑Skripte erstellen ✅
 - 0.0.2 Implementierung der REST API
-    - Datenbankzugriff via `MySql.Data` / `MySqlConnector` implementieren (MariaDB nutzt die MySQL Schnittstelle) ✅
+    - Datenbankzugriff via `MySql.Data` implementieren (MariaDB nutzt die MySQL Schnittstelle) ✅
     - Grundlegende REST API Endpunkte ✅
     - Entity Models / DTOs erstellen ✅
     - Postman Collection ✅
@@ -85,12 +97,12 @@ Mein Hauptentwicklungssystem ist Manjaro (Linux).
 
 ## Branching \& GitLab Flow
 
-Kurz: Wir nutzen GitLab Flow. Detaillierte Regeln zu Branch-Namen, Merge-Requests und Deploys sind in `Docs/GitLabFlow.md` dokumentiert.
+Kurz: Wir nutzen GitLab Flow. Detaillierte Regeln zu Branch-Namen, Merge-Requests und Deploys sind in `Docs/gitlab_flow.md` dokumentiert.
 
 - Wichtige Branches: `main` / `production`, `feature/*`, `hotfix/*`, `bugfix/*`, `release/*`
 - Merge-Requests: Review erforderlich, CI-Pipeline muss erfolgreich sein
 - Deploy: `production` ist der Deployment-Branch (automatisiert)
-- Weitere Hinweise: Siehe `Docs/GitLabFlow.md` für Beispiele und Regeln
+- Weitere Hinweise: Siehe `Docs/gitlab_flow.md` für Beispiele und Regeln
 
 
 ## Verwendung
@@ -112,7 +124,17 @@ python src/main.py --sync
 ```
 
 ### API
-Die REST API läuft auf `https://localhost:7169` (Development) und bietet folgende Endpunkte:
+Die REST API ist das Backend fuer die Synchronisation und laeuft lokal im Development-Modus standardmaessig unter `https://localhost:7169`.
+
+**Quickstart:**
+
+```bash
+cd data_sync.API
+dotnet run
+```
+
+Die ausfuehrliche API-Anleitung mit Voraussetzungen, `.env`, Docker-Setup und Troubleshooting findest du in [Docs/api_usage.md](Docs/api_usage.md).
+
 - `POST /api/sync/manifest` - Manifest-Abgleich mit Three-Way-Merge
 - `POST /api/sync/upload` - Datei-Upload
 - `GET /api/sync/download` - Datei-Download
@@ -126,18 +148,19 @@ Die REST API läuft auf `https://localhost:7169` (Development) und bietet folgen
 - `config.json` im Projektverzeichnis (siehe [cli_usage.md](Docs/cli_usage.md))
 
 **Für die API:**
-- .NET 8.0 SDK oder höher
+- .NET 10.0 SDK oder höher
 - MariaDB Server (MySQL-kompatibel)
-- `MySqlConnector` NuGet Package
+- `MySql.Data` NuGet Package
 ## Verzeichnisstruktur
 
 ```
 data_sync/
 ├── Docs/                            # Projekt-Dokumentation
 │   ├── android_mokup_2.png
+│   ├── api_usage.md                  # Ausfuehrliche API Anleitung
 │   ├── ausgangslage_technologien.md
 │   ├── backend_system_design.md
-│   ├── cli_usage.md                 # CLI Benutzerhandbuch
+│   ├── cli_usage.md                  # CLI Benutzerhandbuch
 │   ├── datenbank_design.md
 │   ├── gitlab_flow.md
 │   └── grundlegende_funktionen.md
@@ -168,6 +191,7 @@ data_sync/
 │   │   ├── FileLogService.cs
 │   │   ├── GetFilesToSyncService.cs
 │   │   ├── MariaDBService.cs        # ADO.NET Service für MariaDB
+│   │   ├── SyncStateService.cs
 │   │   ├── UpdateMetadataService.cs
 │   │   └── UtilsService.cs
 │   │
@@ -192,7 +216,8 @@ data_sync/
 │   │       │   ├── scan_command.py
 │   │       │   ├── manifest_command.py
 │   │       │   ├── upload_command.py
-│   │       │   └── download_command.py
+│   │       │   ├── download_command.py
+│   │       │   └── delete_command.py
 │   │       ├── handlers/            # Hilfsfunktionen
 │   │       │   ├── config_handler.py
 │   │       │   ├── sqlite_handler.py
@@ -201,6 +226,7 @@ data_sync/
 │   │       │   └── file_logger.py
 │   │       ├── api_client.py        # REST API Client
 │   │       ├── file_scanner.py      # Verzeichnis-Scanner
+│   │       ├── sync_state_manager.py # LastSyncState Verwaltung
 │   │       ├── db_setup.py          # DB-Initialisierung
 │   │       └── models.py            # Datenmodelle
 │   ├── SQLite/
@@ -246,23 +272,17 @@ python main.py --init
 ```
 
 ### API Backend starten
+Kurze Version:
+
 ```bash
-# 1. MariaDB vorbereiten
-# Schema aus data_sync.API/MariaDB/CreateTable.sql importieren
-
-# 2. .env Datei erstellen (in data_sync.API/)
-cat > .env << EOF
-DB_HOST=localhost
-DB_PORT=3306
-DB_NAME=data_sync
-DB_USER=data_sync_client
-DB_PASSWORD=your_password
-EOF
-
-# 3. API starten
 cd data_sync.API
 dotnet run
 ```
+
+Die ausfuehrliche Einrichtung findest du in [Docs/api_usage.md](Docs/api_usage.md).
+
+### API im Docker-Container starten
+Die Docker-Anleitung fuer die API findest du in [Docs/api_usage.md](Docs/api_usage.md).
 
 Detaillierte Informationen zur CLI-Verwendung: [Docs/cli_usage.md](Docs/cli_usage.md)
 
@@ -273,8 +293,8 @@ Detaillierte Informationen zur CLI-Verwendung: [Docs/cli_usage.md](Docs/cli_usag
 - Python Standard Library (`os`, `hashlib`, `sqlite3`, `json`, `argparse`)
 
 ### API Backend (ASP.NET Core)
-- .NET 8.0
-- `MySqlConnector` - MariaDB/MySQL Datenbankzugriff
+- .NET 10.0
+- `MySql.Data` - MariaDB/MySQL Datenbankzugriff
 - `DotNetEnv` - .env Datei Support
 
 ## Lizenz

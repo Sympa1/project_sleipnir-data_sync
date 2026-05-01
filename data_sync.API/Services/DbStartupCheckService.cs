@@ -45,7 +45,7 @@ public class DbStartupCheckService : IAsyncDisposable
     
     /// <summary>
     /// Erstellt die erforderlichen Datenbanktabellen, falls diese nicht existieren.
-    /// <b>Tabellen</b>: SyncFiles, SyncEvent, FehlerProtokoll
+    /// <b>Tabellen</b>: SyncFiles, SyncEvent, FehlerProtokoll, LastSyncState
     /// </summary>
     public async Task CheckDatabaseTablesAsync()
     {
@@ -84,6 +84,13 @@ CREATE TABLE IF NOT EXISTS FehlerProtokoll (
     fehler_protokoll_id INT AUTO_INCREMENT PRIMARY KEY,
     fehler_beschreibung TEXT NOT NULL,
     fehler_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS LastSyncState (
+    file_path VARCHAR(768) PRIMARY KEY,
+    hash_value VARCHAR(64) NOT NULL,
+    file_size BIGINT NOT NULL,
+    last_synced_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );";
                         
                         // Asynchrone Ausführung — blockiert nicht

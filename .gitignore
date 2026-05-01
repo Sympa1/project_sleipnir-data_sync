@@ -11,6 +11,7 @@ riderModule.iml
 data_sync.API/.env/
 # Ignore the API .env file (file, not folder)
 data_sync.API/.env
+data_sync.API/.env.container
 # Ignore project-level .env example (use .env locally; don't commit secrets)
 .env
 copilot-instructions.md
@@ -22,6 +23,16 @@ cli_db.db
 .flutter-plugins
 .flutter-plugins-dependencies
 .pub-cache/
+data_sync.FLUTTER/build/
 **/build/
 *.metadata
 **/android/local.properties
+
+# Python
+**/__pycache__/
+*.py[cod]
+
+# Laufzeitdaten und Logs
+data_sync.CLI/src/error.log
+upload/
+data_sync.API/uploads/
