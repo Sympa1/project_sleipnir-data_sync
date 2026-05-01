@@ -29,7 +29,6 @@ class _SyncPageState extends State<SyncPage> {
   bool _isRunning = false;
   String _statusLabel = 'Noch nicht eingerichtet';
   IconData _statusIcon = Icons.hourglass_bottom_rounded;
-  bool _settingsLoaded = false;
   bool _isConfigured = false;
 
   @override
@@ -69,7 +68,6 @@ class _SyncPageState extends State<SyncPage> {
       _statusIcon = isConfigured
           ? Icons.check_circle_outline
           : Icons.hourglass_bottom_rounded;
-      _settingsLoaded = true;
     });
   }
 
@@ -198,15 +196,6 @@ class _SyncPageState extends State<SyncPage> {
                             ),
                           )
                           .toList(),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    _settingsLoaded
-                        ? 'Das Protokoll zeigt den aktuellen Ablauf von Manifest, Upload, Download und Loeschungen.'
-                        : 'Lade aktuellen Einrichtungsstand ...',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ],

@@ -124,7 +124,17 @@ python src/main.py --sync
 ```
 
 ### API
-Die REST API läuft auf `https://localhost:7169` (Development) und bietet folgende Endpunkte:
+Die REST API ist das Backend fuer die Synchronisation und laeuft lokal im Development-Modus standardmaessig unter `https://localhost:7169`.
+
+**Quickstart:**
+
+```bash
+cd data_sync.API
+dotnet run
+```
+
+Die ausfuehrliche API-Anleitung mit Voraussetzungen, `.env`, Docker-Setup und Troubleshooting findest du in [Docs/api_usage.md](Docs/api_usage.md).
+
 - `POST /api/sync/manifest` - Manifest-Abgleich mit Three-Way-Merge
 - `POST /api/sync/upload` - Datei-Upload
 - `GET /api/sync/download` - Datei-Download
@@ -147,9 +157,10 @@ Die REST API läuft auf `https://localhost:7169` (Development) und bietet folgen
 data_sync/
 ├── Docs/                            # Projekt-Dokumentation
 │   ├── android_mokup_2.png
+│   ├── api_usage.md                  # Ausfuehrliche API Anleitung
 │   ├── ausgangslage_technologien.md
 │   ├── backend_system_design.md
-│   ├── cli_usage.md                 # CLI Benutzerhandbuch
+│   ├── cli_usage.md                  # CLI Benutzerhandbuch
 │   ├── datenbank_design.md
 │   ├── gitlab_flow.md
 │   └── grundlegende_funktionen.md
@@ -261,23 +272,17 @@ python main.py --init
 ```
 
 ### API Backend starten
+Kurze Version:
+
 ```bash
-# 1. MariaDB vorbereiten
-# Schema aus data_sync.API/MariaDB/CreateTable.sql importieren
-
-# 2. .env Datei erstellen (in data_sync.API/)
-cat > .env << EOF
-DB_HOST=localhost
-DB_PORT=3306
-DB_NAME=data_sync
-DB_USER=data_sync_client
-DB_PASSWORD=your_password
-EOF
-
-# 3. API starten
 cd data_sync.API
 dotnet run
 ```
+
+Die ausfuehrliche Einrichtung findest du in [Docs/api_usage.md](Docs/api_usage.md).
+
+### API im Docker-Container starten
+Die Docker-Anleitung fuer die API findest du in [Docs/api_usage.md](Docs/api_usage.md).
 
 Detaillierte Informationen zur CLI-Verwendung: [Docs/cli_usage.md](Docs/cli_usage.md)
 
