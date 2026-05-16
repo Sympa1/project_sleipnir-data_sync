@@ -92,7 +92,7 @@ class _SettingsPageState extends State<SettingsPage> {
           controller: controller,
           decoration: InputDecoration(
             hintText:
-                'z.B. http://localhost:5009 oder https://mein-server.de/api',
+                'z.B. http://192.168.0.10:8088 oder https://192.168.0.10:8443',
           ),
           keyboardType: TextInputType.url,
           autofocus: true,
@@ -240,7 +240,7 @@ class _SettingsPageState extends State<SettingsPage> {
         uri.host.isNotEmpty;
   }
 
-  /// Speichert, ob lokale HTTPS-Zertifikate fuer localhost akzeptiert werden.
+  /// Speichert, ob lokale HTTPS-Zertifikate fuer Entwicklung und LAN akzeptiert werden.
   Future<void> _toggleLocalhostCertificateOverride(bool value) async {
     final currentSettings = settings ?? Settings();
 
@@ -264,8 +264,8 @@ class _SettingsPageState extends State<SettingsPage> {
 
       _showMessage(
         value
-            ? 'Lokale HTTPS-Zertifikate fuer localhost sind aktiviert.'
-            : 'Lokale HTTPS-Zertifikate fuer localhost sind deaktiviert.',
+            ? 'Lokale HTTPS-Zertifikate fuer localhost und LAN-Adressen sind aktiviert.'
+            : 'Lokale HTTPS-Zertifikate fuer localhost und LAN-Adressen sind deaktiviert.',
       );
     } catch (e) {
       if (!mounted) {
@@ -425,7 +425,7 @@ class _SettingsPageState extends State<SettingsPage> {
           icon: Icons.https_outlined,
           title: 'Lokale HTTPS-Zertifikate erlauben',
           description:
-              'Erlaubt fuer https://localhost und https://127.0.0.1 auch selbstsignierte Zertifikate. Fuer die Entwicklung ist sonst meist http://localhost:5009 die einfachere Wahl.',
+              'Erlaubt fuer https://localhost, https://127.0.0.1 und private LAN-Adressen auch selbstsignierte Zertifikate. Wenn du ueber Caddy im Heimnetz arbeitest, gib in der API-URL den richtigen Port deines Reverse Proxys an.',
           value: settings?.allowInsecureTlsForLocalhost ?? false,
           isLoading: _isLoading,
           onChanged: _toggleLocalhostCertificateOverride,

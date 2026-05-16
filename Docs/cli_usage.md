@@ -11,6 +11,53 @@ Das Data Sync CLI Tool ist ein Python-basiertes Kommandozeilen-Werkzeug zur Sync
 - Zugriff auf eine laufende Data Sync API (ASP.NET Core Backend)
 - Konfigurationsdatei `config.json` im CLI-Verzeichnis
 
+## Alias einrichten (empfohlen)
+
+Damit das Tool mit `ds` oder `data_sync` statt mit dem langen Pfad aufgerufen werden kann, einen Shell-Alias einrichten.
+
+### Option A – einfacher Alias (`ds`)
+
+In `~/.bashrc` oder `~/.zshrc` eintragen:
+
+```bash
+alias ds='python /pfad/zum/repo/data_sync.CLI/src/main.py'
+```
+
+Danach die Konfiguration neu laden:
+
+```bash
+source ~/.bashrc
+```
+
+Ab jetzt reicht:
+
+```bash
+ds --sync
+ds --scan
+ds --init
+```
+
+### Option B – Alias mit automatischem Verzeichniswechsel
+
+Falls das CLI aus einem beliebigen Verzeichnis heraus aufgerufen werden soll und dabei immer das richtige Arbeitsverzeichnis nutzt:
+
+```bash
+alias ds='(cd /pfad/zum/repo && python data_sync.CLI/src/main.py)'
+```
+
+### Alias dauerhaft verfügbar machen
+
+Die Zeile muss in der Shell-Konfigurationsdatei stehen:
+
+| Shell | Datei |
+|-------|-------|
+| Bash | `~/.bashrc` |
+| Zsh | `~/.zshrc` |
+
+Nach jeder Änderung: `source ~/.bashrc` (oder `~/.zshrc`)
+
+---
+
 ## Installation
 
 1. **Python-Abhängigkeiten installieren:**

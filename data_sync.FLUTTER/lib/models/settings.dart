@@ -3,7 +3,7 @@
 /// Diese Klasse speichert die Konfiguration für die Datensynchronisation:
 /// - syncPath: Der lokale Pfad zum Verzeichnis
 /// - apiUrl: Die URL des Backend-Servers
-/// - allowInsecureTlsForLocalhost: Erlaubt lokale HTTPS-Zertifikate fuer localhost
+/// - allowInsecureTlsForLocalhost: Erlaubt lokale HTTPS-Zertifikate fuer Entwicklung und LAN
 ///
 /// Die Klasse ist immutable (unveränderlich). Um Einstellungen zu ändern,
 /// muss ein neues Settings-Objekt erstellt werden.

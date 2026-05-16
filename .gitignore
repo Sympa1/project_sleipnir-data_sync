@@ -17,6 +17,9 @@ data_sync.API/.env.container
 copilot-instructions.md
 config.json
 cli_db.db
+db_error.log
+uploads/
+
 
 # Flutter/Dart
 .dart_tool/
@@ -31,6 +34,9 @@ data_sync.FLUTTER/build/
 # Python
 **/__pycache__/
 *.py[cod]
+
+# Caddy-Zertifikat (instanzspezifisch, wird pro Server neu generiert)
+caddy-root.crt
 
 # Laufzeitdaten und Logs
 data_sync.CLI/src/error.log

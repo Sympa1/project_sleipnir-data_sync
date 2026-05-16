@@ -108,7 +108,7 @@ Kurz: Wir nutzen GitLab Flow. Detaillierte Regeln zu Branch-Namen, Merge-Request
 ## Verwendung
 
 ### CLI Tool
-Detaillierte Informationen zur Verwendung des CLI Tools finden Sie in [Docs/cli_usage.md](Docs/cli_usage.md).
+Detaillierte Informationen zur Verwendung des CLI Tools findest du in [Docs/cli_usage.md](Docs/cli_usage.md) – inklusive Alias-Einrichtung (`ds` / `data_sync`).
 
 **Schnellstart:**
 ```bash
@@ -123,6 +123,11 @@ python src/main.py --scan
 python src/main.py --sync
 ```
 
+### Flutter App
+Einrichtung, APK-Build und HTTPS-Zertifikat-Installation: [Docs/flutter_setup.md](Docs/flutter_setup.md)
+
+> Das Caddy-Zertifikat wird **nur von der Flutter App** benötigt, nicht vom CLI Tool.
+
 ### API
 Die REST API ist das Backend fuer die Synchronisation und laeuft lokal im Development-Modus standardmaessig unter `https://localhost:7169`.
 
@@ -134,6 +139,8 @@ dotnet run
 ```
 
 Die ausfuehrliche API-Anleitung mit Voraussetzungen, `.env`, Docker-Setup und Troubleshooting findest du in [Docs/api_usage.md](Docs/api_usage.md).
+
+Die Einrichtung auf einem Raspberry Pi oder Linux-Server (inkl. Caddy & HTTPS) findest du in [Docs/server_setup.md](Docs/server_setup.md).
 
 - `POST /api/sync/manifest` - Manifest-Abgleich mit Three-Way-Merge
 - `POST /api/sync/upload` - Datei-Upload

@@ -1,0 +1,17 @@
+# Gemeinsamer Proxy-Block, damit HTTP und HTTPS zur gleichen API gehen.
+(api_proxy) {
+    # Die API bleibt im Compose-Netz intern per HTTP erreichbar.
+    reverse_proxy api:8080
+}
+
+# HTTP bleibt aktiv, falls ein Client bewusst unverschluesselt zugreift.
+http://{$CADDY_PUBLIC_IP}:8080 {
+    import api_proxy
+}
+
+# HTTPS nutzt ein lokales Zertifikat fuer genau diese LAN-IP.
+https://{$CADDY_PUBLIC_IP}:8443 {
+    # Fuer das lokale Netz erstellt Caddy ein internes Zertifikat.
+    tls internal
+    import api_proxy
+}
