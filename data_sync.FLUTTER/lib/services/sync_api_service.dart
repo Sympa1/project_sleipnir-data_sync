@@ -151,7 +151,7 @@ class SyncApiService {
     _ensureSuccess(response, 'Delete');
   }
 
-  /// Führt einen HTTP-Aufruf mit optionaler TLS-Ausnahme fuer localhost aus.
+  /// Führt einen HTTP-Aufruf mit optionaler TLS-Ausnahme fuer lokale Ziele aus.
   Future<T> _executeRequest<T>(
     String apiBaseUrl,
     bool allowInsecureTlsForLocalhost,
@@ -220,22 +220,69 @@ class SyncApiService {
     Uri uri, {
     required bool allowInsecureTlsForLocalhost,
   }) {
-    if (!allowInsecureTlsForLocalhost || !_isLocalHttpsUri(uri)) {
+    if (!allowInsecureTlsForLocalhost || !_isSupportedInsecureHttpsUri(uri)) {
       return _httpClient;
     }
 
     final httpClient = HttpClient()
       ..badCertificateCallback = (certificate, host, port) {
-        return host == 'localhost' || host == '127.0.0.1';
+        return _isSupportedInsecureHost(host);
       };
 
     return IOClient(httpClient);
   }
 
   /// Erlaubt die TLS-Ausnahme nur fuer lokale HTTPS-Adressen.
-  bool _isLocalHttpsUri(Uri uri) {
-    return uri.scheme == 'https' &&
-        (uri.host == 'localhost' || uri.host == '127.0.0.1');
+  bool _isSupportedInsecureHttpsUri(Uri uri) {
+    return uri.scheme == 'https' && _isSupportedInsecureHost(uri.host);
+  }
+
+  /// Begrenzt Zertifikatsausnahmen auf Loopback- und private LAN-Adressen.
+  bool _isSupportedInsecureHost(String host) {
+    final normalizedHost = host.trim().toLowerCase();
+    if (normalizedHost == 'localhost') {
+      return true;
+    }
+
+    final parsedAddress = InternetAddress.tryParse(normalizedHost);
+    if (parsedAddress == null) {
+      return false;
+    }
+
+    if (parsedAddress.isLoopback) {
+      return true;
+    }
+
+    if (parsedAddress.type == InternetAddressType.IPv4) {
+      return _isPrivateIpv4Address(parsedAddress.address);
+    }
+
+    return _isPrivateIpv6Address(parsedAddress.address);
+  }
+
+  /// Erkennt RFC1918- und Link-Local-Adressen im lokalen Netz.
+  bool _isPrivateIpv4Address(String address) {
+    final octets = address.split('.').map(int.tryParse).toList();
+    if (octets.length != 4 || octets.any((octet) => octet == null)) {
+      return false;
+    }
+
+    final first = octets[0]!;
+    final second = octets[1]!;
+
+    return first == 10 ||
+        (first == 172 && second >= 16 && second <= 31) ||
+        (first == 192 && second == 168) ||
+        (first == 169 && second == 254);
+  }
+
+  /// Erkennt lokale IPv6-Bereiche fuer Entwicklung im Heim- oder Firmennetz.
+  bool _isPrivateIpv6Address(String address) {
+    final normalizedAddress = address.toLowerCase();
+
+    return normalizedAddress.startsWith('fc') ||
+        normalizedAddress.startsWith('fd') ||
+        normalizedAddress.startsWith('fe80:');
   }
 
   /// Erkennt typische TLS-Fehler von lokalen Entwicklungszertifikaten.
@@ -249,11 +296,11 @@ class SyncApiService {
 
   /// Baut eine handlungsorientierte Meldung fuer Zertifikatsprobleme.
   String _buildCertificateErrorMessage(Uri uri, String details) {
-    if (_isLocalHttpsUri(uri)) {
-      return 'Das lokale HTTPS-Zertifikat fuer ${uri.host} wird von Linux '
-          'nicht vertraut. Nutze entweder http://localhost:5009 oder '
-          'aktiviere in den Einstellungen den Schalter fuer lokale '
-          'HTTPS-Zertifikate. Details: $details';
+    if (_isSupportedInsecureHttpsUri(uri)) {
+      return 'Das HTTPS-Zertifikat fuer ${uri.host} wird auf diesem Geraet '
+          'nicht vertraut. Bei lokalen Entwicklungs- oder LAN-Adressen kannst '
+          'du in den Einstellungen die Zertifikatsausnahme aktivieren oder '
+          'eine vertrauenswuerdige CA verwenden. Details: $details';
     }
 
     return 'TLS-Verbindung zur API fehlgeschlagen. Details: $details';
@@ -283,11 +330,32 @@ class SyncApiService {
       return;
     }
 
+    if (_looksLikeWrongWebServerResponse(response)) {
+      throw Exception(
+        '$operationLabel fehlgeschlagen (${response.statusCode}): '
+        'Die konfigurierte URL zeigt nicht auf die Sync-API, sondern auf '
+        'einen anderen Webserver oder den falschen Port. Pruefe Host, Port '
+        'und Reverse-Proxy-Konfiguration.',
+      );
+    }
+
     final responseBody = response.body.trim();
     final details = responseBody.isEmpty ? 'Keine weiteren Details.' : responseBody;
 
     throw Exception(
       '$operationLabel fehlgeschlagen (${response.statusCode}): $details',
     );
+  }
+
+  /// Erkennt typische HTML-Fehlerseiten fremder Webserver statt einer API-Antwort.
+  bool _looksLikeWrongWebServerResponse(http.Response response) {
+    final contentType =
+        response.headers[HttpHeaders.contentTypeHeader]?.toLowerCase() ?? '';
+    final responseBody = response.body.toLowerCase();
+
+    return contentType.contains('text/html') ||
+        responseBody.contains('<!doctype html') ||
+        responseBody.contains('<html') ||
+        responseBody.contains('apache/');
   }
 }

@@ -1,5 +1,6 @@
 using System.Net;
 using data_sync.API.Services;
+using Microsoft.AspNetCore.HttpOverrides;
 //using data_sync.API.Tests;
 
 static void ConfigureEndpoint(Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerOptions options, string url, bool useHttps)
@@ -75,6 +76,16 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.PropertyNamingPolicy = null;
     });
 
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    // Caddy setzt diese Header, damit ASP.NET das urspruengliche HTTPS-Schema kennt.
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost;
+
+    // Im Compose-Netz bekommt der Proxy eine dynamische interne IP.
+    options.KnownIPNetworks.Clear();
+    options.KnownProxies.Clear();
+});
+
 if (testMode)
 {
     //builder.Services.AddScoped<TestService>();
@@ -125,11 +136,15 @@ FileLogService log = new FileLogService("Db-Startup.log");
 //     }
 // }
 
-// HTTPS-Umleitung bleibt konfigurierbar, damit Container ohne Zertifikat sauber per HTTP laufen können.
+// Muss vor weiterer Middleware laufen, damit Request.Scheme hinter Caddy korrekt auf https steht.
+app.UseForwardedHeaders();
+
+// HTTPS-Umleitung bleibt konfigurierbar, damit Container ohne Zertifikat sauber per HTTP laufen koennen.
 if (enableHttpsRedirection)
 {
     app.UseHttpsRedirection();
 }
+
 app.UseAuthorization();
 app.MapControllers();
 

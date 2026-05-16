@@ -61,7 +61,7 @@ class SyncService {
 
     onLog('Nutze API: ${_syncApiService.describeBaseUrl(apiBaseUrl)}');
     if (allowInsecureTlsForLocalhost) {
-      onLog('Lokale HTTPS-Zertifikate fuer localhost sind aktiviert.');
+      onLog('Lokale HTTPS-Zertifikate fuer localhost und LAN-Adressen sind aktiviert.');
     }
     onLog('Scanne lokales Verzeichnis ...');
 
