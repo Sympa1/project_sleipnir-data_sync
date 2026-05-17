@@ -70,15 +70,15 @@ Nach jeder Änderung: `source ~/.bashrc` (oder `~/.zshrc`)
    ```json
    {
      "sync_path": "/pfad/zum/synchronisations/verzeichnis",
-     "api_base_url": "https://localhost:7169/api/sync",
-     "verify_ssl": false
+     "api_base_url": "https://192.168.0.x:5001/api/sync",
+     "verify_ssl": "/pfad/zum/caddy-root.crt"
    }
    ```
 
    **Parameter:**
    - `sync_path`: Absoluter Pfad zum Verzeichnis, das synchronisiert werden soll
    - `api_base_url`: URL der Data Sync API (ohne trailing slash)
-   - `verify_ssl`: SSL-Zertifikatsprüfung aktivieren (`true`) oder deaktivieren (`false`)
+   - `verify_ssl`: Pfad zur CA-Zertifikatsdatei (empfohlen), `true` (System-CA) oder `false` (deaktiviert – unsicher!)
 
 3. **Datenbank initialisieren:**
    ```bash
@@ -104,7 +104,10 @@ python src/main.py --init
 **Was passiert:**
 - Erstellt die SQLite-Datenbank `cli_db.db` im `data_sync.CLI/` Verzeichnis
 - Legt die Tabellen `SyncFiles`, `SyncEvents`, `LastSyncState` und `FehlerProtokoll` an
-- Fragt nach dem Sync-Pfad und speichert ihn in `config.json`
+- Fragt interaktiv nach folgenden Werten und speichert sie in `config.json`:
+  - **Sync-Pfad** – das lokale Verzeichnis, das synchronisiert werden soll
+  - **API-URL** – die Adresse des Data Sync Backends
+  - **SSL-Zertifikat** – Pfad zur CA-Zertifikatsdatei (leer lassen deaktiviert die Verifikation)
 - Lädt das SQL-Schema aus `sqlite/create_table.sql`
 
 **Beispiel-Output:**
@@ -112,9 +115,15 @@ python src/main.py --init
 Initializing database...
 Database initialized successfully.
 
-Please configure your path to sync in config.json before proceeding.
+Please provide the following configuration values:
 Enter the path to sync: /home/user/Documents/sync
-Sync path '/home/user/Documents/sync' saved to config.json.
+Enter the API base URL (e.g. https://192.168.0.1:5001/api/sync): https://192.168.0.204:5001/api/sync
+Enter the path to the SSL certificate (leave empty to disable verification): /home/user/Dev/data_sync/caddy-root.crt
+
+Configuration saved to config.json:
+  Sync path:   /home/user/Documents/sync
+  API URL:     https://192.168.0.204:5001/api/sync
+  SSL verify:  /home/user/Dev/data_sync/caddy-root.crt
 ```
 
 ---
@@ -407,8 +416,14 @@ Error uploading file: document.txt - Error: Connection refused
    - `api_base_url` in `config.json` prüfen
    - API-Server starten
 
-3. **SSL Certificate Verification Failed**
-   - Lösung: `verify_ssl: false` in `config.json` setzen (nur für Entwicklung!)
+3. **SSL Certificate Verification Failed / TLSV1_ALERT_INTERNAL_ERROR**
+   - Ursache: Python kann das selbstsignierte Server-Zertifikat nicht verifizieren, oder der TLS-Handshake schlägt fehl
+   - **Empfohlene Lösung:** Pfad zur CA-Zertifikatsdatei (`caddy-root.crt`) in `config.json` eintragen:
+     ```json
+     "verify_ssl": "/pfad/zum/caddy-root.crt"
+     ```
+   - **Notlösung (unsicher!):** `verify_ssl: false` – deaktiviert die Verifikation komplett
+   - **Hinweis:** `verify_ssl: false` behebt keine TLS-Handshake-Fehler – dafür ist das Zertifikat nötig!
 
 4. **File not found**
    - `sync_path` in `config.json` prüfen

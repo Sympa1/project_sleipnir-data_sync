@@ -1,6 +1,7 @@
 import os
 from .base_command import BaseCommand
 from ..handlers.config_handler import ConfigHandler
+from ..handlers.sqlite_handler import SqliteHandler
 from .. import ApiClient
 from ..sync_state_manager import SyncStateManager
 
@@ -66,14 +67,36 @@ class UploadCommand(BaseCommand):
                         params={"basePath": relative_dir})
 
                     if response.get("status") == "success":
-                        # LastSyncState aktualisieren nach erfolgreichem Upload
+                        relative_path = file.get("relativePath")
+                        client_hash = file.get("sha256")
+                        server_hash = response.get("hash", "")
+
+                        # Prüfe ob Client- und Server-Hash übereinstimmen
+                        hash_match = client_hash == server_hash
+                        if not hash_match:
+                            print(f"  HASH MISMATCH for {file.get('fileName')}!")
+                            print(f"    Client: {client_hash}")
+                            print(f"    Server: {server_hash}")
+
+                        # LastSyncState mit dem vom Server berechneten Hash aktualisieren,
+                        # damit der nächste Manifest-Vergleich übereinstimmt
                         sync_state_manager = SyncStateManager()
                         sync_state_manager.update_sync_state(
-                            file_path=file.get("relativePath"),
-                            hash_value=file.get("sha256"),
+                            file_path=relative_path,
+                            hash_value=server_hash if server_hash else client_hash,
                             file_size=file.get("size")
                         )
-                        
+
+                        # SyncFiles mit dem Server-Hash aktualisieren, damit der
+                        # nächste Scan die Datei nicht erneut als geändert erkennt
+                        db_handler = SqliteHandler()
+                        db_handler.execute_query(
+                            "UPDATE SyncFiles SET file_state = 'unchanged', hash_value = ? WHERE file_path = ?",
+                            (server_hash if server_hash else client_hash, relative_path,)
+                        )
+
+                        status = "✓" if hash_match else "⚠ hash mismatch"
+                        print(f"  Upload successful: {file.get('fileName')} [{status}] (Client: {client_hash[:8]}... | Server: {server_hash[:8] if server_hash else 'N/A'}...)")
                         file_upload_success.append(file)
                     else:
                         error_upload = f"Failed to upload file: {file.get('fileName')} - Reason: {response.get('message')}"
@@ -85,3 +108,7 @@ class UploadCommand(BaseCommand):
                     error_message = f"Error uploading file: {file.get('fileName')} - Error: {str(e)}"
                     print(error_message)
                     file_upload_failed.append(file)
+
+        print(f"\nSuccessful uploads: {len(file_upload_success)}")
+        print(f"Failed uploads: {len(file_upload_failed)}")
+        print("Upload process completed")

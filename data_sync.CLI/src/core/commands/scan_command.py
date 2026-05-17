@@ -202,9 +202,24 @@ class ScanCommand(BaseCommand):
         :param db_handler:
         :return:
         """
-        file_paths = []
-        for file_info in file_list:
-            file_paths.append(file_info.file_path)
+        file_paths = [file_info.file_path for file_info in file_list]
+
+        # Sonderfall: Sync-Verzeichnis ist komplett leer → alle Dateien als gelöscht markieren
+        if not file_paths:
+            db_handler.execute_query(
+                "UPDATE SyncFiles SET file_state = 'deleted' WHERE file_state != 'deleted'"
+            )
+            query_result = db_handler.execute_query(
+                "SELECT file_path FROM SyncFiles WHERE file_state = 'deleted'"
+            )
+            if query_result:
+                print("Marked files as deleted:")
+                for row in query_result:
+                    print(f"- {row[0]}")
+                    self._log_event(row[0], db_handler, event_type="deleted", event_details="File marked as deleted.")
+            else:
+                print("No files to mark as deleted.")
+            return
 
         query_params = tuple(file_paths)
 

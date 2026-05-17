@@ -1,3 +1,8 @@
+# Globale Optionen: Fallback-SNI fuer Clients ohne SNI-Unterstuetzung (z.B. Python mit IP-Adressen).
+{
+    default_sni {$CADDY_PUBLIC_IP}
+}
+
 # Gemeinsamer Proxy-Block, damit HTTP und HTTPS zur gleichen API gehen.
 (api_proxy) {
     # Die API bleibt im Compose-Netz intern per HTTP erreichbar.

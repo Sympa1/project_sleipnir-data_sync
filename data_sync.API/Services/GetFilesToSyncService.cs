@@ -209,10 +209,10 @@ public class GetFilesToSyncService
                                     Hashvalue = hashValueFromDb,
                                     CreatedAt = createdAtFromDb,
                                     LastModified = modifiedAtFromDb,
-                                    FileState = Enum.Parse<FileChangeState>(fileStateFromDb, ignoreCase:true), // Enum großgeschrieben, in DB kleingeschrieben
+                                    FileState = Enum.Parse<FileChangeState>(fileStateFromDb, ignoreCase:true),
                                     ToUpload = false,
-                                    ToDelet = fileStateFromDb == "Deleted",
-                                    ToDownload = fileStateFromDb != "Deleted"
+                                    ToDelet = fileStateFromDb.Equals("deleted", StringComparison.OrdinalIgnoreCase),
+                                    ToDownload = !fileStateFromDb.Equals("deleted", StringComparison.OrdinalIgnoreCase)
                                 };
                                 
                                 filesToSync.Add(serverFile);
